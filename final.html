@@ -2,21 +2,387 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>蕨積綠色宇宙 - 大圓滿</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>蕨積綠色宇宙 - 大圓滿 | 淨零冒險完結</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        body {
+            background: linear-gradient(145deg, #059669 0%, #047857 100%);
+            overflow-x: hidden;
+        }
+        /* 落葉飄落動畫 */
+        .falling-leaf {
+            position: fixed;
+            pointer-events: none;
+            z-index: 50;
+            font-size: 1.8rem;
+            animation: fallLeaf linear forwards;
+        }
+        @keyframes fallLeaf {
+            0% {
+                transform: translateY(-20vh) rotate(0deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(110vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        /* 浮動粒子光點 */
+        .glow-particle {
+            position: fixed;
+            pointer-events: none;
+            background: radial-gradient(circle, #a7f3d0, #34d399);
+            border-radius: 50%;
+            filter: blur(4px);
+            animation: floatGlow 4s ease-out forwards;
+            z-index: 40;
+        }
+        @keyframes floatGlow {
+            0% {
+                opacity: 0.6;
+                transform: scale(0.3) translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1.5) translateY(-200px);
+            }
+        }
+        /* 成就數字滾動 */
+        .counter-value {
+            transition: all 0.2s ease;
+        }
+        .team-card:hover {
+            transform: translateY(-8px);
+            transition: transform 0.3s ease;
+        }
+        .btn-glow {
+            transition: all 0.2s;
+        }
+        .btn-glow:hover {
+            box-shadow: 0 0 20px rgba(255,255,255,0.6);
+            transform: scale(1.02);
+        }
+        /* 慶祝彩帶效果 */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 20px;
+            background: linear-gradient(135deg, #fbbf24, #f97316);
+            position: fixed;
+            top: -20px;
+            animation: confettiFall 2s ease-out forwards;
+            z-index: 100;
+            opacity: 0.8;
+        }
+        @keyframes confettiFall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        .bounce-in {
+            animation: bounceIn 0.8s cubic-bezier(0.34, 1.2, 0.64, 1);
+        }
+        @keyframes bounceIn {
+            0% { opacity: 0; transform: scale(0.8); }
+            60% { opacity: 1; transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+    </style>
 </head>
-<body class="bg-green-600 flex flex-col items-center justify-center h-screen p-6 text-white text-center">
-    <h1 class="text-4xl md:text-6xl font-black mb-8 drop-shadow-lg">恭喜完成綠色任務！</h1>
+<body class="flex flex-col items-center justify-center min-h-screen p-6 text-white text-center relative">
+
+    <!-- 背景裝飾粒子 -->
+    <div id="particlesContainer" class="fixed inset-0 pointer-events-none overflow-hidden"></div>
     
-    <div class="w-full max-w-4xl bg-white p-4 rounded-[3rem] shadow-2xl mb-12">
-        <img src="team.png" alt="Fern+ Team" class="w-full h-auto rounded-[2.5rem]">
+    <!-- 主內容區塊 (毛玻璃卡片風格) -->
+    <div class="relative z-20 w-full max-w-5xl mx-auto backdrop-blur-sm bg-white/10 rounded-3xl shadow-2xl p-6 md:p-10 border border-white/30 animate-fade-up">
+        
+        <!-- 標題區域 -->
+        <div class="mb-6 md:mb-8">
+            <h1 class="text-4xl md:text-7xl font-black drop-shadow-lg bg-gradient-to-r from-yellow-200 via-green-100 to-emerald-200 bg-clip-text text-transparent inline-block">
+                🎉 綠色任務・大圓滿 🎉
+            </h1>
+            <div class="flex justify-center gap-3 mt-3">
+                <span class="text-3xl">🌿</span>
+                <span class="text-3xl">✨</span>
+                <span class="text-3xl">♻️</span>
+            </div>
+        </div>
+        
+        <!-- 植物人戰隊合影 (強化展示) -->
+        <div class="w-full max-w-3xl mx-auto bg-white/20 backdrop-blur-md rounded-3xl p-4 shadow-2xl mb-8 border border-white/40 team-card transition-all">
+            <img src="team.png" alt="FERN+ 植物人戰隊" onerror="this.src='https://placehold.co/800x400/2d6a4f/ffffff?text=🌱+FERN+TEAM+🌱'; this.onerror=null;" class="w-full h-auto rounded-2xl shadow-lg">
+            <div class="text-center mt-3 text-white/80 text-sm font-medium flex justify-center gap-6 flex-wrap">
+                <span>🌿 阿蕨 Fern</span>
+                <span>💧 小積 Brom</span>
+                <span>🐢 小龜 Monstera</span>
+                <span>🐯 虎妹 Sans</span>
+                <span>🌵 肉肉 Succ</span>
+                <span>🎵 琴哥 Ficus</span>
+                <span>☁️ 空空 Till</span>
+            </div>
+        </div>
+        
+        <!-- 成就數據面板 (模擬總減碳量與任務完成度) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+            <div class="bg-white/20 backdrop-blur-sm rounded-2xl p-4 border border-white/30">
+                <div class="text-4xl mb-1">🌍</div>
+                <div class="text-2xl font-black"><span id="carbonTotal" class="counter-value">0</span> kg</div>
+                <div class="text-sm font-medium">累積減碳量</div>
+            </div>
+            <div class="bg-white/20 backdrop-blur-sm rounded-2xl p-4 border border-white/30">
+                <div class="text-4xl mb-1">🏆</div>
+                <div class="text-2xl font-black"><span id="missionsDone">7</span> / 7</div>
+                <div class="text-sm font-medium">關卡完美通關</div>
+            </div>
+            <div class="bg-white/20 backdrop-blur-sm rounded-2xl p-4 border border-white/30">
+                <div class="text-4xl mb-1">🌱</div>
+                <div class="text-2xl font-black"><span id="knowledgeCount">12</span>+</div>
+                <div class="text-sm font-medium">綠色智慧解鎖</div>
+            </div>
+        </div>
+        
+        <!-- 慶祝語句與淨零智慧 -->
+        <div class="bg-black/30 backdrop-blur-md rounded-2xl p-5 md:p-6 mb-8 border-l-8 border-emerald-300 text-left">
+            <p class="text-lg md:text-2xl font-bold leading-relaxed">
+                🌟 你已獲得 <span class="text-yellow-200">7 大植物人</span> 的淨零智慧，<br>
+                讓我們一起守護地球，邁向永續未來！ 💚
+            </p>
+            <div class="flex flex-wrap gap-3 mt-4 text-sm text-white/80">
+                <span class="bg-white/20 px-3 py-1 rounded-full">♻️ 循環經濟</span>
+                <span class="bg-white/20 px-3 py-1 rounded-full">⚡ 節能減碳</span>
+                <span class="bg-white/20 px-3 py-1 rounded-full">🌿 自然共生</span>
+                <span class="bg-white/20 px-3 py-1 rounded-full">💧 水續未來</span>
+            </div>
+        </div>
+        
+        <!-- 行動呼籲按鈕 -->
+        <button onclick="restartAdventure()" class="btn-glow bg-white text-green-800 px-12 py-5 rounded-full text-2xl font-black shadow-xl hover:bg-green-50 active:scale-95 transition-all flex items-center gap-3 mx-auto mb-6">
+            <span>🌍</span> 重新冒險 <span>🌱</span>
+        </button>
+        
+        <!-- 版權與小彩蛋 -->
+        <p class="text-white/50 text-xs tracking-widest mt-4">© 2026 FERN+ 蕨積綠色宇宙 · 淨零冒險全紀錄</p>
+        <p class="text-white/30 text-[10px] mt-2">✨ 每一份減碳行動，都是地球的禮物 ✨</p>
     </div>
-
-    <p class="text-xl md:text-2xl mb-12 font-bold bg-black/20 px-8 py-4 rounded-full">你已獲得 7 大植物人的淨零智慧，讓我們一起守護地球！</p>
-
-    <button onclick="window.location.href='index.html'" class="bg-white text-green-700 px-12 py-5 rounded-full text-2xl font-black shadow-xl hover:bg-green-50 active:scale-95 transition">重新冒險</button>
     
-    <p class="mt-8 text-white/60 text-sm tracking-widest">© 2026 FERN+ 蕨積綠色宇宙</p>
+    <script>
+        // ---------- 大圓滿增強: 動態數字滾動、落葉、彩帶、光粒子 ----------
+        
+        // 模擬總減碳量 (根據前面關卡: 第一關~第七關累積估算，給予一個合理值 約 58~75 kg 之間)
+        // 使用 localStorage 可以讀取之前累積數據，如果沒有則生成驚喜值
+        let totalCarbonReduction = 0;
+        
+        // 嘗試從 localStorage 讀取總減碳 (如果之前關卡有儲存)
+        try {
+            let savedCarbon = localStorage.getItem('fern_total_carbon');
+            if (savedCarbon && !isNaN(parseFloat(savedCarbon))) {
+                totalCarbonReduction = parseFloat(savedCarbon);
+            } else {
+                // 模擬闖關成就總減碳：第一關(6題正確每題減2kg=12) 第二關(降100°C每度0.05=5kg) 第三關(8個標章各2.5=20kg) 第四關(10碳分子各2kg=20kg) 第五關(能量滿溢減碳象徵8kg) 第六關(平衡和諧減碳6kg) 第七關(3包裹各3.3=9.9kg) 總計約80.9kg 取78kg
+                totalCarbonReduction = 78.6;
+            }
+        } catch(e) { totalCarbonReduction = 76.2; }
+        
+        // 確保顯示整數或一位小數
+        const carbonTotalElem = document.getElementById('carbonTotal');
+        const missionsDoneElem = document.getElementById('missionsDone');
+        const knowledgeCountElem = document.getElementById('knowledgeCount');
+        
+        // 知識點數量隨機但呼應
+        const knowledgeUnlocked = 14;
+        knowledgeCountElem.innerText = knowledgeUnlocked;
+        missionsDoneElem.innerText = '7';
+        
+        // 數字滾動效果
+        function animateNumber(element, start, end, duration = 1500) {
+            let startTime = null;
+            const step = (timestamp) => {
+                if (!startTime) startTime = timestamp;
+                const progress = Math.min(1, (timestamp - startTime) / duration);
+                const current = Math.floor(progress * (end - start) + start);
+                element.innerText = current.toFixed(1);
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                } else {
+                    element.innerText = end.toFixed(1);
+                }
+            };
+            requestAnimationFrame(step);
+        }
+        
+        // 觸發數字滾動
+        animateNumber(carbonTotalElem, 0, totalCarbonReduction, 1600);
+        
+        // 落葉與花瓣飄落特效 (增加歡慶感)
+        function createFallingLeaf() {
+            const leafContainer = document.getElementById('particlesContainer');
+            const leaf = document.createElement('div');
+            const leafIcons = ['🍃', '🌿', '🍂', '🌱', '✨', '💚', '♻️'];
+            leaf.innerText = leafIcons[Math.floor(Math.random() * leafIcons.length)];
+            leaf.className = 'falling-leaf';
+            const startLeft = Math.random() * window.innerWidth;
+            leaf.style.left = startLeft + 'px';
+            leaf.style.fontSize = (1.2 + Math.random() * 1.5) + 'rem';
+            leaf.style.animationDuration = (3 + Math.random() * 4) + 's';
+            leaf.style.animationDelay = Math.random() * 2 + 's';
+            leafContainer.appendChild(leaf);
+            setTimeout(() => leaf.remove(), 7000);
+        }
+        
+        // 彩帶效果
+        function createConfetti() {
+            const container = document.getElementById('particlesContainer');
+            const confettiCount = 60;
+            for (let i = 0; i < confettiCount; i++) {
+                const conf = document.createElement('div');
+                conf.className = 'confetti';
+                const colors = ['#fbbf24', '#34d399', '#60a5fa', '#f472b6', '#a78bfa'];
+                conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                conf.style.width = (6 + Math.random() * 10) + 'px';
+                conf.style.height = (8 + Math.random() * 14) + 'px';
+                conf.style.left = Math.random() * window.innerWidth + 'px';
+                conf.style.animationDuration = (1 + Math.random() * 1.5) + 's';
+                conf.style.animationDelay = Math.random() * 0.8 + 's';
+                container.appendChild(conf);
+                setTimeout(() => conf.remove(), 2200);
+            }
+        }
+        
+        // 漂浮光點
+        function createGlowParticle() {
+            const container = document.getElementById('particlesContainer');
+            const particle = document.createElement('div');
+            particle.className = 'glow-particle';
+            const size = 8 + Math.random() * 20;
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            particle.style.left = Math.random() * window.innerWidth + 'px';
+            particle.style.bottom = '0px';
+            particle.style.animationDuration = (2 + Math.random() * 3) + 's';
+            container.appendChild(particle);
+            setTimeout(() => particle.remove(), 4000);
+        }
+        
+        // 開始慶祝動畫 (落葉間隔、彩帶爆發、光點)
+        let leafInterval, glowInterval;
+        function startCelebration() {
+            // 立即爆發彩帶
+            createConfetti();
+            // 每0.5秒一片落葉
+            leafInterval = setInterval(() => {
+                createFallingLeaf();
+            }, 600);
+            // 每1秒光點
+            glowInterval = setInterval(() => {
+                createGlowParticle();
+            }, 900);
+            // 額外每2秒一次小型彩帶重複 (增加氣氛)
+            const extraConfetti = setInterval(() => {
+                if (document.hasFocus()) createConfetti();
+            }, 3800);
+            // 20秒後減緩特效但保留少量
+            setTimeout(() => {
+                clearInterval(leafInterval);
+                clearInterval(glowInterval);
+                clearInterval(extraConfetti);
+                // 再降頻率 保留一些落葉但不多
+                const gentleLeaf = setInterval(() => {
+                    if (Math.random() > 0.7) createFallingLeaf();
+                }, 1800);
+                setTimeout(() => clearInterval(gentleLeaf), 10000);
+            }, 18000);
+        }
+        
+        // 重新冒險功能: 清除localStorage中的碳數據可選，重置遊戲到第一關
+        function restartAdventure() {
+            // 保留一些用戶數據重置選項但直接跳轉到第一關 (index.html或level1.html)
+            // 按照原遊戲入口 index.html 為第一關起始
+            window.location.href = 'index.html';
+        }
+        
+        // 如果圖片加載失敗，替代團隊圖片預案
+        const teamImg = document.querySelector('img');
+        if (teamImg) {
+            teamImg.addEventListener('error', () => {
+                teamImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 400'%3E%3Crect width='800' height='400' fill='%232d6a4f'/%3E%3Ctext x='400' y='200' font-size='30' fill='white' text-anchor='middle' font-weight='bold'%3E🌱 蕨積戰隊大集合 🌱%3C/text%3E%3C/svg%3E";
+            });
+        }
+        
+        // 頁面加載額外動畫
+        window.addEventListener('load', () => {
+            startCelebration();
+            // 添加一個淡入動畫
+            const mainCard = document.querySelector('.relative.z-20');
+            if (mainCard) mainCard.classList.add('bounce-in');
+            
+            // 創造小型煙火效果（隨機生成閃光）
+            for(let i=0;i<12;i++) {
+                setTimeout(() => createGlowParticle(), i * 200);
+            }
+        });
+        
+        // 監聽重新冒險按鈕
+        const restartBtn = document.querySelector('button');
+        if (restartBtn) {
+            restartBtn.addEventListener('click', (e) => {
+                // 播放點擊效果，避免多次跳轉
+                e.preventDefault();
+                restartAdventure();
+            });
+        }
+        
+        // 響應窗口尺寸變化時，重新調整部分飄落葉片不影響
+        window.addEventListener('resize', () => {
+            // 無需額外操作
+        });
+        
+        // 補充localStorage可以存最終碳量 (可選)
+        if (typeof(Storage) !== "undefined") {
+            localStorage.setItem('fern_final_carbon', totalCarbonReduction.toFixed(1));
+            localStorage.setItem('fern_completed', 'true');
+        }
+        
+        // 如果用戶點擊任何成就區，顯示小驚喜訊息
+        const statCards = document.querySelectorAll('.grid > div');
+        statCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const msg = document.createElement('div');
+                msg.innerText = '✨ 謝謝你為地球盡一份力 ✨';
+                msg.className = 'fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-6 py-2 rounded-full text-sm z-50 animate-pulse';
+                document.body.appendChild(msg);
+                setTimeout(() => msg.remove(), 2000);
+            });
+        });
+        
+        // 增加背景自動播放安靜的森林音頻? 不需要但提供視覺而已
+        console.log('🎉 綠色宇宙圓滿達成，感謝冒險者！');
+    </script>
+    
+    <!-- 額外確保動畫不受限 -->
+    <style>
+        @keyframes fade-up {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-fade-up {
+            animation: fade-up 0.6s ease-out;
+        }
+        /* 滾動條隱藏保持乾淨 */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+    </style>
 </body>
 </html>
