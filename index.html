@@ -3,140 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>蕨積綠色宇宙：淨零大冒險</title>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <title>蕨積綠色宇宙 - 第一關</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
     <style>
-        body { background: #f0fdf4; font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; overflow: hidden; touch-action: none; }
-        .character-bounce { animation: bounce 4s ease-in-out infinite; }
+        .character-bounce { animation: bounce 3s ease-in-out infinite; }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
-        /* 滾動條隱藏 */
-        ::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body>
-    <div id="root"></div>
+<body class="bg-white overflow-hidden">
+    <div class="h-screen w-full flex flex-col md:flex-row">
+        <div class="w-full h-[35%] md:h-full md:w-5/12 bg-green-500 flex flex-col items-center justify-center p-6 relative">
+            <img src="fern.png" class="w-40 md:w-80 character-bounce drop-shadow-2xl mb-4">
+            <div class="bg-white/90 p-4 rounded-2xl shadow-xl w-full max-w-sm border-l-8 border-green-700">
+                <h2 class="text-xl font-black text-gray-800">阿蕨 Fern</h2>
+                <p id="dialog" class="text-base text-gray-600 font-medium">問題不急，先釐清碳排脈絡。請幫我分類這些物件！</p>
+            </div>
+        </div>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-        const { motion, AnimatePresence } = window.Motion;
+        <div class="w-full h-[65%] md:h-full md:w-7/12 bg-gray-50 flex flex-col items-center justify-center p-8">
+            <div id="game-ui" class="text-center w-full max-w-sm">
+                <div id="item-icon" class="text-[120px] mb-6">🏭</div>
+                <div class="grid gap-4">
+                    <button onclick="check(1)" class="bg-white border-4 border-green-500 p-6 rounded-2xl text-2xl font-bold hover:bg-green-50 active:scale-95 transition">直接排放 (Scope 1)</button>
+                    <button onclick="check(0)" class="bg-white border-4 border-gray-200 p-6 rounded-2xl text-2xl font-bold text-gray-400">其他分類</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // --- 全角色與關卡設定 ---
-        const CHARS = {
-            1: { id: 'fern', name: '阿蕨 Fern', file: 'fern.png', color: 'bg-green-500', intro: '我是策略長阿蕨。先釐清碳排脈絡，才能對症下藥。' },
-            2: { id: 'brom', name: '小積 Brom', file: 'brom.png', color: 'bg-blue-500', intro: '我是營運總監小積。講人話，幫設備降溫才是硬道理。' },
-            3: { id: 'mons', name: '小龜 Monstera', file: 'mons.png', color: 'bg-emerald-500', intro: '我是冒險王小龜！校園裡到處都是節能寶藏，快去找！' },
-            4: { id: 'sans', name: '虎妹 Sans', file: 'sans.png', color: 'bg-slate-800', intro: '我是虎妹。大家睡覺時，就是我夜間特訓捕碳的時刻。' },
-            5: { id: 'succ', name: '肉肉 Succ', file: 'succ.png', color: 'bg-orange-400', intro: '我是肉肉。慢慢來，穩定儲存水分與能量，才能長久。' },
-            6: { id: 'ficus', name: '琴哥 Ficus', file: 'ficus.png', color: 'bg-indigo-500', intro: '我是琴哥。優雅的環境律動，能讓能源消耗達到平衡。' },
-            7: { id: 'till', name: '空空 Till', file: 'till.png', color: 'bg-sky-400', intro: '我是特派員空空。數位化讓綠色知識不受土壤限制！' }
-        };
-
-        const L1_ITEMS = [
-            { n: '工廠煙囪', t: 'fire', i: '🏭' }, { n: '教室電燈', t: 'bolt', i: '💡' }, { n: '牛肉漢堡', t: 'hidden', i: '🍔' }
+    <script>
+        let step = 0;
+        const items = [
+            { icon: '🏭', dialog: '做得好！工廠煙囪是直接排放。那電燈呢？' },
+            { icon: '💡', dialog: '沒錯，電力是能源使用。最後是漢堡？' },
+            { icon: '🍔', dialog: '太棒了！這是間接生命週期。去找小積吧！' }
         ];
 
-        function App() {
-            const [level, setLevel] = useState(1);
-            const [score, setScore] = useState(0);
-            const [subStep, setSubStep] = useState(0); // 各關卡內進度
-            const [dialog, setDialog] = useState(CHARS[1].intro);
-
-            // 通用過關邏輯
-            const triggerNext = (points = 10, customMsg = "做得好！") => {
-                setScore(s => s + points);
-                setDialog(customMsg);
-                setTimeout(() => {
-                    if (level < 7) {
-                        setLevel(l => l + 1);
-                        setSubStep(0);
-                        setDialog(CHARS[level + 1].intro);
-                    } else {
-                        setLevel(8);
-                    }
-                }, 1500);
-            };
-
-            return (
-                <div className="h-screen w-full flex flex-col md:flex-row overflow-hidden bg-white">
-                    {/* --- 左舞台：IP 角色區 (響應式：手機佔 40% 高, 電腦佔 5/12 寬) --- */}
-                    <div className={`w-full h-[40%] md:h-full md:w-5/12 ${level <= 7 ? CHARS[level].color : 'bg-green-700'} transition-colors duration-700 flex flex-col items-center justify-center p-4 relative`}>
-                        <AnimatePresence mode="wait">
-                            {level <= 7 && (
-                                <motion.div key={level} initial={{ x: -100, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -50, opacity: 0 }} className="flex flex-col items-center">
-                                    <img src={CHARS[level].file} className="w-40 md:w-80 h-auto character-bounce drop-shadow-2xl mb-4 md:mb-8" />
-                                    <div className="bg-white/90 p-4 md:p-6 rounded-2xl shadow-xl w-full max-w-sm border-l-8 border-green-700">
-                                        <h2 className="text-xl md:text-2xl font-black text-gray-800 mb-1">{CHARS[level].name}</h2>
-                                        <p className="text-sm md:text-lg text-gray-600 font-medium leading-snug">{dialog}</p>
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                        <div className="absolute top-4 left-4 bg-black/20 px-3 py-1 rounded-full text-white font-bold text-xs md:text-base">SCORE: {score}</div>
-                    </div>
-
-                    {/* --- 右舞台：遊戲內容區 (響應式：手機佔 60% 高, 電腦佔 7/12 寬) --- */}
-                    <div className="w-full h-[60%] md:h-full md:w-7/12 bg-gray-50 flex flex-col items-center justify-center p-6 md:p-12 overflow-y-auto">
-                        <AnimatePresence mode="wait">
-                            {/* 第一關：阿蕨 - 分類任務 */}
-                            {level === 1 && (
-                                <motion.div key="l1" className="w-full max-w-md text-center">
-                                    <div className="text-7xl md:text-9xl mb-4">{L1_ITEMS[subStep].i}</div>
-                                    <h3 className="text-2xl font-bold mb-8">{L1_ITEMS[subStep].n}</h3>
-                                    <div className="grid gap-3">
-                                        {['fire', 'bolt', 'hidden'].map(t => (
-                                            <button key={t} onClick={() => subStep < 2 ? setSubStep(s => s + 1) : triggerNext()} className="bg-white border-4 border-green-500 p-4 rounded-2xl text-xl font-bold hover:bg-green-50">{t === 'fire' ? '直接排放' : t === 'bolt' ? '電力使用' : '間接排放'}</button>
-                                        ))}
-                                    </div>
-                                </motion.div>
-                            )}
-
-                            {/* 第二關：小積 - 降溫任務 */}
-                            {level === 2 && (
-                                <motion.div key="l2" className="text-center">
-                                    <div className="text-8xl mb-8 animate-pulse">🖥️🔥</div>
-                                    <button onClick={() => triggerNext(20, "降溫成功！這就是執行力。")} className="bg-blue-600 text-white px-12 py-6 rounded-full text-2xl font-black shadow-2xl active:scale-90 transition">噴水降溫 💧</button>
-                                </motion.div>
-                            )}
-
-                            {/* 第三關：小龜 - 標章任務 */}
-                            {level === 3 && (
-                                <motion.div key="l3" className="grid grid-cols-2 gap-4">
-                                    {['🏷️', '♻️', '🚲', '🔋'].map(i => (
-                                        <button key={i} onClick={() => triggerNext(10, "找到節能點了！")} className="text-6xl p-8 bg-white rounded-3xl shadow-xl">{i}</button>
-                                    ))}
-                                </motion.div>
-                            )}
-
-                            {/* 第四至七關... (以此類推簡化互動) */}
-                            {level >= 4 && level <= 7 && (
-                                <motion.div key="gen" className="text-center">
-                                    <div className="text-9xl mb-8">{level === 4 ? '🌑' : level === 5 ? '☀️' : level === 6 ? '🎵' : '📦'}</div>
-                                    <button onClick={() => triggerNext(30, "太棒了，任務完成！")} className="bg-gray-800 text-white px-10 py-5 rounded-full text-xl font-bold">點擊執行任務</button>
-                                </motion.div>
-                            )}
-
-                            {/* 最終大合照 */}
-                            {level === 8 && (
-                                <motion.div key="final" initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="text-center">
-                                    <h2 className="text-4xl md:text-5xl font-black text-green-700 mb-6">綠色宇宙大圓滿！</h2>
-                                    <div className="flex flex-wrap justify-center gap-2 mb-8">
-                                        {[1,2,3,4,5,6,7].map(i => <img key={i} src={CHARS[i].file} className="w-12 h-12 md:w-16 md:h-16 rounded-full border-2 border-green-200" />)}
-                                    </div>
-                                    <button onClick={() => window.location.reload()} className="bg-green-600 text-white px-12 py-5 rounded-full text-2xl font-black shadow-xl">再次挑戰</button>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
-                </div>
-            );
+        function check(isCorrect) {
+            if (isCorrect) {
+                if (step < items.length - 1) {
+                    step++;
+                    document.getElementById('item-icon').innerText = items[step].icon;
+                    document.getElementById('dialog').innerText = items[step].dialog;
+                } else {
+                    document.getElementById('dialog').innerText = "脈絡釐清了，去找小積落地執行！";
+                    setTimeout(() => { window.location.href = 'level2.html'; }, 1500);
+                }
+            } else {
+                document.getElementById('dialog').innerText = "哎呀，這個分類不對喔，再想想！";
+            }
         }
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
     </script>
 </body>
 </html>
