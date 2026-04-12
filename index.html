@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>蕨積綠色宇宙：夜間特訓</title>
+    <title>蕨積綠色宇宙：佛系儲能</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
     <style>
-        body { background: #0f172a; font-family: sans-serif; overflow: hidden; touch-action: none; color: white; }
-        .bg-day { background: #eefdf4; color: black; }
+        body { background: #fff7ed; font-family: sans-serif; overflow: hidden; touch-action: none; }
+        .bg-night { background: #0f172a; color: white; }
+        .bg-day { background: #eefdf4; }
     </style>
 </head>
 <body>
@@ -22,76 +23,76 @@
         const { motion, AnimatePresence } = window.Motion;
 
         function App() {
-            const [level, setLevel] = useState(1); // 為了展示，你可以手動改成 4 測試
+            const [level, setLevel] = useState(1); 
             const [score, setScore] = useState(0);
-            const [carbonCaught, setCarbonCaught] = useState(0);
-            const [msg, setMsg] = useState("虎妹：半夜運動最安靜，準備好補碳了嗎？");
+            const [msg, setMsg] = useState("肉肉：慢慢來，水要存，心情也要。");
+            const [waterLevel, setWaterLevel] = useState(0);
 
-            // 第四關：補碳邏輯
-            const catchCarbon = () => {
-                setScore(score + 5);
-                setCarbonCaught(prev => prev + 1);
-                if (carbonCaught >= 9) {
-                    setMsg("虎妹：特訓完成！空氣變清新了。下位教主準備好了嗎？");
-                    setTimeout(() => setLevel(5), 2000); // 通往第五關肉肉
+            // 第五關：收集資源邏輯
+            const collect = (type) => {
+                if (type === 'good') {
+                    setScore(score + 10);
+                    setWaterLevel(prev => Math.min(prev + 20, 100));
+                    if (waterLevel >= 80) {
+                        setMsg("肉肉：水存滿了，感覺能量充足～準備見琴哥囉。");
+                        setTimeout(() => setLevel(6), 2000);
+                    }
+                } else {
+                    setScore(Math.max(0, score - 5));
+                    setMsg("肉肉：嗚...這煙味我不喜歡...");
                 }
             };
 
             return (
-                <div className={`flex flex-col items-center h-screen p-4 max-w-md mx-auto ${level < 4 ? 'bg-day' : ''}`}>
+                <div className={`flex flex-col items-center h-screen p-4 max-w-md mx-auto ${level === 4 ? 'bg-night' : level === 5 ? 'bg-orange-50' : 'bg-day'}`}>
                     {/* 對話框 */}
-                    <div className="w-full bg-white rounded-2xl shadow-lg p-4 mt-2 border-2 border-green-500 z-50 text-black">
+                    <div className="w-full bg-white rounded-2xl shadow-lg p-4 mt-2 border-2 border-orange-400 z-50 text-black">
                         <div className="flex items-center gap-3">
-                            <img src={level === 4 ? 'sans.png' : 'fern.png'} className="w-12 h-12 rounded-full border shadow-sm" />
+                            <img src={level === 5 ? 'succ.png' : 'fern.png'} className="w-12 h-12 rounded-full border shadow-sm" />
                             <div className="flex-1">
-                                <p className="font-bold text-green-800 text-sm">{level === 4 ? '虎妹' : '阿蕨'}</p>
+                                <p className="font-bold text-orange-800 text-sm">{level === 5 ? '肉肉' : '阿蕨'}</p>
                                 <p className="text-gray-600 text-[10px] leading-tight">{msg}</p>
                             </div>
                         </div>
-                        <div className="text-right text-xl font-black text-green-600">SCORE: {score}</div>
+                        <div className="text-right text-xl font-black text-orange-600">SCORE: {score}</div>
                     </div>
 
                     <div className="flex-1 flex flex-col items-center justify-center w-full relative">
-                        {level < 4 && (
-                            <button className="bg-white text-black p-4 rounded-xl shadow" onClick={() => setLevel(4)}>
-                                點擊直接進入第四關 (測試用)
+                        {level < 5 && (
+                            <button className="bg-white text-black p-4 rounded-xl shadow border-2 border-orange-200" onClick={() => setLevel(5)}>
+                                直接進入第五關肉肉挑戰
                             </button>
                         )}
 
-                        {level === 4 && (
-                            <div className="w-full h-full flex flex-col items-center justify-center overflow-hidden">
-                                <p className="text-xs text-blue-300 mb-4">點擊飄過的「二氧化碳分子 🌑」進行淨化！</p>
-                                
-                                {/* 模擬飄過的碳分子 */}
-                                <div className="h-64 w-full relative">
-                                    <AnimatePresence>
-                                        {[...Array(3)].map((_, i) => (
-                                            <motion.div
-                                                key={carbonCaught + i}
-                                                initial={{ x: -100, y: Math.random() * 200, opacity: 0 }}
-                                                animate={{ x: 500, opacity: 1 }}
-                                                transition={{ duration: 3, repeat: Infinity, delay: i * 1.5 }}
-                                                onClick={catchCarbon}
-                                                className="absolute text-4xl cursor-pointer filter grayscale hover:grayscale-0"
-                                            >🌑</motion.div>
-                                        ))}
-                                    </AnimatePresence>
-                                    
-                                    {/* 虎妹本體 */}
+                        {level === 5 && (
+                            <div className="w-full h-full flex flex-col items-center py-10">
+                                {/* 儲水條 */}
+                                <div className="w-3/4 h-6 bg-gray-200 rounded-full border-2 border-orange-200 overflow-hidden mb-10">
                                     <motion.div 
-                                        animate={{ y: [0, -10, 0] }}
-                                        transition={{ duration: 2, repeat: Infinity }}
-                                        className="absolute bottom-0 left-1/2 -translate-x-1/2 text-center"
-                                    >
-                                        <img src="sans.png" className="w-28 h-28 rounded-full border-4 border-green-400" />
-                                        <div className="bg-green-600 text-[10px] px-2 py-1 rounded mt-2">光合作用特訓中... ({carbonCaught}/10)</div>
-                                    </motion.div>
+                                        className="h-full bg-blue-400" 
+                                        animate={{ width: `${waterLevel}%` }}
+                                    />
                                 </div>
+
+                                <div className="grid grid-cols-3 gap-6 mb-20">
+                                    <motion.div whileTap={{scale:0.9}} onClick={()=>collect('good')} className="text-5xl cursor-pointer">💧</motion.div>
+                                    <motion.div whileTap={{scale:0.9}} onClick={()=>collect('bad')} className="text-5xl cursor-pointer filter grayscale">☁️</motion.div>
+                                    <motion.div whileTap={{scale:0.9}} onClick={()=>collect('good')} className="text-5xl cursor-pointer">☀️</motion.div>
+                                </div>
+
+                                {/* 肉肉本體 */}
+                                <motion.div 
+                                    drag="x" dragConstraints={{left:-100, right:100}}
+                                    className="text-center cursor-grab active:cursor-grabbing"
+                                >
+                                    <img src="succ.png" className="w-32 h-32 rounded-full border-4 border-orange-300 shadow-2xl" />
+                                    <p className="font-bold text-orange-600 mt-2 italic tracking-widest">Q彈儲能中...</p>
+                                </motion.div>
+                                
+                                <p className="text-[10px] text-gray-400 mt-10">提示：點擊水滴與陽光來存水！</p>
                             </div>
                         )}
                     </div>
-                    
-                    <p className="text-[10px] text-gray-500 mb-2">FERN+ GREEN UNIVERSE</p>
                 </div>
             );
         }
