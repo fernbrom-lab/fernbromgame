@@ -15,7 +15,9 @@
         body {
             background: #0f172a;
             overflow: hidden;
-            touch-action: pan-y; /* 只允許垂直滾動 */
+            position: fixed;
+            width: 100%;
+            height: 100%;
         }
         /* 角色漂浮 */
         .character-float {
@@ -34,7 +36,11 @@
             z-index: 20;
             touch-action: manipulation;
             transition: transform linear;
-            left: -80px;
+            font-size: clamp(2.5rem, 12vw, 4rem);
+            min-width: 70px;
+            text-align: center;
+            background: transparent;
+            pointer-events: auto;
         }
         /* 點擊特效：浮字 */
         .float-number {
@@ -80,82 +86,83 @@
             0%, 100% { background-color: rgba(34,197,94,0); }
             50% { background-color: rgba(34,197,94,0.25); }
         }
-        /* 手機觸控區域加大 */
-        .carbon-particle {
-            min-width: 70px;
-            text-align: center;
-            font-size: clamp(2.5rem, 12vw, 4rem);
-            padding: 8px;
-            background: transparent;
-        }
-        /* 確保遊戲區有明確的定位參考 */
+        /* 確保遊戲區有明確的尺寸 */
         #game-area {
             position: relative;
+            width: 100%;
+            height: 100%;
             overflow: hidden;
+            touch-action: pan-y;
+        }
+        /* 手機直向時調整左側區域高度 */
+        @media (max-width: 768px) {
+            .mobile-game-area {
+                min-height: 0;
+                flex: 1;
+            }
         }
     </style>
 </head>
-<body class="bg-slate-900 overflow-hidden antialiased">
+<body class="bg-slate-900">
 
 <div class="h-screen w-full flex flex-col md:flex-row relative">
     
-    <!-- 左側虎妹區 -->
-    <div class="w-full md:w-5/12 bg-gradient-to-br from-slate-800 to-slate-900 flex flex-col items-center justify-center p-5 relative shadow-2xl z-10 border-r border-white/10">
+    <!-- 左側虎妹區（手機版在上方） -->
+    <div class="w-full md:w-5/12 bg-gradient-to-br from-slate-800 to-slate-900 flex flex-col items-center justify-center p-4 relative shadow-2xl z-10 border-r border-white/10" style="min-height: 280px;">
         <div class="absolute inset-0 opacity-20 pointer-events-none overflow-hidden">
             <div class="absolute top-8 left-5 text-2xl">⭐</div>
             <div class="absolute bottom-20 right-8 text-3xl">🌙</div>
             <div class="absolute top-1/3 left-1/4 text-xl">✨</div>
         </div>
         <div class="character-float relative z-20">
-            <div class="bg-white/10 backdrop-blur-sm rounded-full p-3 shadow-2xl border border-white/20">
-                <img src="sans.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/616/616489.png';" class="w-36 h-36 md:w-44 md:h-44 object-contain drop-shadow-xl">
+            <div class="bg-white/10 backdrop-blur-sm rounded-full p-2 shadow-2xl border border-white/20">
+                <img src="sans.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/616/616489.png';" class="w-28 h-28 md:w-36 md:h-36 object-contain drop-shadow-xl">
             </div>
         </div>
-        <div class="mt-6 w-full max-w-sm relative z-20">
-            <div class="bg-gray-800/90 backdrop-blur-md rounded-3xl p-5 shadow-2xl border-l-[10px] border-emerald-500 bubble-glow text-white">
+        <div class="mt-3 w-full max-w-sm relative z-20">
+            <div class="bg-gray-800/90 backdrop-blur-md rounded-2xl p-3 shadow-2xl border-l-[8px] border-emerald-500 bubble-glow text-white">
                 <div class="flex items-start gap-2">
-                    <span class="text-3xl">🐯</span>
+                    <span class="text-2xl">🐯</span>
                     <div class="flex-1">
-                        <h3 class="font-black text-xl text-emerald-300">虎妹 Sans · 夜行淨化者</h3>
-                        <p id="dialog" class="text-gray-200 font-medium mt-1 text-base">🌑 碳分子飄過，快速點擊捕捉！淨化空氣就靠你。</p>
+                        <h3 class="font-black text-base md:text-xl text-emerald-300">虎妹 Sans</h3>
+                        <p id="dialog" class="text-gray-200 font-medium mt-1 text-xs md:text-sm">🌑 碳分子飄過，快速點擊捕捉！</p>
                     </div>
                 </div>
             </div>
-            <div class="absolute -bottom-2 left-8 w-4 h-4 bg-gray-800/90 rotate-45 rounded-sm"></div>
         </div>
-        <div class="absolute bottom-4 left-0 right-0 text-center text-white/50 text-xs font-medium md:block hidden">
-            💨 點擊漂浮 CO₂ 分子，每捕捉一個 = 減少 2kg 碳排放
+        <div class="absolute bottom-2 left-0 right-0 text-center text-white/40 text-[10px] font-medium md:block hidden">
+            💨 每捕捉一個 = 減少 2kg 碳排放
         </div>
     </div>
 
-    <!-- 右側遊戲區 -->
-    <div class="w-full md:w-7/12 bg-gradient-to-br from-slate-950 to-black flex flex-col relative overflow-hidden">
+    <!-- 右側遊戲區（手機版在下方，佔滿剩餘空間） -->
+    <div class="w-full md:w-7/12 bg-gradient-to-br from-slate-950 to-black flex flex-col relative overflow-hidden" style="flex: 1; min-height: 0;">
         <!-- 進度面板 -->
-        <div class="absolute top-4 left-0 right-0 z-30 px-5 pointer-events-none">
-            <div class="bg-black/60 backdrop-blur-md rounded-2xl p-3 border border-white/20 shadow-xl pointer-events-auto">
-                <div class="flex justify-between items-center flex-wrap gap-2">
-                    <div class="flex items-center gap-2">
-                        <span class="text-2xl">🌫️</span>
-                        <span class="font-black text-white text-sm md:text-base">碳捕獲進度</span>
+        <div class="absolute top-2 left-0 right-0 z-30 px-3 pointer-events-none">
+            <div class="bg-black/60 backdrop-blur-md rounded-xl p-2 border border-white/20 shadow-xl pointer-events-auto max-w-md mx-auto w-full">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-1">
+                        <span class="text-lg">🌫️</span>
+                        <span class="font-black text-white text-xs">碳捕獲</span>
                     </div>
-                    <div class="bg-emerald-900/80 text-emerald-300 px-4 py-1.5 rounded-full font-black text-xl">
+                    <div class="bg-emerald-900/80 text-emerald-300 px-3 py-0.5 rounded-full font-black text-sm">
                         <span id="captureCount">0</span> / <span id="targetTotal">10</span>
                     </div>
                 </div>
-                <div class="w-full bg-gray-700 rounded-full h-2.5 mt-2 overflow-hidden">
-                    <div id="captureProgress" class="progress-fill bg-gradient-to-r from-emerald-500 to-green-400 h-2.5 rounded-full" style="width: 0%"></div>
+                <div class="w-full bg-gray-700 rounded-full h-1.5 mt-1 overflow-hidden">
+                    <div id="captureProgress" class="progress-fill bg-gradient-to-r from-emerald-500 to-green-400 h-1.5 rounded-full" style="width: 0%"></div>
                 </div>
-                <div class="flex justify-between mt-2 text-xs text-gray-300">
-                    <span>⚡ 即時減碳：<span id="liveCarbon">0</span> kg CO₂e</span>
-                    <span>🎯 目標：捕獲 <span id="targetNumSpan">10</span> 個</span>
+                <div class="flex justify-between mt-1 text-[10px] text-gray-300">
+                    <span>⚡ 減碳：<span id="liveCarbon">0</span> kg</span>
+                    <span>🎯 目標：10 個</span>
                 </div>
             </div>
         </div>
 
-        <!-- 動態遊戲區 -->
-        <div id="game-area" class="relative w-full h-full overflow-hidden" style="position: relative;">
+        <!-- 動態遊戲區 - 關鍵：確保高度正確 -->
+        <div id="game-area" class="relative w-full h-full overflow-hidden" style="position: relative; flex: 1; min-height: 300px;">
             <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle fill=%22rgba(255,255,255,0.03)%22 cx=%2250%22 cy=%2250%22 r=%221%22/%3E%3C/svg%3E')] bg-repeat pointer-events-none"></div>
-            <div class="absolute bottom-6 left-0 right-0 text-center text-white/30 text-xs pointer-events-none">
+            <div class="absolute bottom-3 left-0 right-0 text-center text-white/30 text-[10px] pointer-events-none">
                 💧 點擊飄動的 🌑 分子，淨化它們！
             </div>
         </div>
@@ -170,7 +177,7 @@
         let isGameCompleted = false;
         let activeMolecules = [];
         let spawnInterval = null;
-        let animationFramePending = false;
+        let gameAreaWidth = 0;
 
         // DOM 元素
         const dialogEl = document.getElementById('dialog');
@@ -181,7 +188,7 @@
         const gameArea = document.getElementById('game-area');
 
         targetTotalSpan.innerText = TARGET_CAPTURES;
-        document.getElementById('targetNumSpan').innerText = TARGET_CAPTURES;
+        document.getElementById('targetNumSpan') && (document.getElementById('targetNumSpan').innerText = TARGET_CAPTURES);
 
         // 更新 UI
         function updateStatsUI() {
@@ -197,9 +204,9 @@
                 } else if (currentCaptured >= TARGET_CAPTURES - 3) {
                     dialogEl.innerText = `⚡ 只差 ${TARGET_CAPTURES - currentCaptured} 個！再加把勁！`;
                 } else if (currentCaptured >= TARGET_CAPTURES / 2) {
-                    dialogEl.innerText = `🌙 已淨化 ${currentCaptured} 個碳分子，減碳 ${savedCarbon}kg！繼續努力～`;
+                    dialogEl.innerText = `🌙 已淨化 ${currentCaptured} 個碳分子，減碳 ${savedCarbon}kg！`;
                 } else if (currentCaptured > 0) {
-                    dialogEl.innerText = `🌑 捕獲 ${currentCaptured} 個！點擊飄過的暗影，淨化大氣！`;
+                    dialogEl.innerText = `🌑 捕獲 ${currentCaptured} 個！繼續點擊！`;
                 } else {
                     dialogEl.innerText = "🌫️ 碳分子從左至右飄移，快速點擊它們！目標10個！";
                 }
@@ -252,9 +259,6 @@
             const coords = getClickCoords(event, moleculeElement);
             if (coords.x && coords.y) {
                 createPlusEffect(coords.x, coords.y);
-            } else {
-                const rect = moleculeElement.getBoundingClientRect();
-                createPlusEffect(rect.left + rect.width/2, rect.top + rect.height/2);
             }
 
             if (moleculeElement.parentNode) moleculeElement.remove();
@@ -284,13 +288,25 @@
             }, newDelay);
         }
 
-        // 產生碳分子 - 使用 transform translateX 確保手機順暢
+        // 取得遊戲區實際寬度
+        function updateGameAreaWidth() {
+            if (gameArea) {
+                gameAreaWidth = gameArea.clientWidth;
+            }
+            return gameAreaWidth;
+        }
+
+        // 產生碳分子 - 使用 transform translateX，並確保起始位置正確
         function createCarbonMolecule() {
             if (isGameCompleted) return;
             if (!gameArea) return;
             
+            const currentWidth = updateGameAreaWidth();
+            if (currentWidth < 100) return; // 寬度未就緒，稍後重試
+            
             const molecule = document.createElement('div');
-            const randomIcon = Math.random() < 0.8 ? '🌑' : (Math.random() < 0.6 ? '💨' : '🌫️');
+            const icons = ['🌑', '🌑', '🌑', '💨', '🌫️'];
+            const randomIcon = icons[Math.floor(Math.random() * icons.length)];
             molecule.innerText = randomIcon;
             molecule.className = 'carbon-particle';
             
@@ -298,9 +314,8 @@
             const topPercent = 10 + Math.random() * 75;
             molecule.style.top = topPercent + '%';
             
-            // 起始位置：左側螢幕外
-            molecule.style.transform = 'translateX(-100px)';
-            molecule.style.left = '0px';
+            // 起始位置：左側螢幕外 (-80px)
+            molecule.style.transform = 'translateX(-80px)';
             
             // 隨機移動速度 (2.5秒 ~ 4.5秒)
             const duration = 2.5 + Math.random() * 2.5;
@@ -318,14 +333,16 @@
             gameArea.appendChild(molecule);
             activeMolecules.push(molecule);
             
-            // 計算目標移動距離：螢幕寬度 + 分子寬度
-            const targetDistance = window.innerWidth + 150;
+            // 目標移動距離：遊戲區寬度 + 分子寬度 (約80px)
+            const targetDistance = currentWidth + 100;
             
-            // 使用 requestAnimationFrame 確保 DOM 已渲染再觸發移動
+            // 強制重排後觸發移動
             requestAnimationFrame(() => {
-                if (molecule && molecule.parentNode) {
-                    molecule.style.transform = `translateX(${targetDistance}px)`;
-                }
+                requestAnimationFrame(() => {
+                    if (molecule && molecule.parentNode && !molecule.getAttribute('data-captured')) {
+                        molecule.style.transform = `translateX(${targetDistance}px)`;
+                    }
+                });
             });
             
             // 自動清除（未被點擊的）
@@ -355,11 +372,25 @@
             
             const finalMsg = document.createElement('div');
             finalMsg.innerText = '✨ 碳捕捉大師 ✨';
-            finalMsg.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/80 text-emerald-400 font-black text-3xl px-8 py-4 rounded-2xl z-50 backdrop-blur border border-emerald-400 animate-pulse';
+            finalMsg.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/80 text-emerald-400 font-black text-2xl px-6 py-3 rounded-2xl z-50 backdrop-blur border border-emerald-400 animate-pulse';
             document.body.appendChild(finalMsg);
             setTimeout(() => finalMsg.remove(), 1500);
             
             setTimeout(() => { window.location.href = 'level5.html'; }, 1800);
+        }
+
+        // 啟動分子生成（確保遊戲區準備好）
+        let initAttempts = 0;
+        function startSpawner() {
+            if (spawnInterval) clearInterval(spawnInterval);
+            spawnInterval = setInterval(() => {
+                if (!isGameCompleted && activeMolecules.length < 18 && gameArea && gameArea.clientWidth > 50) {
+                    createCarbonMolecule();
+                } else if (gameArea && gameArea.clientWidth <= 50 && initAttempts < 5) {
+                    // 寬度還沒準備好，延遲重試
+                    initAttempts++;
+                }
+            }, 1000);
         }
 
         // 初始化
@@ -372,11 +403,8 @@
             }
             updateStatsUI();
             if (spawnInterval) clearInterval(spawnInterval);
-            spawnInterval = setInterval(() => {
-                if (!isGameCompleted && activeMolecules.length < 18) {
-                    createCarbonMolecule();
-                }
-            }, 1000);
+            updateGameAreaWidth();
+            startSpawner();
         }
 
         // 圖片備援
@@ -400,15 +428,30 @@
         // 啟動遊戲
         initGame();
 
+        // 螢幕旋轉或視窗大小改變時，重新調整現有分子的目標位置
+        window.addEventListener('resize', () => {
+            const newWidth = updateGameAreaWidth();
+            // 更新現有分子的目標位置（讓它們繼續移動到新的邊界）
+            for (let mol of activeMolecules) {
+                if (mol && mol.parentNode && !mol.getAttribute('data-captured')) {
+                    const currentTransform = mol.style.transform;
+                    // 如果還沒到達終點，更新目標距離
+                    if (currentTransform && !currentTransform.includes(`${newWidth + 100}`)) {
+                        const newTarget = newWidth + 100;
+                        mol.style.transition = 'transform 0.3s linear';
+                        mol.style.transform = `translateX(${newTarget}px)`;
+                    }
+                }
+            }
+        });
+
         // 頁面可見性處理
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 if (spawnInterval) clearInterval(spawnInterval);
             } else {
                 if (!isGameCompleted && !spawnInterval) {
-                    spawnInterval = setInterval(() => {
-                        if (!isGameCompleted && activeMolecules.length < 18) createCarbonMolecule();
-                    }, 1000);
+                    startSpawner();
                 }
             }
         });
@@ -416,11 +459,6 @@
         window.addEventListener('beforeunload', () => {
             if (spawnInterval) clearInterval(spawnInterval);
             activeMolecules.forEach(m => { if(m._timeout) clearTimeout(m._timeout); });
-        });
-
-        // 螢幕旋轉時重新調整（不需特別處理，但確保現有分子繼續移動）
-        window.addEventListener('resize', () => {
-            // 不中斷現有分子，新分子會用新的寬度計算
         });
     })();
 </script>
