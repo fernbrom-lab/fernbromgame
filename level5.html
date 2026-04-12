@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>蕨積綠色宇宙 - 第五關</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-orange-50 overflow-hidden">
+    <div class="h-screen w-full flex flex-col md:flex-row">
+        <div class="w-full h-[35%] md:h-full md:w-5/12 bg-orange-400 flex flex-col items-center justify-center p-6 text-center text-white">
+            <img src="succ.png" class="w-40 md:w-80 mb-4 drop-shadow-2xl">
+            <div class="bg-white/90 p-4 rounded-2xl shadow-xl w-full max-w-sm border-l-8 border-orange-600 text-black text-left">
+                <h2 class="text-xl font-black">肉肉 Succ</h2>
+                <p id="dialog">慢慢來。連續點擊 ☀️ 與 💧 來儲存能量進度條！</p>
+            </div>
+        </div>
+        <div class="w-full h-[65%] md:h-full md:w-7/12 flex flex-col items-center justify-center p-8 bg-orange-50">
+            <div class="flex gap-10 mb-12">
+                <button onclick="charge(10)" class="text-8xl hover:scale-110 active:scale-90 transition">☀️</button>
+                <button onclick="charge(10)" class="text-8xl hover:scale-110 active:scale-90 transition">💧</button>
+            </div>
+            <div class="w-full max-w-md h-10 bg-gray-200 rounded-full border-4 border-orange-200 overflow-hidden">
+                <div id="bar" class="h-full bg-orange-500 w-0 transition-all duration-300"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let progress = 0;
+        function charge(val) {
+            progress += val;
+            document.getElementById('bar').style.width = progress + '%';
+            if (progress >= 100) {
+                document.getElementById('dialog').innerText = "能量存滿了，感覺真舒服～去找琴哥囉。";
+                setTimeout(() => { window.location.href = 'level6.html'; }, 1500);
+            }
+        }
+    </script>
+</body>
+</html>
