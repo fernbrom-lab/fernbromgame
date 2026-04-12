@@ -2,58 +2,510 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>蕨積綠色宇宙 - 第一關</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>蕨積綠色宇宙 - 碳排分類挑戰</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <style>
-        .character-bounce { animation: bounce 3s ease-in-out infinite; }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        * {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        body {
+            background: linear-gradient(145deg, #eaf7e6 0%, #c8e6c9 100%);
+        }
+        /* 自定义弹跳与漂浮动画 */
+        .character-float {
+            animation: float 3.5s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+            100% { transform: translateY(0px); }
+        }
+        .bubble-glow {
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.3) inset;
+        }
+        .card-hover {
+            transition: all 0.2s ease;
+        }
+        .card-hover:active {
+            transform: scale(0.97);
+        }
+        .shake-animation {
+            animation: shake 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+        .pulse-green {
+            animation: pulse-green 0.5s ease-out;
+        }
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(34,197,94,0.5); background-color: #dcfce7; }
+            70% { box-shadow: 0 0 0 12px rgba(34,197,94,0); background-color: #bbf7d0; }
+            100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); background-color: transparent; }
+        }
+        .progress-bar-fill {
+            transition: width 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4ade80;
+            border-radius: 10px;
+        }
     </style>
 </head>
-<body class="bg-white overflow-hidden">
-    <div class="h-screen w-full flex flex-col md:flex-row">
-        <div class="w-full h-[35%] md:h-full md:w-5/12 bg-green-500 flex flex-col items-center justify-center p-6 relative">
-            <img src="fern.png" class="w-40 md:w-80 character-bounce drop-shadow-2xl mb-4">
-            <div class="bg-white/90 p-4 rounded-2xl shadow-xl w-full max-w-sm border-l-8 border-green-700">
-                <h2 class="text-xl font-black text-gray-800">阿蕨 Fern</h2>
-                <p id="dialog" class="text-base text-gray-600 font-medium">問題不急，先釐清碳排脈絡。請幫我分類這些物件！</p>
+<body class="h-screen w-full overflow-hidden font-sans antialiased">
+
+    <div class="h-screen w-full flex flex-col md:flex-row relative backdrop-blur-sm">
+        
+        <!-- 左侧阿蕨區域 裝飾更豐富 -->
+        <div class="w-full md:w-5/12 bg-gradient-to-br from-emerald-600 to-green-700 flex flex-col items-center justify-center p-5 relative shadow-2xl z-10">
+            <!-- 裝飾性葉片背景 -->
+            <div class="absolute inset-0 opacity-10 pointer-events-none">
+                <div class="absolute top-10 left-5 text-8xl">🍃</div>
+                <div class="absolute bottom-20 right-8 text-9xl rotate-45">🌿</div>
+                <div class="absolute top-1/3 right-2 text-7xl">🍂</div>
+            </div>
+            
+            <!-- 蕨類角色圖標 + 動畫 -->
+            <div class="character-float relative z-20">
+                <div class="bg-white/20 backdrop-blur-sm rounded-full p-3 shadow-2xl">
+                    <img src="fern.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1995/1995572.png'; this.onerror=null;" class="w-36 h-36 md:w-44 md:h-44 object-contain drop-shadow-xl">
+                </div>
+            </div>
+            
+            <!-- 對話氣泡 (毛玻璃) -->
+            <div class="mt-6 w-full max-w-sm relative z-20 transform transition-all duration-300">
+                <div class="bg-white/95 backdrop-blur-sm rounded-3xl p-5 shadow-2xl border-l-[10px] border-emerald-700 bubble-glow">
+                    <div class="flex items-start gap-2">
+                        <span class="text-3xl">🌱</span>
+                        <div class="flex-1">
+                            <h3 class="font-black text-xl text-gray-800 tracking-tight">阿蕨 · 碳智庫</h3>
+                            <p id="dialog" class="text-gray-700 font-medium mt-1 leading-relaxed text-base">歡迎！請幫我判斷每個項目的碳排放分類 🌍</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 對話小尾巴 -->
+                <div class="absolute -bottom-2 left-8 w-4 h-4 bg-white/95 rotate-45 rounded-sm"></div>
+            </div>
+            
+            <!-- 額外碳知識小提示 -->
+            <div class="absolute bottom-4 left-0 right-0 text-center text-white/60 text-xs font-medium md:block hidden">
+                💡 直接排放(Scope1) | 間接排放(Scope2/3)
             </div>
         </div>
 
-        <div class="w-full h-[65%] md:h-full md:w-7/12 bg-gray-50 flex flex-col items-center justify-center p-8">
-            <div id="game-ui" class="text-center w-full max-w-sm">
-                <div id="item-icon" class="text-[120px] mb-6">🏭</div>
-                <div class="grid gap-4">
-                    <button onclick="check(1)" class="bg-white border-4 border-green-500 p-6 rounded-2xl text-2xl font-bold hover:bg-green-50 active:scale-95 transition">直接排放 (Scope 1)</button>
-                    <button onclick="check(0)" class="bg-white border-4 border-gray-200 p-6 rounded-2xl text-2xl font-bold text-gray-400">其他分類</button>
+        <!-- 右側遊戲主區域 美觀卡片設計 -->
+        <div class="w-full md:w-7/12 bg-white/40 backdrop-blur-sm flex flex-col items-center justify-center p-6 overflow-y-auto">
+            <div class="w-full max-w-lg mx-auto">
+                <!-- 分數與進度條區域 -->
+                <div class="mb-6 bg-white/70 rounded-2xl p-4 shadow-md border border-white/50">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl">🏆</span>
+                            <span class="font-black text-gray-700 text-lg">碳排積分</span>
+                        </div>
+                        <div class="bg-gray-800 text-white px-4 py-1.5 rounded-full font-black text-xl">
+                            <span id="scoreValue">0</span> / <span id="totalScore">60</span>
+                        </div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-600 font-semibold mt-1">
+                        <span>📊 答對進度</span>
+                        <span id="progressFraction">第1 / 6題</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3 mt-2 overflow-hidden">
+                        <div id="progressBar" class="progress-bar-fill bg-gradient-to-r from-emerald-500 to-green-600 h-3 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- 主要遊戲卡片 -->
+                <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 border border-emerald-100 transform transition-all duration-300">
+                    <div class="text-center">
+                        <!-- 動態物品圖標 附帶彈跳效果 -->
+                        <div id="item-icon" class="text-[140px] md:text-[160px] mb-3 transition-all duration-300 drop-shadow-2xl inline-block hover:scale-105 cursor-default">🏭</div>
+                        <!-- 物品描述 -->
+                        <div class="mt-2 mb-6">
+                            <p id="item-description" class="text-gray-700 font-bold text-xl md:text-2xl bg-gray-50 inline-block px-6 py-2 rounded-full shadow-inner">工廠煙囪排放</p>
+                        </div>
+                        
+                        <!-- 兩個主要分類按鈕 -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4">
+                            <button id="scope1Btn" class="group relative bg-gradient-to-br from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-black py-5 rounded-2xl text-xl tracking-wide shadow-lg transition-all duration-200 card-hover flex items-center justify-center gap-3 border border-white/30">
+                                <span class="text-3xl">🏭</span>
+                                <span>直接排放 (Scope 1)</span>
+                                <div class="absolute inset-0 rounded-2xl bg-white/0 group-hover:bg-white/10 transition"></div>
+                            </button>
+                            <button id="otherBtn" class="group relative bg-gradient-to-br from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 text-white font-black py-5 rounded-2xl text-xl tracking-wide shadow-lg transition-all duration-200 card-hover flex items-center justify-center gap-3 border border-white/30">
+                                <span class="text-3xl">🌍</span>
+                                <span>間接／其他 (Scope 2/3)</span>
+                                <div class="absolute inset-0 rounded-2xl bg-white/0 group-hover:bg-white/10 transition"></div>
+                            </button>
+                        </div>
+                        
+                        <!-- 額外反饋提示區 -->
+                        <div id="feedbackTip" class="mt-6 text-sm font-semibold text-gray-500 bg-gray-100 p-2 rounded-xl transition-all">
+                            💡 點擊分類，幫助阿蕨釐清碳排源頭
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 底部可愛裝飾 -->
+                <div class="text-center mt-6 text-gray-500 text-xs font-medium flex justify-center gap-4">
+                    <span>🌿 淨零旅程</span>
+                    <span>⚡ 知識即是力量</span>
+                    <span>🍃 第1關 · 碳足跡辨識</span>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        let step = 0;
-        const items = [
-            { icon: '🏭', dialog: '做得好！工廠煙囪是直接排放。那電燈呢？' },
-            { icon: '💡', dialog: '沒錯，電力是能源使用。最後是漢堡？' },
-            { icon: '🍔', dialog: '太棒了！這是間接生命週期。去找小積吧！' }
+        // ======================= 題庫 (豐富6道題目) =======================
+        const QUESTIONS = [
+            { 
+                icon: "🏭", 
+                description: "工廠煙囪燃燒煤炭排放黑煙", 
+                correctType: "scope1", 
+                successMsg: "完全正確！工廠直接燃燒燃料屬於直接排放 (Scope 1) 👍",
+                errorMsg: "不對喔～煙囪排放來自公司自有設施的直接燃燒，屬於直接排放 (Scope 1) 喔！"
+            },
+            { 
+                icon: "💡", 
+                description: "辦公室照明與空調用電", 
+                correctType: "other", 
+                successMsg: "答對了！外購電力屬於間接排放 (Scope 2)，並非直接排放唷 ⚡",
+                errorMsg: "哎呀！用電是來自電力公司，歸類在間接排放 (Scope 2/3)，試試另一個選項！"
+            },
+            { 
+                icon: "🍔", 
+                description: "生產牛肉漢堡 (農場飼養、加工運輸)", 
+                correctType: "other", 
+                successMsg: "太棒了！漢堡的生命週期排放屬於間接排放 (Scope 3)，涵蓋供應鏈各環節 🍃",
+                errorMsg: "牛隻甲烷、飼料種植、加工運送⋯都是間接排放唷！選擇間接分類才正確～"
+            },
+            { 
+                icon: "🚛", 
+                description: "公司自有貨車運送產品 (燃油)", 
+                correctType: "scope1", 
+                successMsg: "正確！自有貨車燃燒汽油/柴油屬於直接排放 (Scope 1) ✅",
+                errorMsg: "公司擁有或控制的車輛排放是直接排放喔！試試 Scope 1 選項 🚛"
+            },
+            { 
+                icon: "⚡", 
+                description: "向台電購買的電力", 
+                correctType: "other", 
+                successMsg: "專業判斷！外購電力是典型的間接排放 (Scope 2) 🎯",
+                errorMsg: "外購電力並非公司自己燃燒產生，正確歸類為間接排放 (Scope 2/3) 唷～"
+            },
+            { 
+                icon: "✈️", 
+                description: "員工出差搭乘國際航班", 
+                correctType: "other", 
+                successMsg: "完美！商務航空旅行屬於Scope 3 (其他間接排放)，分類正確 🌏",
+                errorMsg: "飛機排放並非公司直接擁有，歸屬間接排放 (Scope 3) 才正確！再試一次～"
+            }
         ];
-
-        function check(isCorrect) {
-            if (isCorrect) {
-                if (step < items.length - 1) {
-                    step++;
-                    document.getElementById('item-icon').innerText = items[step].icon;
-                    document.getElementById('dialog').innerText = items[step].dialog;
-                } else {
-                    document.getElementById('dialog').innerText = "脈絡釐清了，去找小積落地執行！";
-                    setTimeout(() => { window.location.href = 'level2.html'; }, 1500);
-                }
-            } else {
-                document.getElementById('dialog').innerText = "哎呀，這個分類不對喔，再想想！";
+        
+        const TOTAL_QS = QUESTIONS.length;
+        const MAX_SCORE = TOTAL_QS * 10;  // 每題10分 共60分
+        
+        // 遊戲狀態
+        let currentIndex = 0;            // 0-based
+        let currentScore = 0;
+        let waitingForNext = false;       // 避免連點 / 等待切換下一題
+        let answeredCorrect = false;      // 當前題目是否已經答對 (防止重複加分)
+        
+        // DOM 元素
+        const dialogEl = document.getElementById('dialog');
+        const itemIconEl = document.getElementById('item-icon');
+        const itemDescEl = document.getElementById('item-description');
+        const scoreValueSpan = document.getElementById('scoreValue');
+        const totalScoreSpan = document.getElementById('totalScore');
+        const progressFractionSpan = document.getElementById('progressFraction');
+        const progressBarFill = document.getElementById('progressBar');
+        const feedbackTipDiv = document.getElementById('feedbackTip');
+        const scope1Btn = document.getElementById('scope1Btn');
+        const otherBtn = document.getElementById('otherBtn');
+        
+        // 初始化顯示總分上限
+        totalScoreSpan.innerText = MAX_SCORE;
+        
+        // 更新UI (分數，進度條，題目內容)
+        function updateUI() {
+            // 更新分數顯示
+            scoreValueSpan.innerText = currentScore;
+            // 更新題目進度文字
+            progressFractionSpan.innerText = `第${currentIndex+1} / ${TOTAL_QS}題`;
+            // 更新進度條寬度 (根據答對題數 / 總題數，但為視覺友善按題號進度)
+            const progressPercent = ((currentIndex) / TOTAL_QS) * 100;
+            progressBarFill.style.width = `${progressPercent}%`;
+            // 顯示當前題目的 icon 及描述
+            const q = QUESTIONS[currentIndex];
+            itemIconEl.innerText = q.icon;
+            itemDescEl.innerText = q.description;
+            // 重設反饋提示為一般狀態 (非錯誤閃爍)
+            feedbackTipDiv.className = "mt-6 text-sm font-semibold text-gray-500 bg-gray-100 p-2 rounded-xl transition-all";
+            feedbackTipDiv.innerHTML = `🌱 目前項目：${q.description} — 請選擇分類`;
+        }
+        
+        // 動畫: 錯誤shake
+        function shakeCard() {
+            const gameCard = document.querySelector('.bg-white.rounded-3xl');
+            gameCard.classList.add('shake-animation');
+            setTimeout(() => {
+                gameCard.classList.remove('shake-animation');
+            }, 300);
+        }
+        
+        // 正確時按鈕閃爍綠光
+        function correctFlash() {
+            const btnGroup = document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2');
+            if(btnGroup) {
+                btnGroup.classList.add('pulse-green');
+                setTimeout(() => btnGroup.classList.remove('pulse-green'), 500);
             }
         }
+        
+        // 顯示對話框 (阿蕨發言)
+        function setDialogMessage(msg, isError = false) {
+            dialogEl.innerText = msg;
+            // 視覺微反饋：對話框改變邊框顏色
+            const dialogBox = document.querySelector('.bg-white\\/95');
+            if (isError) {
+                dialogBox.style.borderLeftColor = '#ef4444';
+                setTimeout(() => {
+                    if (dialogBox) dialogBox.style.borderLeftColor = '#047857';
+                }, 800);
+            } else {
+                dialogBox.style.borderLeftColor = '#047857';
+            }
+        }
+        
+        // 正確處理 (加分，顯示成功，禁用按鈕並準備下一題)
+        function handleCorrect() {
+            if (waitingForNext) return;
+            if (answeredCorrect) return; // 已經加分過
+            
+            // 加分 (每題10分)
+            currentScore += 10;
+            scoreValueSpan.innerText = currentScore;
+            answeredCorrect = true;
+            waitingForNext = true;
+            
+            // 正確動畫與反饋
+            correctFlash();
+            const currentQ = QUESTIONS[currentIndex];
+            setDialogMessage(`✅ ${currentQ.successMsg} +10分！`, false);
+            feedbackTipDiv.innerHTML = `🎉 正確！ ${currentQ.successMsg.substring(0, 60)}`;
+            feedbackTipDiv.classList.add('bg-green-100', 'text-green-800', 'border', 'border-green-300');
+            feedbackTipDiv.classList.remove('bg-gray-100', 'text-gray-500');
+            
+            // 禁用按鈕防止重複點擊
+            scope1Btn.disabled = true;
+            otherBtn.disabled = true;
+            
+            // 判斷是否完成所有題目
+            const isLastQuestion = (currentIndex + 1 === TOTAL_QS);
+            
+            if (isLastQuestion) {
+                // 遊戲完成，顯示過關訊息，跳轉下一關
+                setDialogMessage(`🎉 太強了！全數正確！總分 ${currentScore} 分。前往下一關與小積會合！ 🌟`);
+                feedbackTipDiv.innerHTML = `🏆 完美過關！獲得 ${currentScore}/${MAX_SCORE} 分，前往下一關執行減碳！`;
+                // 延遲跳轉到 level2.html
+                setTimeout(() => {
+                    window.location.href = 'level2.html';
+                }, 1800);
+            } else {
+                // 不是最後一題，延遲加載下一題
+                setDialogMessage(`✨ 漂亮！下一題來囉～ 繼續挑戰！`);
+                setTimeout(() => {
+                    loadNextQuestion();
+                }, 1200);
+            }
+        }
+        
+        // 錯誤處理 (不扣分，提示錯誤，不切換題目)
+        function handleIncorrect(selectedType) {
+            if (waitingForNext) return;
+            if (answeredCorrect) return; // 已答對此題就不能再錯
+            
+            const currentQ = QUESTIONS[currentIndex];
+            const isScope1Error = (selectedType === 'scope1' && currentQ.correctType !== 'scope1');
+            let errorMessage = '';
+            
+            if (isScope1Error) {
+                errorMessage = `❌ ${currentQ.errorMsg}`;
+            } else {
+                errorMessage = `❌ ${currentQ.errorMsg}`;
+            }
+            
+            // 顯示錯誤對話
+            setDialogMessage(errorMessage, true);
+            // 顯示提示區加強教學
+            feedbackTipDiv.innerHTML = `⚠️ 答錯了！ ${currentQ.errorMsg.substring(0, 100)}`;
+            feedbackTipDiv.classList.add('bg-red-100', 'text-red-700', 'border', 'border-red-200');
+            feedbackTipDiv.classList.remove('bg-gray-100', 'text-gray-500');
+            // 震動卡片效果
+            shakeCard();
+            
+            // 按鈕暫時不鎖定，讓玩家重新嘗試 (但可閃一下錯誤)
+            // 為了更好的體驗，不對按鈕禁用，但需要等待重新選擇
+            // 不改變等待標誌，可以繼續點擊
+        }
+        
+        // 載入下一題 (重置狀態)
+        function loadNextQuestion() {
+            // 移到下一題
+            currentIndex++;
+            if (currentIndex >= TOTAL_QS) return; // 安全
+            
+            // 重置當前題目相關狀態
+            answeredCorrect = false;
+            waitingForNext = false;
+            
+            // 啟用按鈕
+            scope1Btn.disabled = false;
+            otherBtn.disabled = false;
+            
+            // 更新UI (題目，icon，描述)
+            updateUI();
+            
+            // 重置對話框為中性詢問語氣
+            const nextQ = QUESTIONS[currentIndex];
+            setDialogMessage(`🌿 那麼這一項呢？「${nextQ.description}」屬於直接還是間接排放？`, false);
+            feedbackTipDiv.innerHTML = `💡 提示：思考排放源是否為公司自有/控制。點擊正確分類獲得10分！`;
+            feedbackTipDiv.classList.remove('bg-green-100', 'bg-red-100', 'text-green-800', 'text-red-700');
+            feedbackTipDiv.classList.add('bg-gray-100', 'text-gray-500');
+            
+            // 進度條更新: updateUI 已經處理進度百分比 (依據當前索引/總題數)
+            // 但因為答對下一題後進度條基於題號，更好看
+            const newProgressPercent = (currentIndex / TOTAL_QS) * 100;
+            progressBarFill.style.width = `${newProgressPercent}%`;
+        }
+        
+        // 遊戲開始/重置 初始化第一題 (剛載入頁面)
+        function initGame() {
+            currentIndex = 0;
+            currentScore = 0;
+            waitingForNext = false;
+            answeredCorrect = false;
+            scoreValueSpan.innerText = "0";
+            updateUI();  // 顯示第一題內容
+            setDialogMessage(`🌱 歡迎！第一題：「${QUESTIONS[0].description}」是直接排放還是間接呢？`, false);
+            feedbackTipDiv.innerHTML = `🧠 記得！工廠煙囪、自有車輛是直接排放；電力、供應鏈是間接排放喔！`;
+            scope1Btn.disabled = false;
+            otherBtn.disabled = false;
+            // 進度條寬度歸零 (因為目前第0題，答對0題)
+            progressBarFill.style.width = "0%";
+            progressFractionSpan.innerText = `第1 / ${TOTAL_QS}題`;
+        }
+        
+        // 按鈕事件綁定 (點擊時判斷類型)
+        function onSelectScope1() {
+            if (waitingForNext) return;
+            if (answeredCorrect) {
+                setDialogMessage("這題已經答對囉！等待前往下一題吧～ 🌟", false);
+                return;
+            }
+            const currentQ = QUESTIONS[currentIndex];
+            if (currentQ.correctType === "scope1") {
+                // 正確
+                handleCorrect();
+            } else {
+                // 錯誤
+                handleIncorrect("scope1");
+            }
+        }
+        
+        function onSelectOther() {
+            if (waitingForNext) return;
+            if (answeredCorrect) {
+                setDialogMessage("已經過關了，下一題馬上來！放輕鬆～", false);
+                return;
+            }
+            const currentQ = QUESTIONS[currentIndex];
+            if (currentQ.correctType === "other") {
+                // 正確
+                handleCorrect();
+            } else {
+                // 錯誤
+                handleIncorrect("other");
+            }
+        }
+        
+        // 註冊事件監聽
+        scope1Btn.addEventListener('click', onSelectScope1);
+        otherBtn.addEventListener('click', onSelectOther);
+        
+        // 附加鍵盤/觸摸優化 (避免快速點擊)
+        // 啟動遊戲
+        initGame();
+        
+        // 為了增加精緻感: 當正確或錯誤時控制按鈕過渡避免高頻
+        // 並且當等待時按鈕disabled樣式會呈現半透明，防止點擊
+        // 修正視覺: 若使用者嘗試點擊disabled按鈕給出提示
+        function addDisabledHint() {
+            const btns = [scope1Btn, otherBtn];
+            btns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    if (waitingForNext && btn.disabled) {
+                        // 微小提示但無需打斷
+                        if (!answeredCorrect) return;
+                        setDialogMessage("⏳ 稍等片刻，下一題馬上出現～", false);
+                    }
+                });
+            });
+        }
+        addDisabledHint();
+        
+        // 額外優化: 移動端touch防止縮放干擾
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('touchstart', (e) => {
+                // 只為增強觸感
+            });
+        });
+        
+        // 背景動態彩色水波紋效果 (純裝飾)
+        const styleSheet = document.createElement("style");
+        styleSheet.textContent = `
+            .bg-white\\/40 {
+                background: radial-gradient(circle at 10% 30%, rgba(220, 245, 210, 0.5), rgba(255,255,240,0.3));
+            }
+        `;
+        document.head.appendChild(styleSheet);
+        
+        // 若圖片加載失敗，確保蕨類顯示好看emoji替代
+        const fernImg = document.querySelector('img');
+        if (fernImg) {
+            fernImg.addEventListener('error', function() {
+                this.onerror = null;
+                this.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle fill='%234ade80' cx='50' cy='50' r='45'/%3E%3Ctext x='50' y='70' font-size='50' text-anchor='middle' fill='white'%3E🌿%3C/text%3E%3C/svg%3E";
+            });
+        }
+        
+        // 額外控制如果中途刷新導致分數顯示正確，無bug
+        window.addEventListener('load', () => {
+            // 確保所有狀態整潔
+            if (currentIndex === 0 && currentScore === 0) {
+                progressBarFill.style.width = "0%";
+            }
+        });
+        
     </script>
 </body>
 </html>
