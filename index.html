@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>蕨積綠色宇宙：淨零行動</title>
+    <title>蕨積綠色宇宙：校園冒險</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
     <style>
-        body { background: #eefdf4; font-family: sans-serif; overflow: hidden; touch-action: none; }
-        .character-img { object-fit: contain; }
+        body { background: #f0fdf4; font-family: sans-serif; overflow: hidden; touch-action: none; }
+        .grid-bg { background-image: radial-gradient(#d1fae5 1px, transparent 1px); background-size: 20px 20px; }
     </style>
 </head>
 <body>
@@ -22,121 +22,97 @@
         const { motion, AnimatePresence } = window.Motion;
 
         const CHARACTERS = {
-            fern: { name: '阿蕨 Fern', file: 'fern.png', title: '策略長', quote: '問題不急，先釐清脈絡。' },
-            brom: { name: '小積 Brom', file: 'brom.png', title: '營運總監', quote: '講人話，我幫你做到。' }
+            fern: { name: '阿蕨', file: 'fern.png' },
+            brom: { name: '小積', file: 'brom.png' },
+            mons: { name: '小龜', file: 'mons.png' }
         };
 
-        const LEVEL1_ITEMS = [
-            { id: 1, name: '工廠煙囪', type: 'fire', icon: '🏭', hint: '直接排放廢氣...' },
-            { id: 2, name: '教室冷氣', type: 'bolt', icon: '❄️', hint: '夏天最耗電的傢伙...' },
-            { id: 3, name: '美味牛排', type: 'hidden', icon: '🥩', hint: '養牛會產生溫室氣體...' },
-            { id: 4, name: '外送機車', type: 'fire', icon: '🛵', hint: '汽油燃燒噴煙中...' }
+        const LEVEL3_TARGETS = [
+            { id: 1, name: '節能冷氣', icon: '🏷️', isGreen: true, desc: '有節能標章！' },
+            { id: 2, name: '長明燈', icon: '🏮', isGreen: false, desc: '白天不用開燈喔。' },
+            { id: 3, name: '資源回收桶', icon: '♻️', isGreen: true, desc: '分類做得好！' },
+            { id: 4, name: '漏水龍頭', icon: '🚰💧', isGreen: false, desc: '水滴光了快修好！' }
         ];
 
         function App() {
             const [level, setLevel] = useState(1);
             const [score, setScore] = useState(0);
-            const [level1Step, setLevel1Step] = useState(0);
-            const [level1Msg, setLevel1Msg] = useState(CHARACTERS.fern.quote);
+            const [step, setStep] = useState(0); // 通用步驟
+            const [msg, setMsg] = useState("阿蕨：先釐清碳排脈絡吧。");
 
-            // 第二關狀態
-            const [waterDrops, setWaterDrops] = useState([1, 2, 3]);
-            const [hotItems, setHotItems] = useState([
-                { id: 10, name: '過熱冷氣', icon: '❄️🔥', cooled: false },
-                { id: 11, name: '發燙伺服器', icon: '🖥️🔥', cooled: false },
-            ]);
-            const [level2Msg, setLevel2Msg] = useState("小積：把水滴拖上去，或者直接點擊水滴降溫！");
-
-            const handleLevel1Answer = (targetType) => {
-                if (targetType === LEVEL1_ITEMS[level1Step].type) {
-                    setScore(score + 10);
-                    setLevel1Msg("阿蕨：邏輯正確。");
-                    if (level1Step < LEVEL1_ITEMS.length - 1) {
-                        setLevel1Step(level1Step + 1);
-                    } else {
-                        setLevel1Msg("阿蕨：通過！接下來去見小積。");
-                        setTimeout(() => setLevel(2), 1500);
-                    }
+            // 第三關邏輯
+            const handleL3 = (isGreen) => {
+                if (isGreen) {
+                    setScore(score + 15);
+                    setMsg("小龜：發現綠色寶藏了！這就是探索的樂趣！");
                 } else {
-                    setLevel1Msg("小積：搞錯啦！再想一下！");
+                    setScore(Math.max(0, score - 5));
+                    setMsg("小龜：哎呀，這裡是浪費熱點，快避開！");
+                }
+                setStep(step + 1);
+                if (step >= LEVEL3_TARGETS.length - 1) {
+                    setTimeout(() => setMsg("校園探索完成！你真是 ESG 小偵探！"), 1000);
                 }
             };
 
-            const triggerCoolDown = (dropId) => {
-                const nextTarget = hotItems.find(item => !item.cooled);
-                if (nextTarget) {
-                    setHotItems(hotItems.map(item => item.id === nextTarget.id ? { ...item, cooled: true } : item));
-                    setWaterDrops(waterDrops.filter(id => id !== dropId));
-                    setScore(score + 20);
-                    setLevel2Msg("小積：降溫成功！這就是落地執行。");
-                }
+            // 第一、二關邏輯 (簡化呼叫)
+            const handleL1 = (correct) => {
+                if (correct) { setScore(score + 10); setStep(step + 1); setMsg("阿蕨：正確。"); }
+                else { setMsg("小積：錯啦！"); }
+                if (step >= 3) { setLevel(2); setStep(0); setMsg("小積：幫忙降溫吧！"); }
+            };
+
+            const handleL2 = () => {
+                setScore(score + 20); setStep(step + 1); setMsg("小積：落地執行！");
+                if (step >= 1) { setLevel(3); setStep(0); setMsg("小龜：跟我一起去校園探險！"); }
             };
 
             return (
-                <div className="flex flex-col items-center h-screen p-4 max-w-md mx-auto relative">
+                <div className="flex flex-col items-center h-screen p-4 max-w-md mx-auto grid-bg">
                     {/* 對話框 */}
                     <div className="w-full bg-white rounded-2xl shadow-lg p-4 mt-2 border-2 border-green-500 z-50">
                         <div className="flex items-center gap-3">
-                            <img src={level === 1 ? 'fern.png' : 'brom.png'} className="w-12 h-12 rounded-full border shadow-sm" />
+                            <img src={level === 1 ? 'fern.png' : level === 2 ? 'brom.png' : 'mons.png'} className="w-12 h-12 rounded-full border" />
                             <div className="flex-1">
-                                <p className="font-bold text-green-800 text-sm">{level === 1 ? '阿蕨' : '小積'}</p>
-                                <p className="text-gray-600 text-[10px] leading-tight">{level === 1 ? level1Msg : level2Msg}</p>
+                                <p className="font-bold text-green-800 text-sm">
+                                    {level === 1 ? '阿蕨' : level === 2 ? '小積' : '小龜'}
+                                </p>
+                                <p className="text-gray-600 text-[10px]">{msg}</p>
                             </div>
                         </div>
                         <div className="text-right text-xl font-black text-green-600">SCORE: {score}</div>
                     </div>
 
-                    <AnimatePresence mode="wait">
-                        {level === 1 ? (
-                            <motion.div key="l1" initial={{opacity:0}} animate={{opacity:1}} exit={{x:-300}} className="flex-1 flex flex-col items-center justify-center w-full gap-6">
-                                <div className="bg-white p-8 rounded-3xl shadow-xl border-4 border-green-100 text-center">
-                                    <div className="text-6xl">{LEVEL1_ITEMS[level1Step].icon}</div>
-                                    <div className="font-bold mt-2">{LEVEL1_ITEMS[level1Step].name}</div>
-                                </div>
-                                <div className="grid grid-cols-1 gap-2 w-full">
-                                    <button onClick={()=>handleLevel1Answer('fire')} className="bg-red-500 text-white p-3 rounded-xl font-bold">🔥 噴火龍</button>
-                                    <button onClick={()=>handleLevel1Answer('bolt')} className="bg-yellow-400 text-white p-3 rounded-xl font-bold text-gray-800">⚡ 閃電俠</button>
-                                    <button onClick={()=>handleLevel1Answer('hidden')} className="bg-blue-500 text-white p-3 rounded-xl font-bold">🧤 隱形手</button>
-                                </div>
-                            </motion.div>
-                        ) : (
-                            <motion.div key="l2" initial={{opacity:0, x:300}} animate={{opacity:1, x:0}} className="flex-1 flex flex-col items-center justify-center w-full gap-8">
-                                {/* 降溫目標 */}
-                                <div className="flex gap-4">
-                                    {hotItems.map(item => (
-                                        <div key={item.id} className={`w-28 h-28 rounded-2xl border-4 flex flex-col items-center justify-center transition-all ${item.cooled ? 'bg-green-100 border-green-400' : 'bg-red-100 border-red-400 animate-pulse'}`}>
-                                            <div className="text-4xl">{item.cooled ? '✅' : item.icon}</div>
-                                            <p className="text-[10px] font-bold mt-1 text-gray-700">{item.cooled ? 'OK!' : item.name}</p>
-                                        </div>
+                    <div className="flex-1 flex flex-col items-center justify-center w-full">
+                        {level === 1 && <button className="p-10 bg-white rounded-2xl shadow" onClick={()=>handleL1(true)}>第一關測試按鈕 (跳過)</button>}
+                        
+                        {level === 2 && <button className="p-10 bg-white rounded-2xl shadow" onClick={handleL2}>第二關測試按鈕 (跳過)</button>}
+
+                        {level === 3 && (
+                            <div className="w-full text-center">
+                                <p className="text-xs text-gray-500 mb-6">點擊小龜，讓他去探索校園中的目標！</p>
+                                <div className="grid grid-cols-2 gap-4 mb-8">
+                                    {LEVEL3_TARGETS.map((t, idx) => (
+                                        <motion.div 
+                                            key={t.id}
+                                            whileTap={{ scale: 0.9 }}
+                                            onClick={() => handleL3(t.isGreen)}
+                                            className={`p-4 rounded-2xl border-2 bg-white shadow-md cursor-pointer ${step > idx ? 'opacity-30' : 'opacity-100'}`}
+                                        >
+                                            <div className="text-4xl">{t.icon}</div>
+                                            <p className="text-[10px] font-bold mt-1">{t.name}</p>
+                                        </motion.div>
                                     ))}
                                 </div>
-
-                                {/* 操作區域 */}
-                                <div className="flex flex-col items-center gap-4">
-                                    <div className="flex gap-4 bg-white/50 p-4 rounded-full border-2 border-dashed border-blue-200 min-h-[80px] items-center">
-                                        {waterDrops.map(id => (
-                                            <motion.div
-                                                key={id}
-                                                drag
-                                                dragSnapToOrigin
-                                                onDragEnd={(e, info) => {
-                                                    // 只要向上拖曳一段距離就觸發
-                                                    if (info.offset.y < -50) triggerCoolDown(id);
-                                                }}
-                                                onClick={() => triggerCoolDown(id)} // 點擊也能降溫，防止學生拖不動
-                                                className="text-5xl cursor-pointer"
-                                                whileTap={{ scale: 1.2 }}
-                                            >💧</motion.div>
-                                        ))}
-                                    </div>
-                                    <div className="text-center">
-                                        <img src="brom.png" className="w-20 h-20 rounded-full border-4 border-blue-200" />
-                                        <p className="text-xs font-bold text-blue-500 mt-2">向上滑動水滴 或 直接點擊</p>
-                                    </div>
-                                </div>
-                            </motion.div>
+                                <motion.img 
+                                    drag dragSnapToOrigin
+                                    src="mons.png" 
+                                    className="w-24 h-24 mx-auto rounded-full border-4 border-green-400 shadow-xl"
+                                />
+                                <p className="text-[10px] text-green-600 mt-2 font-bold animate-pulse">拖曳或點擊目標來收集能量！</p>
+                            </div>
                         )}
-                    </AnimatePresence>
+                    </div>
                 </div>
             );
         }
