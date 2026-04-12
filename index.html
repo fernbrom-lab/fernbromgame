@@ -11,193 +11,116 @@
     <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
     <style>
         body { background: #eefdf4; font-family: sans-serif; overflow: hidden; touch-action: none; }
-        .character-img { object-fit: contain; }
+        .hint-arrow { animation: bounce 1s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState } = React;
+        const { useState, useEffect } = React;
         const { motion, AnimatePresence } = window.Motion;
 
-        // --- IP 設定 ---
         const CHARACTERS = {
-            fern: { name: '阿蕨 Fern', file: 'fern.jpg', title: '策略長・邏輯構築者', quote: '問題不急，先釐清脈絡。' },
-            brom: { name: '小積 Brom', file: 'brom.png', title: '營運總監・落地執行王', quote: '講人話，我幫你做到。' },
-            mons: { name: '小龜 Monstera', file: 'mons.png', title: '活動策劃部長', quote: '新路線？我第一個去踩點！' },
-            sans: { name: '虎妹 Sansevieria', file: 'sans.png', title: '健身擔當・夜間特訓', quote: '半夜運動最安靜，要跟嗎？' },
-            succ: { name: '肉肉 Succulent', file: 'succ.png', title: '療癒系吉祥物', quote: '慢慢來，水要存，心情也要。' },
-            ficus: { name: '琴哥 Ficus lyrata', file: 'ficus.png', title: '氛圍大師・優雅擔當', quote: '今天想聽巴哈，還是蕭邦？' },
-            till: { name: '空空 Tillandsia', file: 'till.png', title: '外派特派員', quote: '不用土壤，哪裡都是我的座位。' }
+            fern: { name: '阿蕨 Fern', file: 'fern.jpg', title: '策略長', quote: '問題不急，先釐清脈絡。' },
+            brom: { name: '小積 Brom', file: 'brom.png', title: '營運總監', quote: '講人話，我幫你做到。' }
         };
 
-        // --- 第一關資料 ---
         const LEVEL1_ITEMS = [
-            { id: 1, name: '工廠煙囪', type: 'fire', icon: '🏭' },
-            { id: 2, name: '教室電燈', type: 'bolt', icon: '💡' },
-            { id: 3, name: '牛肉漢堡', type: 'hidden', icon: '🍔' },
-            { id: 4, name: '公車排氣管', type: 'fire', icon: '🚌' },
-            { id: 5, name: '電腦插頭', type: 'bolt', icon: '🔌' },
-            { id: 6, name: '手搖飲杯', type: 'hidden', icon: '🥤' },
+            { id: 1, name: '工廠煙囪', type: 'fire', icon: '🏭', hint: '它在噴火排煙...' },
+            { id: 2, name: '教室電燈', type: 'bolt', icon: '💡', hint: '這要插電才能開...' },
+            { id: 3, name: '牛肉漢堡', type: 'hidden', icon: '🍔', hint: '養牛會排很多碳喔...' }
         ];
 
-        // --- 子元件：阿蕨對話框 ---
-        const FernDialog = ({ msg, char }) => (
-            <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-4 flex items-center gap-4 border-2 border-green-500 my-4">
-                <img src={char.file} alt={char.name} className="w-16 h-16 rounded-full character-img border-2 border-green-100" />
-                <div>
-                    <p className="font-bold text-green-800">{char.name} <span className="text-xs text-gray-400 font-normal">{char.title}</span></p>
-                    <p className="text-gray-700 text-sm mt-1">{msg}</p>
-                </div>
-            </div>
-        );
-
-        // --- 主遊戲元件 ---
         function App() {
             const [level, setLevel] = useState(1);
             const [score, setScore] = useState(0);
-            const [level1Index, setLevel1Index] = useState(0);
-            const [dialogMsg, setDialogMsg] = useState(CHARACTERS.fern.quote);
+            const [step, setStep] = useState(0);
+            const [msg, setMsg] = useState(CHARACTERS.fern.quote);
 
-            // 第一關邏輯
-            const checkLevel1Answer = (targetType) => {
-                if (targetType === LEVEL1_ITEMS[level1Index].type) {
+            // 第一關：點擊分類
+            const handleL1 = (type) => {
+                if (type === LEVEL1_ITEMS[step].type) {
                     setScore(score + 10);
-                    setDialogMsg("阿蕨：脈絡清晰，這就是邏輯的力量。");
+                    setMsg("阿蕨：答對了！邏輯正確。");
+                    if (step < LEVEL1_ITEMS.length - 1) {
+                        setStep(step + 1);
+                    } else {
+                        setMsg("阿蕨：釐清完成！接下來交給小積。");
+                        setTimeout(() => { setLevel(2); setStep(0); setMsg(CHARACTERS.brom.quote); }, 1500);
+                    }
                 } else {
-                    setScore(score - 2); // 錯誤小懲罰
-                    setDialogMsg("小積（亂入）：欸！那是插電的，別亂丟喔！");
-                }
-                
-                if (level1Index < LEVEL1_ITEMS.length - 1) {
-                    setLevel1Index(level1Index + 1);
-                } else {
-                    setDialogMsg("阿蕨：做得好，第一步釐清完成了。接下來，去見小積吧。");
-                    setTimeout(() => {
-                        setLevel(2); // 自動前往第二關
-                        setDialogMsg(CHARACTERS.brom.quote);
-                    }, 2000);
+                    setMsg("小積：不對喔！再想一下它是怎麼排碳的？");
                 }
             };
 
-            // 第二關狀態 (簡化落地執行)
-            const [waterDrops, setWaterDrops] = useState([1, 2, 3]); // 三個水滴
-            const [hotItems, setHotItems] = useState([
-                { id: 10, name: '過熱的冷氣機', icon: '🏢🔥', cooled: false },
-                { id: 11, name: '發燙的伺服器', icon: '🖥️🔥', cooled: false },
-            ]);
-
-            const coolDownItem = (itemId) => {
-                setHotItems(hotItems.map(item => item.id === itemId ? { ...item, cooled: true } : item));
+            // 第二關：點擊降溫
+            const handleL2 = () => {
                 setScore(score + 20);
-                setDialogMsg("小積：這就叫做「落地執行」，降溫才是硬道理！");
-                
-                // 檢查是否完成第二關
-                if (hotItems.every(item => item.id === itemId || item.cooled)) {
-                    setTimeout(() => {
-                        setDialogMsg("小積：表現不錯！接下來，我們去小龜的 ESG 冒險地圖！");
-                    }, 1500);
+                setStep(step + 1);
+                setMsg("小積：噴水降溫！這就是落地執行！");
+                if (step >= 1) {
+                    setTimeout(() => setMsg("挑戰成功！你太棒了！"), 1500);
                 }
             };
 
             return (
-                <div className="flex flex-col items-center justify-between h-screen p-6 relative">
-                    {/* 背景植物 (簡單示意) */}
-                    <div className="absolute top-0 right-0 p-4 opacity-20 text-8xl">🌿🌵</div>
-
-                    {/* 對話框與分數 */}
-                    <div className="z-10 w-full flex flex-col items-center">
-                        <FernDialog msg={dialogMsg} char={level === 1 ? CHARACTERS.fern : CHARACTERS.brom} />
-                        <div className="text-3xl font-black text-green-700 bg-white/70 px-4 py-1 rounded-full shadow-inner">SCORE: {score}</div>
-                    </div>
-
-                    {/* 第一關：阿蕨的碳排解密 */}
-                    {level === 1 && (
-                        <div className="flex-1 w-full flex flex-col items-center justify-center gap-10">
-                            <AnimatePresence mode="wait">
-                                {level1Index < LEVEL1_ITEMS.length && (
-                                    <motion.div
-                                        key={level1Index}
-                                        initial={{ scale: 0, y: -50 }} animate={{ scale: 1, y: 0 }} exit={{ x: 300, opacity: 0 }}
-                                        className="bg-white p-6 rounded-3xl shadow-lg border-4 border-green-100 text-center w-32 h-32 flex flex-col items-center justify-center"
-                                    >
-                                        <div className="text-6xl">{LEVEL1_ITEMS[level1Index].icon}</div>
-                                        <div className="mt-2 font-bold text-gray-700">{LEVEL1_ITEMS[level1Index].name}</div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-
-                            <div className="grid grid-cols-3 gap-4 w-full max-w-md">
-                                <button onClick={() => checkLevel1Answer('fire')} className="bg-red-500 p-4 rounded-xl shadow-lg hover:scale-105 active:scale-95 transition">
-                                    <div className="text-white font-bold">🔥 噴火龍</div>
-                                    <div className="text-white text-xs opacity-80">自己燒火</div>
-                                </button>
-                                <button onClick={() => checkLevel1Answer('bolt')} className="bg-yellow-400 p-4 rounded-xl shadow-lg hover:scale-105 active:scale-95 transition">
-                                    <div className="text-white font-bold">⚡ 閃電俠</div>
-                                    <div className="text-white text-xs opacity-80">消耗電力</div>
-                                </button>
-                                <button onClick={() => checkLevel1Answer('hidden')} className="bg-blue-400 p-4 rounded-xl shadow-lg hover:scale-105 active:scale-95 transition">
-                                    <div className="text-white font-bold">🧤 隱形手</div>
-                                    <div className="text-white text-xs opacity-80">製造運輸</div>
-                                </button>
+                <div className="flex flex-col items-center h-screen p-4 max-w-md mx-auto">
+                    {/* 分數與對話框 */}
+                    <div className="w-full bg-white rounded-2xl shadow-lg p-4 mt-2 border-2 border-green-500">
+                        <div className="flex items-center gap-3">
+                            <img src={level === 1 ? 'fern.jpg' : 'brom.png'} className="w-12 h-12 rounded-full border" />
+                            <div>
+                                <p className="font-bold text-green-800 text-sm">{level === 1 ? '阿蕨' : '小積'}</p>
+                                <p className="text-gray-600 text-xs">{msg}</p>
                             </div>
                         </div>
-                    )}
+                        <div className="text-right text-xl font-black text-green-600">SCORE: {score}</div>
+                    </div>
 
-                    {/* 第二關：小積的落地執行力 */}
-                    {level === 2 && (
-                        <div className="flex-1 w-full flex flex-col items-center justify-center gap-10">
-                            <p className="text-gray-600">小積中心永遠有水。將<span className="text-blue-500 font-bold">水滴💧</span>拖曳到<span className="text-red-500 font-bold">過熱設備🏢🔥</span>上降溫！</p>
-                            
-                            {/* 過熱設備 (接收目標) */}
-                            <div className="flex gap-10">
-                                {hotItems.map(item => (
-                                    <div key={item.id} className={`p-6 rounded-2xl border-4 ${item.cooled ? 'bg-green-100 border-green-300' : 'bg-red-100 border-red-300'}`}>
-                                        <div className="text-7xl">{item.cooled ? '🏢✅' : item.icon}</div>
-                                        <div className="text-center mt-2 font-bold text-gray-700">{item.cooled ? '已降溫' : item.name}</div>
+                    {/* 遊戲主體 */}
+                    <div className="flex-1 flex flex-col items-center justify-center w-full">
+                        {level === 1 ? (
+                            <div className="text-center">
+                                <p className="mb-4 text-sm text-gray-500">任務：請幫物品找到正確的碳排家</p>
+                                <motion.div key={step} initial={{scale:0}} animate={{scale:1}} className="bg-white p-8 rounded-3xl shadow-xl mb-10 border-4 border-green-100">
+                                    <div className="text-6xl">{LEVEL1_ITEMS[step].icon}</div>
+                                    <div className="font-bold mt-2">{LEVEL1_ITEMS[step].name}</div>
+                                    <div className="text-xs text-blue-400 mt-1">提示：{LEVEL1_ITEMS[step].hint}</div>
+                                </motion.div>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <button onClick={()=>handleL1('fire')} className="bg-red-400 text-white p-3 rounded-xl font-bold text-sm">🔥噴火龍<br/><span className="text-[10px]">直接排</span></button>
+                                    <button onClick={()=>handleL1('bolt')} className="bg-yellow-400 text-white p-3 rounded-xl font-bold text-sm">⚡閃電俠<br/><span className="text-[10px]">用電力</span></button>
+                                    <button onClick={()=>handleL1('hidden')} className="bg-blue-400 text-white p-3 rounded-xl font-bold text-sm">🧤隱形手<br/><span className="text-[10px]">製造運輸</span></button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="text-center">
+                                <p className="mb-8 text-sm text-gray-500">任務：點擊「小積」噴水幫過熱設備降溫！</p>
+                                <div className="flex gap-4 mb-10">
+                                    <div className={`p-4 rounded-xl border-2 ${step > 0 ? 'bg-green-100' : 'bg-red-100 animate-pulse'}`}>
+                                        <div className="text-4xl">{step > 0 ? '✅' : '🏢🔥'}</div>
+                                        <p className="text-xs font-bold">辦公大樓</p>
                                     </div>
-                                ))}
+                                    <div className={`p-4 rounded-xl border-2 ${step > 1 ? 'bg-green-100' : 'bg-red-100 animate-pulse'}`}>
+                                        <div className="text-4xl">{step > 1 ? '✅' : '🖥️🔥'}</div>
+                                        <p className="text-xs font-bold">電腦機房</p>
+                                    </div>
+                                </div>
+                                <div className="relative">
+                                    <div className="hint-arrow text-3xl mb-2">👇</div>
+                                    <button onClick={handleL2} className="hover:scale-110 transition active:scale-95">
+                                        <img src="brom.png" className="w-24 h-24 rounded-full border-4 border-blue-300 shadow-2xl" />
+                                        <p className="font-bold text-blue-600 mt-2">點我噴水！</p>
+                                    </button>
+                                </div>
                             </div>
-
-                            {/* 水滴容器 (拖曳源) */}
-                            <div className="bg-white p-4 rounded-full shadow-lg flex items-center gap-4 relative">
-                                <img src={CHARACTERS.brom.file} alt="小積" className="w-16 h-16 character-img rounded-full" />
-                                {waterDrops.map((dropId, index) => (
-                                    <motion.div
-                                        key={dropId}
-                                        drag
-                                        dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-                                        dragElastic={1}
-                                        onDragEnd={(e, info) => {
-                                            // 簡單模擬：如果拖曳距離大於 100 則判斷為冷卻第一個未冷卻設備
-                                            if (Math.abs(info.offset.x) > 100 || Math.abs(info.offset.y) > 100) {
-                                                const nextHotItem = hotItems.find(item => !item.cooled);
-                                                if (nextHotItem) {
-                                                    coolDownItem(nextHotItem.id);
-                                                    setWaterDrops(prev => prev.filter(id => id !== dropId)); // 移除水滴
-                                                }
-                                            }
-                                        }}
-                                        className="text-4xl cursor-grab active:cursor-grabbing"
-                                    >💧</motion.div>
-                                ))}
-                                <p className="text-xs text-blue-500 absolute -bottom-4 left-1/2 -translate-x-1/2">拖曳水滴</p>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* 頁尾：顯示所有 IP (簡單示意，未來可做成解鎖圖鑑) */}
-                    <div className="flex gap-2 p-2 bg-white/50 rounded-full border border-gray-100">
-                        {Object.values(CHARACTERS).map(char => (
-                            <img key={char.file} src={char.file} alt={char.name} className="w-6 h-6 rounded-full opacity-60" title={char.name} />
-                        ))}
+                        )}
                     </div>
-
                 </div>
             );
         }
-
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
