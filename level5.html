@@ -2,39 +2,406 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>蕨積綠色宇宙 - 第五關</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>蕨積綠色宇宙 - 第五關：光合能量儲存</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            user-select: none;
+        }
+        body {
+            background: linear-gradient(145deg, #fff7ed 0%, #ffedd5 100%);
+        }
+        /* 角色漂浮 */
+        .character-float {
+            animation: float 3.5s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+            100% { transform: translateY(0px); }
+        }
+        /* 能量按鈕 */
+        .energy-btn {
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+        .energy-btn:active {
+            transform: scale(0.88);
+        }
+        .bubble-glow {
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.3) inset;
+        }
+        /* 進度條特效 */
+        .progress-fill {
+            transition: width 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+        /* 飄浮能量粒子 */
+        .float-energy {
+            position: fixed;
+            pointer-events: none;
+            font-weight: 800;
+            font-size: 1.5rem;
+            z-index: 200;
+            animation: floatUpEnergy 0.8s ease-out forwards;
+        }
+        @keyframes floatUpEnergy {
+            0% {
+                opacity: 1;
+                transform: translateY(0px) scale(0.7);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-70px) scale(1.2);
+            }
+        }
+        /* 光點閃爍效果 */
+        .glow-pulse {
+            animation: glowPulse 0.5s ease-out;
+        }
+        @keyframes glowPulse {
+            0% { box-shadow: 0 0 0 0 #f97316; background-color: #ffedd5; }
+            70% { box-shadow: 0 0 0 18px rgba(249,115,22,0); background-color: #fed7aa; }
+            100% { box-shadow: 0 0 0 0 rgba(249,115,22,0); background-color: transparent; }
+        }
+        /* 完成時爆炸陽光 */
+        .sunburst {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(circle, rgba(251,146,60,0.4) 0%, rgba(255,237,213,0) 80%);
+            animation: burstFade 0.8s ease-out forwards;
+            z-index: 300;
+        }
+        @keyframes burstFade {
+            0% { opacity: 0.8; transform: scale(0.8); }
+            100% { opacity: 0; transform: scale(2); }
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+    </style>
 </head>
-<body class="bg-orange-50 overflow-hidden">
-    <div class="h-screen w-full flex flex-col md:flex-row">
-        <div class="w-full h-[35%] md:h-full md:w-5/12 bg-orange-400 flex flex-col items-center justify-center p-6 text-center text-white">
-            <img src="succ.png" class="w-40 md:w-80 mb-4 drop-shadow-2xl">
-            <div class="bg-white/90 p-4 rounded-2xl shadow-xl w-full max-w-sm border-l-8 border-orange-600 text-black text-left">
-                <h2 class="text-xl font-black">肉肉 Succ</h2>
-                <p id="dialog">慢慢來。連續點擊 ☀️ 與 💧 來儲存能量進度條！</p>
+<body class="overflow-hidden antialiased">
+
+    <div class="h-screen w-full flex flex-col md:flex-row relative">
+        
+        <!-- 左侧肉肉 Succ 區域 (橘色多肉風格) -->
+        <div class="w-full md:w-5/12 bg-gradient-to-br from-orange-500 to-amber-600 flex flex-col items-center justify-center p-5 relative shadow-2xl z-10">
+            <!-- 多肉裝飾背景 -->
+            <div class="absolute inset-0 opacity-20 pointer-events-none">
+                <div class="absolute top-5 left-4 text-7xl rotate-12">🌵</div>
+                <div class="absolute bottom-16 right-5 text-8xl -rotate-12">🌿</div>
+                <div class="absolute top-1/3 left-8 text-6xl">🌱</div>
+            </div>
+            
+            <!-- 肉肉角色圖像 + 浮動 -->
+            <div class="character-float relative z-20">
+                <div class="bg-white/20 backdrop-blur-sm rounded-full p-3 shadow-2xl">
+                    <img src="succ.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3081/3081559.png'; this.onerror=null;" class="w-36 h-36 md:w-44 md:h-44 object-contain drop-shadow-xl">
+                </div>
+            </div>
+            
+            <!-- 對話氣泡 (溫暖色系) -->
+            <div class="mt-6 w-full max-w-sm relative z-20 transition-all duration-300">
+                <div class="bg-white/95 backdrop-blur-sm rounded-3xl p-5 shadow-2xl border-l-[10px] border-orange-700 bubble-glow">
+                    <div class="flex items-start gap-2">
+                        <span class="text-3xl">🌵</span>
+                        <div class="flex-1">
+                            <h3 class="font-black text-xl text-gray-800 tracking-tight">肉肉 Succ · 光合儲能所</h3>
+                            <p id="dialog" class="text-gray-700 font-medium mt-1 leading-relaxed text-base">慢慢來～點擊太陽或水滴，儲存滿滿能量！🌞💧</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="absolute -bottom-2 left-8 w-4 h-4 bg-white/95 rotate-45 rounded-sm"></div>
+            </div>
+            
+            <!-- 小提示 -->
+            <div class="absolute bottom-4 left-0 right-0 text-center text-white/80 text-xs font-medium md:block hidden">
+                💡 每點一次獲得 10 能量 | 累積 100% 即可完成光合作用
             </div>
         </div>
-        <div class="w-full h-[65%] md:h-full md:w-7/12 flex flex-col items-center justify-center p-8 bg-orange-50">
-            <div class="flex gap-10 mb-12">
-                <button onclick="charge(10)" class="text-8xl hover:scale-110 active:scale-90 transition">☀️</button>
-                <button onclick="charge(10)" class="text-8xl hover:scale-110 active:scale-90 transition">💧</button>
+
+        <!-- 右側能量儲存區 -->
+        <div class="w-full md:w-7/12 bg-gradient-to-br from-amber-50 to-orange-50 flex flex-col items-center justify-center p-6 relative">
+            
+            <!-- 能量數值卡 -->
+            <div class="w-full max-w-md mb-6 bg-white/70 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-orange-200">
+                <div class="flex justify-between items-center mb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl">🔋</span>
+                        <span class="font-black text-gray-700">光合能量槽</span>
+                    </div>
+                    <div class="bg-orange-800 text-white px-4 py-1.5 rounded-full font-black text-xl">
+                        <span id="energyPercent">0</span>%
+                    </div>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-5 border border-orange-300 overflow-hidden">
+                    <div id="energyBar" class="progress-fill bg-gradient-to-r from-orange-500 to-amber-500 h-full rounded-full" style="width: 0%"></div>
+                </div>
+                <div class="flex justify-between mt-2 text-xs text-gray-600">
+                    <span>☀️ 太陽能 +10</span>
+                    <span>💧 水能 +10</span>
+                    <span>🌱 目標：100% 能量</span>
+                </div>
             </div>
-            <div class="w-full max-w-md h-10 bg-gray-200 rounded-full border-4 border-orange-200 overflow-hidden">
-                <div id="bar" class="h-full bg-orange-500 w-0 transition-all duration-300"></div>
+            
+            <!-- 主要按鈕區塊 增加質感與動畫 -->
+            <div class="flex gap-12 md:gap-20 mb-8">
+                <button id="sunBtn" class="energy-btn bg-gradient-to-br from-yellow-400 to-orange-500 p-8 rounded-full shadow-2xl hover:shadow-xl transition-all flex flex-col items-center border-4 border-white/60">
+                    <span class="text-7xl md:text-8xl">☀️</span>
+                    <span class="mt-2 text-white font-bold text-sm bg-black/30 px-3 py-1 rounded-full">+10 能量</span>
+                </button>
+                <button id="waterBtn" class="energy-btn bg-gradient-to-br from-sky-400 to-blue-500 p-8 rounded-full shadow-2xl hover:shadow-xl transition-all flex flex-col items-center border-4 border-white/60">
+                    <span class="text-7xl md:text-8xl">💧</span>
+                    <span class="mt-2 text-white font-bold text-sm bg-black/30 px-3 py-1 rounded-full">+10 能量</span>
+                </button>
+            </div>
+            
+            <!-- 動態小提示/回饋區域 -->
+            <div id="feedbackArea" class="w-full max-w-md text-center text-sm font-semibold text-amber-800 bg-amber-100/80 p-3 rounded-xl border border-amber-300 backdrop-blur-sm transition-all">
+                🌟 點擊太陽或水滴，儲存能量讓肉肉長大！
+            </div>
+            
+            <!-- 底部裝飾文字 -->
+            <div class="absolute bottom-4 left-0 right-0 text-center text-gray-400 text-xs">
+                🌞 每一份能量都是減碳助力 | 綠能滿載
             </div>
         </div>
     </div>
+
     <script>
-        let progress = 0;
-        function charge(val) {
-            progress += val;
-            document.getElementById('bar').style.width = progress + '%';
-            if (progress >= 100) {
-                document.getElementById('dialog').innerText = "能量存滿了，感覺真舒服～去找琴哥囉。";
-                setTimeout(() => { window.location.href = 'level6.html'; }, 1500);
+        // ---------- 遊戲核心 ----------
+        const MAX_ENERGY = 100;
+        let currentEnergy = 0;
+        let isCompleted = false;
+        
+        // DOM 元素
+        const dialogEl = document.getElementById('dialog');
+        const energyPercentSpan = document.getElementById('energyPercent');
+        const energyBar = document.getElementById('energyBar');
+        const feedbackArea = document.getElementById('feedbackArea');
+        const sunBtn = document.getElementById('sunBtn');
+        const waterBtn = document.getElementById('waterBtn');
+        
+        // 輔助函式: 更新進度條與百分比顯示
+        function updateEnergyUI() {
+            const percent = currentEnergy;
+            energyPercentSpan.innerText = percent;
+            energyBar.style.width = `${percent}%`;
+            
+            // 根據能量比例改變對話和反饋
+            if (!isCompleted) {
+                if (percent >= MAX_ENERGY) {
+                    dialogEl.innerText = "🌞 能量存滿了！光合作用大成功！感覺真舒服～去找琴哥囉！ 🌿✨";
+                    feedbackArea.innerHTML = "🎉 太棒了！能量槽已滿！準備前往下一關 🌟🎉";
+                    feedbackArea.classList.add("bg-green-100", "text-green-800", "border-green-300");
+                } 
+                else if (percent >= 80) {
+                    dialogEl.innerText = `⚡ 能量已達 ${percent}%！快要滿載了，再點幾下就能完成光合儲能！`;
+                    feedbackArea.innerHTML = `🌞 再加把勁！還需要 ${MAX_ENERGY - percent} 能量，點擊太陽或水滴吧 💧`;
+                    feedbackArea.classList.remove("bg-green-100", "text-green-800");
+                    feedbackArea.classList.add("bg-amber-100", "text-amber-800");
+                }
+                else if (percent >= 50) {
+                    dialogEl.innerText = `🌱 能量儲存 ${percent}% ，植物正在茁壯，繼續給予陽光和水！`;
+                    feedbackArea.innerHTML = `💪 進度過半！累積 ${percent} 能量，保持節奏～`;
+                    feedbackArea.classList.remove("bg-green-100", "text-green-800");
+                    feedbackArea.classList.add("bg-amber-100", "text-amber-800");
+                }
+                else if (percent > 0) {
+                    dialogEl.innerText = `🍃 能量 ${percent}% ，慢慢累積，每次點擊都能幫助地球減碳 🌍`;
+                    feedbackArea.innerHTML = `✨ 點擊圖示獲得 +10 能量！距離目標還有 ${MAX_ENERGY - percent} 點 ✨`;
+                }
+                else {
+                    dialogEl.innerText = "慢慢來。連續點擊 ☀️ 與 💧 來儲存能量進度條！每點一次獲得 10 能量～";
+                    feedbackArea.innerHTML = "🌿 點擊太陽或水滴，儲存乾淨能源，達到100%完成特訓！";
+                }
             }
         }
+        
+        // 產生飄浮特效 (+10 能量)
+        function createFloatEffect(x, y, value) {
+            const floatDiv = document.createElement('div');
+            floatDiv.innerText = `+${value} ⚡`;
+            floatDiv.className = 'float-energy';
+            floatDiv.style.left = `${x - 25}px`;
+            floatDiv.style.top = `${y - 30}px`;
+            floatDiv.style.color = '#ea580c';
+            floatDiv.style.textShadow = '0 0 4px #ffedd5';
+            document.body.appendChild(floatDiv);
+            setTimeout(() => floatDiv.remove(), 800);
+        }
+        
+        // 點擊閃光效果 (在按鈕周圍)
+        function addGlowEffect(element) {
+            if (!element) return;
+            element.classList.add('glow-pulse');
+            setTimeout(() => {
+                element.classList.remove('glow-pulse');
+            }, 500);
+        }
+        
+        // 增加能量核心邏輯
+        function addEnergy(amount, event, sourceElement) {
+            if (isCompleted) return;
+            
+            // 獲取點擊座標以產生特效
+            let clientX, clientY;
+            if (event && event.touches) {
+                clientX = event.touches[0].clientX;
+                clientY = event.touches[0].clientY;
+            } else if (event) {
+                clientX = event.clientX;
+                clientY = event.clientY;
+            } else if (sourceElement) {
+                const rect = sourceElement.getBoundingClientRect();
+                clientX = rect.left + rect.width / 2;
+                clientY = rect.top + rect.height / 2;
+            }
+            
+            if (clientX && clientY) {
+                createFloatEffect(clientX, clientY, amount);
+            }
+            
+            // 震動反饋（手機）
+            if (navigator.vibrate) navigator.vibrate(30);
+            
+            // 增加能量但不超過上限
+            let newEnergy = currentEnergy + amount;
+            if (newEnergy > MAX_ENERGY) newEnergy = MAX_ENERGY;
+            currentEnergy = newEnergy;
+            
+            // 更新 UI
+            updateEnergyUI();
+            
+            // 檢查是否完成
+            if (currentEnergy >= MAX_ENERGY && !isCompleted) {
+                completeGame();
+            } else {
+                // 短暫改變回饋區提示
+                const prevFeedback = feedbackArea.innerHTML;
+                feedbackArea.innerHTML = `🌱 +${amount} 能量！目前 ${currentEnergy}% / 100% ，繼續蓄能！`;
+                setTimeout(() => {
+                    if (!isCompleted) {
+                        updateEnergyUI(); // 會重新整理正確的提示文字
+                    } else {
+                        feedbackArea.innerHTML = "🎉 能量滿載！準備前往下一關～";
+                    }
+                }, 1000);
+            }
+            
+            // 按鈕點擊動畫
+            if (sourceElement) {
+                addGlowEffect(sourceElement);
+            }
+        }
+        
+        // 通關完成
+        function completeGame() {
+            if (isCompleted) return;
+            isCompleted = true;
+            
+            // 最終能量顯示100%
+            currentEnergy = MAX_ENERGY;
+            updateEnergyUI();
+            
+            // 禁用按鈕
+            sunBtn.disabled = true;
+            waterBtn.disabled = true;
+            sunBtn.style.opacity = '0.6';
+            waterBtn.style.opacity = '0.6';
+            
+            // 全螢幕太陽閃光特效
+            const burstDiv = document.createElement('div');
+            burstDiv.className = 'sunburst';
+            document.body.appendChild(burstDiv);
+            setTimeout(() => burstDiv.remove(), 900);
+            
+            // 更新最終對話
+            dialogEl.innerText = "🌞 能量存滿了，感覺真舒服～光合作用完成！去找琴哥繼續冒險吧！ 🌟";
+            feedbackArea.innerHTML = "🏆 完美！100% 潔淨能源儲存完成！減碳達人即將邁向最終關卡 🏆";
+            feedbackArea.classList.add("bg-gradient-to-r", "from-green-200", "to-emerald-200", "font-black");
+            
+            // 跳轉至 level6.html (延遲 1.8 秒)
+            setTimeout(() => {
+                window.location.href = 'level6.html';
+            }, 1800);
+        }
+        
+        // 綁定點擊事件 (同時支援觸控)
+        function bindEvents() {
+            const sunHandler = (e) => {
+                e.preventDefault();
+                if (!isCompleted) {
+                    addEnergy(10, e, sunBtn);
+                }
+            };
+            const waterHandler = (e) => {
+                e.preventDefault();
+                if (!isCompleted) {
+                    addEnergy(10, e, waterBtn);
+                }
+            };
+            
+            sunBtn.addEventListener('click', sunHandler);
+            sunBtn.addEventListener('touchstart', sunHandler, { passive: false });
+            waterBtn.addEventListener('click', waterHandler);
+            waterBtn.addEventListener('touchstart', waterHandler, { passive: false });
+        }
+        
+        // 圖片備援機制
+        const succImg = document.querySelector('img');
+        if (succImg) {
+            succImg.addEventListener('error', function() {
+                this.onerror = null;
+                this.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle fill='%23f97316' cx='50' cy='50' r='45'/%3E%3Ctext x='50' y='70' font-size='50' text-anchor='middle' fill='white'%3E🌵%3C/text%3E%3C/svg%3E";
+            });
+        }
+        
+        // 初始化遊戲狀態 (重置)
+        function initGame() {
+            currentEnergy = 0;
+            isCompleted = false;
+            updateEnergyUI();
+            sunBtn.disabled = false;
+            waterBtn.disabled = false;
+            sunBtn.style.opacity = '1';
+            waterBtn.style.opacity = '1';
+            feedbackArea.classList.remove("bg-gradient-to-r", "from-green-200", "to-emerald-200", "font-black");
+            feedbackArea.classList.add("bg-amber-100", "text-amber-800");
+            feedbackArea.innerHTML = "🌟 點擊太陽或水滴，儲存能量讓肉肉長大！";
+        }
+        
+        initGame();
+        bindEvents();
+        
+        // 增加提示防止雙重點擊造成過度能量 (額外保護：已在 addEnergy 中檢查 isCompleted)
+        // 增加一個防止頁面縮放時誤觸
+        window.addEventListener('touchmove', function(e) {
+            // 避免在按鈕區域滑動時觸發縮放
+            if (e.target.closest('.energy-btn')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        // 動態背景微調
+        const rightArea = document.querySelector('.md\\:w-7\\/12');
+        if (rightArea) {
+            rightArea.addEventListener('mousemove', (e) => {
+                // 單純裝飾
+            });
+        }
+        
+        // 若完成後使用者不再能增加能量
+        console.log("第五關優化版：光合能量儲存，一起達到100%綠色能量！");
     </script>
 </body>
 </html>
