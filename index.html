@@ -10,11 +10,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
     <style>
-        body { background: #f0fdf4; font-family: sans-serif; overflow: hidden; touch-action: none; user-select: none; }
-        /* 定義角色浮動動畫 */
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
-        .character-float { animation: float 3s ease-in-out infinite; }
-        .game-screen { max-width: 480px; margin: 0 auto; h-screen; display: flex; flex-direction: column; position: relative; }
+        body { background: #f0fdf4; font-family: 'PingFang TC', sans-serif; overflow: hidden; touch-action: none; }
+        .character-bounce { animation: bounce 4s ease-in-out infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
     </style>
 </head>
 <body>
@@ -24,155 +22,114 @@
         const { useState } = React;
         const { motion, AnimatePresence } = window.Motion;
 
-        // --- 全域角色設定 (加大、去背) ---
         const CHARS = {
-            1: { id: 'fern', name: '阿蕨 Fern', title: '策略長', file: 'fern.png', dialogs: ['問題不急，先釐清脈絡。', '脈絡清晰，這就是邏輯的力量。', '做得好，去見小積吧。'] },
-            2: { id: 'brom', name: '小積 Brom', title: '營運總監', file: 'brom.png', dialogs: ['講人話，我幫你做到。', '噴水降溫！這就是落地執行！'] },
-            3: { id: 'mons', name: '小龜 Monstera', title: '活動部長', file: 'mons.png', dialogs: ['新路線？我第一個踩點！'] },
-            4: { id: 'sans', name: '虎妹 Sans', title: '健身教練', file: 'sans.png', dialogs: ['半夜特訓最安靜。'] },
-            5: { id: 'succ', name: '肉肉 Succ', title: 'Q彈教主', file: 'succ.png', dialogs: ['慢慢來，水要存。'] },
-            6: { id: 'ficus', name: '琴哥 Ficus', title: '氛圍大師', file: 'ficus.png', dialogs: ['今天想聽蕭邦嗎？'] },
-            7: { id: 'till', name: '空空 Till', title: '雲端特派', file: 'till.png', dialogs: ['哪裡都是我的座位。'] }
+            1: { id: 'fern', name: '阿蕨 Fern', file: 'fern.png', color: 'bg-green-500', msg: '釐清碳排脈絡。' },
+            2: { id: 'brom', name: '小積 Brom', file: 'brom.png', color: 'bg-blue-500', msg: '落地執行降溫！' },
+            3: { id: 'mons', name: '小龜 Monstera', file: 'mons.png', color: 'bg-emerald-500', msg: '尋找節能標誌。' },
+            4: { id: 'sans', name: '虎妹 Sans', file: 'sans.png', color: 'bg-slate-700', msg: '夜間特訓捕碳！' },
+            5: { id: 'succ', name: '肉肉 Succ', file: 'succ.png', color: 'bg-orange-400', msg: '儲存陽光與水。' },
+            6: { id: 'ficus', name: '琴哥 Ficus', file: 'ficus.png', color: 'bg-indigo-500', msg: '優雅平衡音律。' },
+            7: { id: 'till', name: '空空 Till', file: 'till.png', color: 'bg-sky-400', msg: '傳送雲端包裹。' }
         };
 
-        // --- 第一關資料 ---
         const L1_ITEMS = [
-            { n: '工廠煙囪', t: 'fire', i: '🏭' }, { n: '教室電燈', t: 'bolt', i: '💡' }, { n: '牛肉漢堡', t: 'hidden', i: '🍔' }
+            { n: '工廠煙囪', t: 'fire', i: '🏭', h: '直接排放' }, 
+            { n: '教室電燈', t: 'bolt', i: '💡', h: '能源使用' }, 
+            { n: '牛肉漢堡', t: 'hidden', i: '🍔', h: '間接生命週期' }
         ];
-
-        // --- 子元件：放大對話框 (RPG風格) ---
-        const RPGDialog = ({ char, msg, score }) => (
-            <div className="absolute bottom-0 left-0 right-0 bg-black/80 text-white p-6 backdrop-blur-sm border-t-4 border-green-400 z-50 rounded-t-3xl shadow-2xl">
-                <div className="flex items-center gap-4 mb-3 border-b border-white/20 pb-2 relative">
-                    <img src={char.file} className="w-16 h-16 rounded-full border-2 border-white/50" />
-                    <div>
-                        <h3 className="font-bold text-xl text-green-300">{char.name}</h3>
-                        <p className="text-xs text-gray-400">{char.title}</p>
-                    </div>
-                    {/* 分數移到對話框右下角，凸顯IP */}
-                    <div className="absolute right-0 bottom-1 font-mono text-4xl font-black text-green-400">{score}</div>
-                </div>
-                <p className="text-lg leading-relaxed h-16">{msg}</p>
-            </div>
-        );
-
-        // --- 子元件：放大角色人偶 ---
-        const CharacterSprite = ({ file, name }) => (
-            <motion.div 
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                className="absolute inset-0 flex items-center justify-center p-12 character-float z-0"
-            >
-                <img 
-                    src={file} 
-                    alt={name} 
-                    className="max-h-[70vh] w-auto object-contain drop-shadow-[0_20px_20px_rgba(0,0,0,0.3)]"
-                />
-            </motion.div>
-        );
 
         function App() {
             const [level, setLevel] = useState(1);
             const [score, setScore] = useState(0);
             const [subStep, setSubStep] = useState(0);
-            const [dialogMsg, setDialogMsg] = useState(CHARS[1].dialogs[0]);
+            const [dialog, setDialog] = useState("歡迎來到綠色宇宙！我是阿蕨。");
 
-            // 下一關邏輯
             const nextLevel = () => {
                 if (level < 7) {
                     setLevel(level + 1);
                     setSubStep(0);
-                    setDialogMsg(CHARS[level+1].dialogs[0]);
-                } else {
-                    setLevel(8); // 全員合照
-                }
+                    setDialog(CHARS[level+1].msg);
+                } else { setLevel(8); }
             };
 
-            // 第一關邏輯 (阿蕨)
             const handleL1 = (type) => {
                 if (type === L1_ITEMS[subStep].t) {
                     setScore(score + 10);
-                    setDialogMsg(CHARS[1].dialogs[1]);
-                    setTimeout(() => {
-                        if (subStep < L1_ITEMS.length - 1) {
-                            setSubStep(subStep + 1);
-                        } else {
-                            setDialogMsg(CHARS[1].dialogs[2]);
-                            setTimeout(nextLevel, 1500);
-                        }
-                    }, 1000);
+                    setDialog("做得好！邏輯非常清晰。");
+                    setTimeout(() => subStep < 2 ? setSubStep(subStep+1) : nextLevel(), 1200);
                 } else {
-                    setScore(Math.max(0, score - 5));
-                    setDialogMsg("小積（亂入）：欸！那是插電的，別亂丟！");
+                    setDialog("哎呀，這個脈絡不對喔，再想想！");
                 }
             };
 
             return (
-                <div className={`game-screen h-screen transition-colors duration-1000 ${level === 4 ? 'bg-slate-950' : ''}`}>
-                    
-                    {/* 背景裝飾 */}
-                    <div className="absolute top-10 left-10 text-9xl opacity-10">🌿</div>
+                <div className="h-screen w-full flex flex-col md:flex-row overflow-hidden bg-white">
+                    {/* 左側/上方：IP 角色舞台區 */}
+                    <div className={`w-full md:w-5/12 ${level <= 7 ? CHARS[level].color : 'bg-green-600'} transition-colors duration-700 flex flex-col items-center justify-center p-6 relative`}>
+                        <AnimatePresence mode="wait">
+                            {level <= 7 && (
+                                <motion.div 
+                                    key={level} 
+                                    initial={{ x: -100, opacity: 0 }} 
+                                    animate={{ x: 0, opacity: 1 }} 
+                                    exit={{ x: -50, opacity: 0 }}
+                                    className="relative flex flex-col items-center"
+                                >
+                                    <img src={CHARS[level].file} className="w-64 md:w-80 h-auto character-bounce drop-shadow-2xl mb-8" />
+                                    <div className="bg-white/90 p-6 rounded-2xl shadow-xl w-full max-w-sm border-l-8 border-green-700">
+                                        <h2 className="text-2xl font-black text-gray-800 mb-2">{CHARS[level].name}</h2>
+                                        <p className="text-lg text-gray-600 font-medium leading-snug">{dialog}</p>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                        {/* 分數顯示 */}
+                        <div className="absolute top-6 left-6 bg-black/20 px-4 py-2 rounded-full text-white font-bold tracking-widest">
+                            SCORE: {score}
+                        </div>
+                    </div>
 
-                    {/* 中央：凸顯 IP 人偶 */}
-                    <AnimatePresence mode="wait">
-                        {level <= 7 && (
-                            <CharacterSprite key={level} file={CHARS[level].file} name={CHARS[level].name} />
-                        )}
-                    </AnimatePresence>
-
-                    {/* 遊戲操作層 (物件加大) */}
-                    <div className="relative flex-1 flex flex-col items-center justify-center p-10 z-10">
+                    {/* 右側/下方：遊戲互動區 */}
+                    <div className="w-full md:w-7/12 bg-gray-50 flex flex-col items-center justify-center p-8">
                         <AnimatePresence mode="wait">
                             {level === 1 && (
-                                <motion.div key="l1" initial={{opacity:0, y: 50}} animate={{opacity:1, y: 0}} className="text-center w-full max-w-sm mt-[-100px]">
-                                    {/* 待分類物件 (加大) */}
-                                    <motion.div key={subStep} initial={{scale:0}} animate={{scale:1}} className="bg-white p-10 rounded-full shadow-2xl mb-12 border-8 border-green-100">
-                                        <div className="text-8xl">{L1_ITEMS[subStep].i}</div>
-                                        <div className="text-xl font-black mt-2 text-gray-700">{L1_ITEMS[subStep].n}</div>
-                                    </motion.div>
-                                    
-                                    {/* 按鈕 (加大、適合平板) */}
-                                    <div className="grid grid-cols-1 gap-4">
-                                        <button onClick={()=>handleL1('fire')} className="bg-red-500 text-white p-6 rounded-2xl shadow-xl font-bold text-xl active:scale-95 transition">🔥 噴火龍 (直接燃燒)</button>
-                                        <button onClick={()=>handleL1('bolt')} className="bg-yellow-400 text-gray-900 p-6 rounded-2xl shadow-xl font-bold text-xl active:scale-95 transition">⚡ 閃電俠 (消耗電力)</button>
-                                        <button onClick={()=>handleL1('hidden')} className="bg-blue-500 text-white p-6 rounded-2xl shadow-xl font-bold text-xl active:scale-95 transition">🧤 隱形手 (製造運輸)</button>
+                                <motion.div key="l1" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-md">
+                                    <div className="text-center mb-12">
+                                        <div className="text-[120px] mb-4 drop-shadow-lg">{L1_ITEMS[subStep].i}</div>
+                                        <h3 className="text-3xl font-black text-gray-700">{L1_ITEMS[subStep].n}</h3>
+                                        <p className="text-gray-400 mt-2">請分類這個項目的排放脈絡</p>
+                                    </div>
+                                    <div className="flex flex-col gap-4">
+                                        <button onClick={()=>handleL1('fire')} className="bg-white hover:bg-red-50 border-4 border-red-500 text-red-600 p-6 rounded-3xl text-2xl font-black shadow-lg transition active:scale-95">🔥 直接排放</button>
+                                        <button onClick={()=>handleL1('bolt')} className="bg-white hover:bg-yellow-50 border-4 border-yellow-500 text-yellow-600 p-6 rounded-3xl text-2xl font-black shadow-lg transition active:scale-95">⚡ 電力能源</button>
+                                        <button onClick={()=>handleL1('hidden')} className="bg-white hover:bg-blue-50 border-4 border-blue-500 text-blue-600 p-6 rounded-3xl text-2xl font-black shadow-lg transition active:scale-95">🧤 間接生命週期</button>
                                     </div>
                                 </motion.div>
                             )}
 
                             {level >= 2 && level <= 7 && (
-                                <motion.div key="skip" initial={{opacity:0}} animate={{opacity:1}} className="text-center">
-                                    <button 
-                                        onClick={nextLevel}
-                                        className="bg-white/50 border-4 border-dashed border-white p-10 rounded-full text-white font-bold"
-                                    >
-                                        第 {level} 關測試按鈕 (IP展示中)
+                                <motion.div key="other" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
+                                    <h2 className="text-4xl font-black text-gray-300 mb-8">第 {level} 關開發中</h2>
+                                    <button onClick={nextLevel} className="bg-gray-800 text-white px-12 py-6 rounded-full text-2xl font-bold shadow-2xl">
+                                        前往下一位夥伴
                                     </button>
                                 </motion.div>
                             )}
 
                             {level === 8 && (
-                                <motion.div key="end" initial={{scale:0}} animate={{scale:1}} className="text-center bg-white p-10 rounded-3xl shadow-2xl text-black max-w-sm">
-                                    <h2 className="text-4xl font-black mb-6 text-green-700">大圓滿！</h2>
-                                    <div className="flex flex-wrap justify-center gap-3 mb-10">
-                                        {[1,2,3,4,5,6,7].map(i => <img key={i} src={CHARS[i].file} className="w-14 h-14 rounded-full border-2 border-green-100" />)}
+                                <motion.div key="final" initial={{ y: 50 }} animate={{ y: 0 }} className="text-center bg-white p-12 rounded-[3rem] shadow-2xl border-b-8 border-green-500">
+                                    <h2 className="text-5xl font-black text-green-700 mb-6">任務大圓滿！</h2>
+                                    <p className="text-xl text-gray-500 mb-10 leading-relaxed">你已經獲得了蕨積綠色宇宙的全部智慧。<br/>讓我們一起守護地球！</p>
+                                    <div className="flex justify-center gap-2 mb-10 overflow-x-auto p-4">
+                                        {[1,2,3,4,5,6,7].map(i => <img key={i} src={CHARS[i].file} className="w-16 h-16 rounded-full border-2 border-green-200" />)}
                                     </div>
-                                    <p className="text-lg mb-10 text-gray-600">你已掌握了蕨積綠色宇宙的 7 大減碳智慧！</p>
-                                    <button onClick={()=>window.location.reload()} className="bg-green-600 text-white px-10 py-4 rounded-full font-bold text-xl shadow-lg">重新冒險</button>
+                                    <button onClick={()=>window.location.reload()} className="bg-green-600 hover:bg-green-700 text-white px-12 py-5 rounded-full text-2xl font-black shadow-xl transition active:scale-95">
+                                        再次冒險
+                                    </button>
                                 </motion.div>
                             )}
                         </AnimatePresence>
                     </div>
-
-                    {/* 下方：RPG風格放大對話框 */}
-                    <AnimatePresence>
-                        {level <= 7 && (
-                            <motion.div initial={{y: 200}} animate={{y: 0}} exit={{y: 200}}>
-                                <RPGDialog char={CHARS[level]} msg={dialogMsg} score={score} />
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
                 </div>
             );
         }
