@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>蕨積綠色宇宙 - 第二關</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white overflow-hidden">
+    <div class="h-screen w-full flex flex-col md:flex-row">
+        <div class="w-full h-[35%] md:h-full md:w-5/12 bg-blue-500 flex flex-col items-center justify-center p-6">
+            <img src="brom.png" class="w-40 md:w-80 mb-4 drop-shadow-2xl">
+            <div class="bg-white/90 p-4 rounded-2xl shadow-xl w-full max-w-sm border-l-8 border-blue-700 text-black">
+                <h2 class="text-xl font-black">小積 Brom</h2>
+                <p id="dialog">講人話！設備太熱會耗電，快點擊噴水降溫！</p>
+            </div>
+        </div>
+        <div class="w-full h-[65%] md:h-full md:w-7/12 bg-gray-50 flex flex-col items-center justify-center p-8">
+            <div id="heat" class="text-[150px] mb-10 animate-pulse">🖥️🔥</div>
+            <button onclick="coolDown()" class="bg-blue-600 text-white px-16 py-8 rounded-full text-3xl font-black shadow-2xl active:scale-90 transition">噴水 💧</button>
+        </div>
+    </div>
+
+    <script>
+        let clicks = 0;
+        function coolDown() {
+            clicks++;
+            if (clicks >= 5) {
+                document.getElementById('heat').innerText = '🖥️❄️';
+                document.getElementById('dialog').innerText = '執行力滿分！去找小龜冒險吧！';
+                setTimeout(() => { window.location.href = 'level3.html'; }, 1500);
+            }
+        }
+    </script>
+</body>
+</html>
