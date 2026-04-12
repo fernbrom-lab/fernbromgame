@@ -2,35 +2,454 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>蕨積綠色宇宙 - 第六關</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>蕨積綠色宇宙 - 第六關：平衡調音師</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            user-select: none;
+        }
+        body {
+            background: linear-gradient(145deg, #eef2ff 0%, #e0e7ff 100%);
+        }
+        /* 角色漂浮動畫 */
+        .character-float {
+            animation: float 3.5s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+            100% { transform: translateY(0px); }
+        }
+        .bubble-glow {
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.3) inset;
+        }
+        /* 自定義滑塊樣式 (移除默認，打造精緻風格) */
+        input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+            width: 100%;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+        /* 滑軌 */
+        input[type=range]::-webkit-slider-runnable-track {
+            height: 12px;
+            background: linear-gradient(to right, 
+                #ef4444 0%, #f97316 20%, #facc15 35%, 
+                #4ade80 40%, #22c55e 50%, #4ade80 60%, 
+                #facc15 65%, #f97316 80%, #ef4444 100%);
+            border-radius: 20px;
+            border: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            background: white;
+            border-radius: 50%;
+            margin-top: -8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            border: 2px solid #4f46e5;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:active {
+            transform: scale(1.2);
+            background: #e0e7ff;
+        }
+        input[type=range]::-moz-range-track {
+            height: 12px;
+            background: linear-gradient(to right, 
+                #ef4444 0%, #f97316 20%, #facc15 35%, 
+                #4ade80 40%, #22c55e 50%, #4ade80 60%, 
+                #facc15 65%, #f97316 80%, #ef4444 100%);
+            border-radius: 20px;
+        }
+        input[type=range]::-moz-range-thumb {
+            width: 28px;
+            height: 28px;
+            background: white;
+            border-radius: 50%;
+            border: 2px solid #4f46e5;
+            cursor: pointer;
+        }
+        /* 平衡指示器指針 */
+        .balance-needle {
+            transition: left 0.05s linear;
+        }
+        /* 成功閃光 */
+        .success-glow {
+            animation: successFlash 0.6s ease-out 2;
+        }
+        @keyframes successFlash {
+            0% { box-shadow: 0 0 0 0 #4ade80, 0 0 0 0 rgba(74,222,128,0.5); background-color: #f0fdf4; }
+            50% { box-shadow: 0 0 0 20px #4ade80, 0 0 0 8px rgba(74,222,128,0.3); background-color: #dcfce7; }
+            100% { box-shadow: 0 0 0 0 #4ade80, 0 0 0 0 rgba(74,222,128,0); background-color: transparent; }
+        }
+        .float-note {
+            position: fixed;
+            pointer-events: none;
+            font-size: 2rem;
+            font-weight: bold;
+            z-index: 200;
+            animation: floatNote 1s ease-out forwards;
+        }
+        @keyframes floatNote {
+            0% { opacity: 1; transform: translateY(0px) scale(0.6); }
+            100% { opacity: 0; transform: translateY(-90px) scale(1.2); }
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: default;
+        }
+        .disabled-slider {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+    </style>
 </head>
-<body class="bg-indigo-50 overflow-hidden">
-    <div class="h-screen w-full flex flex-col md:flex-row">
-        <div class="w-full h-[35%] md:h-full md:w-5/12 bg-indigo-500 flex flex-col items-center justify-center p-6 text-center text-white">
-            <img src="ficus.png" class="w-40 md:w-80 mb-4 drop-shadow-2xl">
-            <div class="bg-white/90 p-4 rounded-2xl shadow-xl w-full max-w-sm border-l-8 border-indigo-700 text-black text-left">
-                <h2 class="text-xl font-black">琴哥 Ficus</h2>
-                <p id="dialog">平衡才是最美的。拉動滑桿，讓能量指標停在中間綠色區！</p>
+<body class="overflow-hidden antialiased">
+
+    <div class="h-screen w-full flex flex-col md:flex-row relative">
+        
+        <!-- 左侧琴哥 Ficus 區域 (深紫/靛藍風格) -->
+        <div class="w-full md:w-5/12 bg-gradient-to-br from-indigo-600 to-violet-700 flex flex-col items-center justify-center p-5 relative shadow-2xl z-10">
+            <!-- 樂譜裝飾背景 -->
+            <div class="absolute inset-0 opacity-10 pointer-events-none">
+                <div class="absolute top-6 left-3 text-7xl">🎼</div>
+                <div class="absolute bottom-20 right-6 text-8xl rotate-12">🎵</div>
+                <div class="absolute top-1/3 left-10 text-6xl">🎶</div>
+            </div>
+            
+            <!-- 琴哥角色圖像 + 浮動 -->
+            <div class="character-float relative z-20">
+                <div class="bg-white/20 backdrop-blur-sm rounded-full p-3 shadow-2xl">
+                    <img src="ficus.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1995/1995572.png'; this.onerror=null;" class="w-36 h-36 md:w-44 md:h-44 object-contain drop-shadow-xl">
+                </div>
+            </div>
+            
+            <!-- 對話氣泡 (音樂典雅感) -->
+            <div class="mt-6 w-full max-w-sm relative z-20 transition-all duration-300">
+                <div class="bg-white/95 backdrop-blur-sm rounded-3xl p-5 shadow-2xl border-l-[10px] border-indigo-700 bubble-glow">
+                    <div class="flex items-start gap-2">
+                        <span class="text-3xl">🎻</span>
+                        <div class="flex-1">
+                            <h3 class="font-black text-xl text-gray-800 tracking-tight">琴哥 Ficus · 平衡指揮家</h3>
+                            <p id="dialog" class="text-gray-700 font-medium mt-1 leading-relaxed text-base">平衡才是最美的。拉動滑桿，讓能量指標停在中間綠色區！🎯</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="absolute -bottom-2 left-8 w-4 h-4 bg-white/95 rotate-45 rounded-sm"></div>
+            </div>
+            
+            <!-- 優雅小語 -->
+            <div class="absolute bottom-4 left-0 right-0 text-center text-white/70 text-xs font-medium md:block hidden">
+                🎵 滑動調音鈕，將指針停在綠色區域 (40-60) | 和諧減碳
             </div>
         </div>
-        <div class="w-full h-[65%] md:h-full md:w-7/12 flex flex-col items-center justify-center p-8">
-            <div class="text-9xl mb-12">🎵</div>
-            <div class="w-full max-w-md relative p-4 bg-white rounded-3xl shadow-xl">
-                <div class="h-4 w-full bg-gray-200 rounded-full relative overflow-hidden">
-                    <div class="absolute inset-y-0 left-[40%] right-[40%] bg-green-300"></div>
+
+        <!-- 右側平衡調音台 -->
+        <div class="w-full md:w-7/12 bg-gradient-to-br from-indigo-50 to-violet-50 flex flex-col items-center justify-center p-6 relative">
+            
+            <!-- 主調音卡片 -->
+            <div class="w-full max-w-lg bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-6 md:p-8 border border-indigo-200 transition-all duration-300">
+                
+                <!-- 動態音符圖示 -->
+                <div class="text-center mb-2">
+                    <span id="musicIcon" class="text-7xl inline-block transition-all duration-300">🎵</span>
                 </div>
-                <input type="range" min="0" max="100" value="0" oninput="checkBalance(this.value)" class="w-full mt-6 h-4 bg-transparent appearance-none cursor-pointer accent-indigo-600">
+                
+                <!-- 實時平衡指示器 (模擬儀表) -->
+                <div class="relative w-full h-4 bg-gray-200 rounded-full mb-8 mt-2 overflow-hidden shadow-inner">
+                    <!-- 彩色能量帶 -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-red-500 via-yellow-400 via-green-400 via-yellow-400 to-red-500"></div>
+                    <!-- 指針小圓點 -->
+                    <div id="needlePointer" class="balance-needle absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-white rounded-full border-2 border-indigo-600 shadow-md z-10 transition-all duration-75" style="left: 0%;"></div>
+                    <!-- 綠色目標區標示 -->
+                    <div class="absolute top-0 bottom-0 left-[40%] right-[40%] bg-green-500/30 border-x-2 border-green-600 rounded-sm pointer-events-none"></div>
+                </div>
+                
+                <!-- 當前數值顯示 -->
+                <div class="flex justify-between items-center mb-5 bg-indigo-100/60 rounded-2xl p-3">
+                    <span class="font-bold text-indigo-800 flex items-center gap-2"><span class="text-xl">🎛️</span> 當前平衡值</span>
+                    <span id="currentValue" class="text-3xl font-black text-indigo-900 bg-white px-4 py-1 rounded-full shadow">0</span>
+                </div>
+                
+                <!-- 自定義滑塊區 -->
+                <div class="w-full relative">
+                    <input type="range" id="balanceSlider" min="0" max="100" value="0" step="1" class="w-full">
+                </div>
+                
+                <!-- 提示與反饋區塊 -->
+                <div id="balanceFeedback" class="mt-6 text-center text-sm font-semibold text-gray-600 bg-indigo-50 p-3 rounded-xl border border-indigo-200 transition-all">
+                    💡 滑動滑桿，將指針停留在綠色區域 (40~60) 完成和諧調音
+                </div>
+                
+                <!-- 額外指示條 -->
+                <div class="flex justify-between text-xs text-gray-400 mt-3 px-1">
+                    <span>低能量 🔴</span>
+                    <span>⚖️ 理想區 🟢</span>
+                    <span>高能量 🔴</span>
+                </div>
+            </div>
+            
+            <!-- 底部裝飾音符飄浮 -->
+            <div class="absolute bottom-4 left-0 right-0 text-center text-indigo-300 text-xs font-medium">
+                ✨ 每一次平衡調音都是減碳的節奏 ✨
             </div>
         </div>
     </div>
+
     <script>
-        function checkBalance(val) {
-            if (val > 40 && val < 60) {
-                document.getElementById('dialog').innerText = "這首曲子真優雅。最後一關，空空在等你。";
-                setTimeout(() => { window.location.href = 'level7.html'; }, 1500);
+        // ---------- 遊戲核心 ----------
+        const TARGET_MIN = 40;
+        const TARGET_MAX = 60;
+        let isCompleted = false;
+        let currentSliderValue = 0;
+        
+        // DOM 元素
+        const dialogEl = document.getElementById('dialog');
+        const balanceSlider = document.getElementById('balanceSlider');
+        const currentValueSpan = document.getElementById('currentValue');
+        const needlePointer = document.getElementById('needlePointer');
+        const balanceFeedback = document.getElementById('balanceFeedback');
+        const musicIcon = document.getElementById('musicIcon');
+        
+        // 更新指針位置 (基於 slider 數值百分比)
+        function updateNeedle(value) {
+            const percent = value; // value 0-100 直接作為百分比位置
+            needlePointer.style.left = `${percent}%`;
+            // 微調偏移使指針中心對準
+            const offset = (needlePointer.offsetWidth / 2) / (needlePointer.parentElement.offsetWidth / 100);
+            needlePointer.style.left = `calc(${percent}% - ${offset}%)`;
+        }
+        
+        // 產生音符飄浮特效 (慶祝/平衡達成)
+        function createNoteEffect(x, y, note = '🎵') {
+            const floatDiv = document.createElement('div');
+            floatDiv.innerText = note;
+            floatDiv.className = 'float-note';
+            floatDiv.style.left = `${x - 20}px`;
+            floatDiv.style.top = `${y - 30}px`;
+            document.body.appendChild(floatDiv);
+            setTimeout(() => floatDiv.remove(), 900);
+        }
+        
+        // 觸發成功完成任務
+        function completeBalance(value) {
+            if (isCompleted) return;
+            isCompleted = true;
+            
+            // 禁用滑塊
+            balanceSlider.disabled = true;
+            balanceSlider.classList.add('disabled-slider');
+            
+            // 顯示最終對話與反饋
+            dialogEl.innerText = "🎶 這首曲子真優雅，能量完全和諧！最後一關，空空在等你。 🌟";
+            balanceFeedback.innerHTML = "✨ 完美平衡！綠色和諧能量達成！即將前往最終篇章 ✨";
+            balanceFeedback.classList.add("bg-green-100", "text-green-800", "border-green-300", "font-bold");
+            
+            // 音樂圖示變成歡呼
+            musicIcon.innerText = "🏆🎶";
+            
+            // 產生多個音符慶祝特效 (基於滑塊位置)
+            const rect = balanceSlider.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            for (let i = 0; i < 6; i++) {
+                setTimeout(() => {
+                    createNoteEffect(centerX + (Math.random() - 0.5) * 60, centerY + (Math.random() - 0.5) * 40, ['🎵', '🎶', '✨', '💚'][Math.floor(Math.random() * 4)]);
+                }, i * 80);
             }
+            
+            // 閃光效果作用於卡片
+            const card = document.querySelector('.bg-white\\/80');
+            if (card) card.classList.add('success-glow');
+            
+            // 震動回饋
+            if (navigator.vibrate) navigator.vibrate(200);
+            
+            // 延遲跳轉至 level7.html
+            setTimeout(() => {
+                window.location.href = 'level7.html';
+            }, 1800);
+        }
+        
+        // 檢查平衡，給出即時反饋
+        function checkBalanceAndFeedback(value) {
+            if (isCompleted) return;
+            
+            const isInGreen = (value >= TARGET_MIN && value <= TARGET_MAX);
+            
+            // 更新動態對話 (琴哥回饋)
+            if (isInGreen) {
+                dialogEl.innerText = "🎼 對！就是這個平衡點！優雅且減碳，準備前往下一關！";
+                balanceFeedback.innerHTML = "🎉 完美！平衡值落在綠色區！能量和諧，即將通關 🎉";
+                balanceFeedback.classList.add("bg-green-100", "text-green-700", "border-green-300");
+                balanceFeedback.classList.remove("bg-indigo-50", "text-gray-600", "border-indigo-200");
+                // 改變音符圖示跳動
+                musicIcon.style.transform = "scale(1.2)";
+                setTimeout(() => { if(!isCompleted) musicIcon.style.transform = "scale(1)"; }, 300);
+                
+                // 觸發通關（僅一次）
+                completeBalance(value);
+            } 
+            else {
+                // 未達平衡，根據偏離程度給予提示
+                let hintText = "";
+                if (value < TARGET_MIN) {
+                    const diff = TARGET_MIN - value;
+                    if (diff > 20) hintText = "🔻 能量太低！向右滑動增加能量，邁向綠色區域 (40-60)";
+                    else hintText = "📈 再往右一點點！目標區 40~60，目前偏低";
+                } else if (value > TARGET_MAX) {
+                    const diff = value - TARGET_MAX;
+                    if (diff > 20) hintText = "🔺 能量過載！向左滑動降低能量，回到和諧區間";
+                    else hintText = "📉 稍微往左移動，平衡值需落在 40~60 之間";
+                }
+                dialogEl.innerText = hintText || "🎵 滑動滑桿，讓指針停在中央綠色地帶 (40-60)";
+                balanceFeedback.innerHTML = `🎚️ 目前 ${value}，目標區間 40-60。${hintText.split('。')[0] || '繼續調整至綠色範圍'}`;
+                balanceFeedback.classList.remove("bg-green-100", "text-green-700", "border-green-300");
+                balanceFeedback.classList.add("bg-indigo-50", "text-gray-600", "border-indigo-200");
+                musicIcon.innerText = value > TARGET_MAX ? '🔊🎵' : (value < TARGET_MIN ? '🔇🎵' : '🎵');
+                musicIcon.style.transform = "scale(1)";
+            }
+        }
+        
+        // 滑塊輸入事件處理
+        function onSliderChange(value) {
+            if (isCompleted) return;
+            currentSliderValue = value;
+            // 更新數值顯示
+            currentValueSpan.innerText = value;
+            // 更新指針位置
+            updateNeedle(value);
+            // 提供即時檢查與反饋 (但不重複觸發通關, 內部只觸發一次)
+            checkBalanceAndFeedback(value);
+            
+            // 觸感反饋（輕微）
+            if (navigator.vibrate && (value === TARGET_MIN || value === TARGET_MAX || value === 50)) {
+                navigator.vibrate(20);
+            }
+        }
+        
+        // 綁定滑塊事件 (同時支援觸控與滑鼠)
+        function bindSliderEvents() {
+            const slider = balanceSlider;
+            slider.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value, 10);
+                onSliderChange(val);
+            });
+            slider.addEventListener('change', (e) => {
+                // 確保最終值同步
+                const val = parseInt(e.target.value, 10);
+                onSliderChange(val);
+            });
+        }
+        
+        // 重置遊戲狀態（初始化用，但該關卡只需首次加載重置）
+        function initGame() {
+            isCompleted = false;
+            balanceSlider.disabled = false;
+            balanceSlider.classList.remove('disabled-slider');
+            balanceSlider.value = '0';
+            currentSliderValue = 0;
+            currentValueSpan.innerText = '0';
+            updateNeedle(0);
+            dialogEl.innerText = "平衡才是最美的。拉動滑桿，讓能量指標停在中間綠色區！🎯";
+            balanceFeedback.innerHTML = "💡 滑動滑桿，將指針停留在綠色區域 (40~60) 完成和諧調音";
+            balanceFeedback.classList.remove("bg-green-100", "text-green-700", "border-green-300");
+            balanceFeedback.classList.add("bg-indigo-50", "text-gray-600", "border-indigo-200");
+            musicIcon.innerText = "🎵";
+            musicIcon.style.transform = "scale(1)";
+            // 移除額外特效殘留
+            const card = document.querySelector('.bg-white\\/80');
+            if (card) card.classList.remove('success-glow');
+        }
+        
+        // 圖片備援
+        const ficusImg = document.querySelector('img');
+        if (ficusImg) {
+            ficusImg.addEventListener('error', function() {
+                this.onerror = null;
+                this.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle fill='%234f46e5' cx='50' cy='50' r='45'/%3E%3Ctext x='50' y='70' font-size='50' text-anchor='middle' fill='white'%3E🎹%3C/text%3E%3C/svg%3E";
+            });
+        }
+        
+        // 窗口尺寸變化時，重新校準指針偏移 (因為偏移量依賴父容器寬度)
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            if (resizeTimer) clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (!isCompleted) {
+                    const curVal = parseInt(balanceSlider.value, 10);
+                    updateNeedle(curVal);
+                }
+            }, 100);
+        });
+        
+        // 啟動遊戲
+        initGame();
+        bindSliderEvents();
+        
+        // 增加額外體驗: 當指針接近綠色區域時，背景輕微閃爍（選擇性）
+        let lastHintValue = -1;
+        function extraAmbience(value) {
+            if (isCompleted) return;
+            if (value >= TARGET_MIN && value <= TARGET_MAX) return;
+            // 靠近目標 (差距小於10)
+            const distanceToMin = Math.abs(value - TARGET_MIN);
+            const distanceToMax = Math.abs(value - TARGET_MAX);
+            const nearTarget = (distanceToMin <= 8) || (distanceToMax <= 8);
+            const rightPanel = document.querySelector('.md\\:w-7\\/12');
+            if (nearTarget && lastHintValue !== value) {
+                if (rightPanel) {
+                    rightPanel.style.transition = 'background 0.2s';
+                    rightPanel.style.background = 'radial-gradient(circle at 50% 30%, rgba(165, 180, 252, 0.3), rgba(224, 231, 255, 0.2))';
+                    setTimeout(() => {
+                        if (!isCompleted) rightPanel.style.background = '';
+                    }, 400);
+                }
+                lastHintValue = value;
+            }
+        }
+        
+        // 擴充 onSliderChange 增加環境效果
+        const originalOnChange = onSliderChange;
+        window.onSliderChange = function(val) {
+            originalOnChange(val);
+            extraAmbience(val);
+        };
+        onSliderChange = function(val) {
+            originalOnChange(val);
+            extraAmbience(val);
+        };
+        
+        // 確保滑塊預設不能完成, 設定初始值0
+        // 針對移動端觸碰滑塊時防止頁面滾動
+        balanceSlider.addEventListener('touchstart', (e) => {
+            e.stopPropagation();
+        }, { passive: false });
+        
+        // 如果使用者點擊綠色區域, 增加一個小巧提示
+        const targetHint = document.querySelector('.left-\\[40\\%\\]');
+        if (targetHint) {
+            targetHint.addEventListener('click', () => {
+                if (!isCompleted) {
+                    balanceFeedback.innerHTML = "🎯 目標區間 40~60！滑動滑塊進入此區域即可通關～";
+                    setTimeout(() => {
+                        if (!isCompleted && balanceFeedback.innerHTML.includes("目標區間")) {
+                            balanceFeedback.innerHTML = "💡 滑動滑桿，將指針停留在綠色區域 (40~60) 完成和諧調音";
+                        }
+                    }, 2000);
+                }
+            });
         }
     </script>
 </body>
