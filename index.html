@@ -3,93 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>蕨積綠色宇宙：佛系儲能</title>
+    <title>蕨積綠色宇宙：優雅律動</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
     <style>
-        body { background: #fff7ed; font-family: sans-serif; overflow: hidden; touch-action: none; }
-        .bg-night { background: #0f172a; color: white; }
-        .bg-day { background: #eefdf4; }
+        body { background: #f8fafc; font-family: sans-serif; overflow: hidden; touch-action: none; }
+        .piano-gradient { background: linear-gradient(to bottom, #f1f5f9, #cbd5e1); }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState } = React;
         const { motion, AnimatePresence } = window.Motion;
 
         function App() {
             const [level, setLevel] = useState(1); 
             const [score, setScore] = useState(0);
-            const [msg, setMsg] = useState("肉肉：慢慢來，水要存，心情也要。");
-            const [waterLevel, setWaterLevel] = useState(0);
+            const [harmony, setHarmony] = useState(50); // 平衡值 0-100
+            const [msg, setMsg] = useState("琴哥：今天想聽巴哈，還是蕭邦？優雅的環境才能減少能源浪費。");
 
-            // 第五關：收集資源邏輯
-            const collect = (type) => {
-                if (type === 'good') {
-                    setScore(score + 10);
-                    setWaterLevel(prev => Math.min(prev + 20, 100));
-                    if (waterLevel >= 80) {
-                        setMsg("肉肉：水存滿了，感覺能量充足～準備見琴哥囉。");
-                        setTimeout(() => setLevel(6), 2000);
-                    }
+            const tune = (value) => {
+                const newHarmony = harmony + value;
+                setHarmony(newHarmony);
+                if (newHarmony >= 40 && newHarmony <= 70) {
+                    setScore(score + 5);
+                    setMsg("琴哥：音律和諧，環境品質達到最佳狀態。");
                 } else {
-                    setScore(Math.max(0, score - 5));
-                    setMsg("肉肉：嗚...這煙味我不喜歡...");
+                    setMsg("琴哥：噢...節奏亂了，太吵或太亮都會耗能喔。");
+                }
+
+                if (score >= 250) { // 累積到一定分數過關
+                    setMsg("琴哥：這首曲子完成得真美。最後一關，空空在雲端等你。");
+                    setTimeout(() => setLevel(7), 2000);
                 }
             };
 
             return (
-                <div className={`flex flex-col items-center h-screen p-4 max-w-md mx-auto ${level === 4 ? 'bg-night' : level === 5 ? 'bg-orange-50' : 'bg-day'}`}>
+                <div className="flex flex-col items-center h-screen p-4 max-w-md mx-auto relative piano-gradient">
                     {/* 對話框 */}
-                    <div className="w-full bg-white rounded-2xl shadow-lg p-4 mt-2 border-2 border-orange-400 z-50 text-black">
+                    <div className="w-full bg-white rounded-2xl shadow-lg p-4 mt-2 border-2 border-slate-400 z-50 text-black">
                         <div className="flex items-center gap-3">
-                            <img src={level === 5 ? 'succ.png' : 'fern.png'} className="w-12 h-12 rounded-full border shadow-sm" />
+                            <img src={level === 6 ? 'ficus.png' : 'fern.png'} className="w-12 h-12 rounded-full border shadow-sm" />
                             <div className="flex-1">
-                                <p className="font-bold text-orange-800 text-sm">{level === 5 ? '肉肉' : '阿蕨'}</p>
+                                <p className="font-bold text-slate-800 text-sm">{level === 6 ? '琴哥' : '阿蕨'}</p>
                                 <p className="text-gray-600 text-[10px] leading-tight">{msg}</p>
                             </div>
                         </div>
-                        <div className="text-right text-xl font-black text-orange-600">SCORE: {score}</div>
+                        <div className="text-right text-xl font-black text-slate-600">SCORE: {score}</div>
                     </div>
 
                     <div className="flex-1 flex flex-col items-center justify-center w-full relative">
-                        {level < 5 && (
-                            <button className="bg-white text-black p-4 rounded-xl shadow border-2 border-orange-200" onClick={() => setLevel(5)}>
-                                直接進入第五關肉肉挑戰
+                        {level < 6 && (
+                            <button className="bg-white text-black p-4 rounded-xl shadow border-2 border-slate-200" onClick={() => setLevel(6)}>
+                                直接進入第六關琴哥挑戰
                             </button>
                         )}
 
-                        {level === 5 && (
+                        {level === 6 && (
                             <div className="w-full h-full flex flex-col items-center py-10">
-                                {/* 儲水條 */}
-                                <div className="w-3/4 h-6 bg-gray-200 rounded-full border-2 border-orange-200 overflow-hidden mb-10">
+                                {/* 環境平衡表 */}
+                                <p className="text-xs text-slate-500 mb-2 font-bold">環境平衡指標 (保持在中央)</p>
+                                <div className="w-full h-8 bg-gray-200 rounded-full border-2 border-slate-300 relative overflow-hidden mb-12">
+                                    <div className="absolute inset-y-0 left-[40%] right-[30%] bg-green-200 opacity-50"></div> {/* 安全區 */}
                                     <motion.div 
-                                        className="h-full bg-blue-400" 
-                                        animate={{ width: `${waterLevel}%` }}
+                                        className="absolute top-0 bottom-0 w-2 bg-slate-800"
+                                        animate={{ left: `${harmony}%` }}
                                     />
                                 </div>
 
-                                <div className="grid grid-cols-3 gap-6 mb-20">
-                                    <motion.div whileTap={{scale:0.9}} onClick={()=>collect('good')} className="text-5xl cursor-pointer">💧</motion.div>
-                                    <motion.div whileTap={{scale:0.9}} onClick={()=>collect('bad')} className="text-5xl cursor-pointer filter grayscale">☁️</motion.div>
-                                    <motion.div whileTap={{scale:0.9}} onClick={()=>collect('good')} className="text-5xl cursor-pointer">☀️</motion.div>
+                                <div className="flex gap-10 mb-16">
+                                    <button onClick={()=>tune(-10)} className="text-5xl hover:scale-110 active:scale-95 transition">🎵</button>
+                                    <button onClick={()=>tune(10)} className="text-5xl hover:scale-110 active:scale-95 transition">🎶</button>
                                 </div>
 
-                                {/* 肉肉本體 */}
-                                <motion.div 
-                                    drag="x" dragConstraints={{left:-100, right:100}}
-                                    className="text-center cursor-grab active:cursor-grabbing"
-                                >
-                                    <img src="succ.png" className="w-32 h-32 rounded-full border-4 border-orange-300 shadow-2xl" />
-                                    <p className="font-bold text-orange-600 mt-2 italic tracking-widest">Q彈儲能中...</p>
+                                {/* 琴哥本體 */}
+                                <motion.div animate={{ rotate: [0, -2, 2, 0] }} transition={{ repeat: Infinity, duration: 4 }}>
+                                    <img src="ficus.png" className="w-36 h-36 rounded-full border-4 border-white shadow-2xl" />
+                                    <p className="font-serif text-slate-700 mt-4 text-center italic">優雅擔當</p>
                                 </motion.div>
-                                
-                                <p className="text-[10px] text-gray-400 mt-10">提示：點擊水滴與陽光來存水！</p>
                             </div>
                         )}
                     </div>
