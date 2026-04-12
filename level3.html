@@ -2,39 +2,440 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>蕨積綠色宇宙 - 第三關</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>蕨積綠色宇宙 - 第三關：校園節能尋寶</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        body {
+            background: linear-gradient(145deg, #d1fae5 0%, #a7f3d0 100%);
+        }
+        /* 角色漂浮 */
+        .character-float {
+            animation: float 3.5s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+            100% { transform: translateY(0px); }
+        }
+        /* 卡片點擊閃爍動畫 */
+        .treasure-card {
+            transition: all 0.2s ease;
+        }
+        .treasure-card:active {
+            transform: scale(0.94);
+        }
+        .glow-effect {
+            box-shadow: 0 0 0 2px #fff, 0 0 0 5px #10b981;
+        }
+        .bubble-glow {
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.3) inset;
+        }
+        .progress-fill {
+            transition: width 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+        .collected-tag {
+            filter: grayscale(0.3) brightness(0.95);
+            opacity: 0.6;
+            transform: scale(0.98);
+            cursor: default;
+        }
+        .sparkle {
+            position: fixed;
+            pointer-events: none;
+            font-size: 2rem;
+            animation: sparkleFly 0.7s ease-out forwards;
+            z-index: 200;
+        }
+        @keyframes sparkleFly {
+            0% {
+                opacity: 1;
+                transform: scale(0.2) translateY(0px);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1.5) translateY(-60px);
+            }
+        }
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+            transform: none !important;
+        }
+        .shake-badge {
+            animation: shakeBadge 0.3s ease-in-out 0s 2;
+        }
+        @keyframes shakeBadge {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+    </style>
 </head>
-<body class="bg-white overflow-hidden">
-    <div class="h-screen w-full flex flex-col md:flex-row">
-        <div class="w-full h-[35%] md:h-full md:w-5/12 bg-emerald-500 flex flex-col items-center justify-center p-6 text-white text-center">
-            <img src="mons.png" class="w-40 md:w-80 mb-4 drop-shadow-2xl">
-            <div class="bg-white/90 p-4 rounded-2xl shadow-xl w-full max-w-sm border-l-8 border-emerald-700 text-black">
-                <h2 class="text-xl font-black">小龜 Monstera</h2>
-                <p id="dialog">校園裡到處都是節能寶藏！點擊 4 個「節能與回收標章」來通關！</p>
+<body class="h-screen w-full overflow-hidden antialiased">
+
+    <div class="h-screen w-full flex flex-col md:flex-row relative">
+        
+        <!-- 左侧小龜 Monstera 區域 (翠綠色調) -->
+        <div class="w-full md:w-5/12 bg-gradient-to-br from-emerald-600 to-green-700 flex flex-col items-center justify-center p-5 relative shadow-2xl z-10">
+            <!-- 葉片裝飾背景 -->
+            <div class="absolute inset-0 opacity-10 pointer-events-none">
+                <div class="absolute top-6 left-3 text-8xl">🍃</div>
+                <div class="absolute bottom-16 right-5 text-9xl rotate-12">🌱</div>
+                <div class="absolute top-1/3 left-10 text-7xl">🍀</div>
+            </div>
+            
+            <!-- 小龜角色圖像 + 浮動 -->
+            <div class="character-float relative z-20">
+                <div class="bg-white/20 backdrop-blur-sm rounded-full p-3 shadow-2xl">
+                    <img src="mons.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1995/1995572.png'; this.onerror=null;" class="w-36 h-36 md:w-44 md:h-44 object-contain drop-shadow-xl">
+                </div>
+            </div>
+            
+            <!-- 對話氣泡 -->
+            <div class="mt-6 w-full max-w-sm relative z-20 transition-all duration-300">
+                <div class="bg-white/95 backdrop-blur-sm rounded-3xl p-5 shadow-2xl border-l-[10px] border-emerald-700 bubble-glow">
+                    <div class="flex items-start gap-2">
+                        <span class="text-3xl">🔍</span>
+                        <div class="flex-1">
+                            <h3 class="font-black text-xl text-gray-800 tracking-tight">小龜 Monstera · 綠活導遊</h3>
+                            <p id="dialog" class="text-gray-700 font-medium mt-1 leading-relaxed text-base">校園裡藏著許多節能標章！找到所有綠色寶藏吧 🌟</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="absolute -bottom-2 left-8 w-4 h-4 bg-white/95 rotate-45 rounded-sm"></div>
+            </div>
+            
+            <!-- 節能知識小語 -->
+            <div class="absolute bottom-4 left-0 right-0 text-center text-white/70 text-xs font-medium md:block hidden">
+                💡 每一個標章都代表一份減碳承諾 | 找到全部過關
             </div>
         </div>
-        <div class="w-full h-[65%] md:h-full md:w-7/12 bg-gray-50 flex items-center justify-center p-8">
-            <div class="grid grid-cols-2 gap-6">
-                <button onclick="found(this)" class="text-7xl p-8 bg-white rounded-3xl shadow-xl hover:bg-emerald-50 active:scale-95 transition">♻️</button>
-                <button onclick="found(this)" class="text-7xl p-8 bg-white rounded-3xl shadow-xl hover:bg-emerald-50 active:scale-95 transition">🔋</button>
-                <button onclick="found(this)" class="text-7xl p-8 bg-white rounded-3xl shadow-xl hover:bg-emerald-50 active:scale-95 transition">🏷️</button>
-                <button onclick="found(this)" class="text-7xl p-8 bg-white rounded-3xl shadow-xl hover:bg-emerald-50 active:scale-95 transition">🌿</button>
+
+        <!-- 右側尋寶遊戲區 -->
+        <div class="w-full md:w-7/12 bg-white/40 backdrop-blur-sm flex flex-col items-center justify-center p-6 overflow-y-auto">
+            <div class="w-full max-w-2xl mx-auto">
+                <!-- 績效面板：收集進度 + 減碳成就 -->
+                <div class="mb-5 bg-white/70 rounded-2xl p-4 shadow-md border border-white/50 backdrop-blur-sm">
+                    <div class="flex justify-between items-center flex-wrap gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl">🏆</span>
+                            <span class="font-black text-gray-700 text-md">校園減碳成就</span>
+                        </div>
+                        <div class="bg-emerald-800 text-white px-4 py-1.5 rounded-full font-black text-xl">
+                            <span id="collectedScore">0</span> / <span id="totalTreasures">8</span>
+                        </div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-600 font-semibold mt-2">
+                        <span>🌿 寶藏收集進度</span>
+                        <span id="progressHint">已找到 0 項節能標章</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3 mt-2 overflow-hidden">
+                        <div id="collectProgressBar" class="progress-fill bg-gradient-to-r from-emerald-500 to-green-600 h-3 rounded-full" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between mt-2 text-xs">
+                        <span>⚡ 累積減碳：<span id="carbonReduce">0</span> kg CO₂e</span>
+                        <span>🎯 每找到一項 → 減少 2.5kg 碳排</span>
+                    </div>
+                </div>
+
+                <!-- 寶藏網格 (豐富至 8 個節能/回收標章) -->
+                <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl p-5 md:p-6 border border-emerald-100">
+                    <div class="text-center mb-3">
+                        <h3 class="font-black text-gray-700 text-xl flex items-center justify-center gap-2">
+                            <span>🔍</span> 校園節能藏寶圖 <span>✨</span>
+                        </h3>
+                        <p class="text-xs text-gray-500">點擊圖示，收集節能標章與知識</p>
+                    </div>
+                    <div id="treasuresGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 justify-items-center">
+                        <!-- 動態由 js 產生，便於管理豐富內容與知識訊息 -->
+                    </div>
+                    <!-- 回饋提示區 -->
+                    <div id="gameFeedback" class="mt-5 text-sm font-semibold text-gray-600 bg-emerald-50 p-3 rounded-xl transition-all border border-emerald-200 text-center">
+                        🌟 點擊任何一個標章，學習節能知識並收集！
+                    </div>
+                </div>
+                
+                <!-- 底部趣味提示 -->
+                <div class="text-center mt-5 text-gray-500 text-xs font-medium flex justify-center gap-4">
+                    <span>♻️ 回收標章</span>
+                    <span>🔋 廢電池回收</span>
+                    <span>💧 節水標章</span>
+                    <span>🌱 碳足跡標籤</span>
+                </div>
             </div>
         </div>
     </div>
+
     <script>
-        let count = 0;
-        function found(btn) {
-            btn.style.opacity = '0.3';
-            btn.disabled = true;
-            count++;
-            if (count >= 4) {
-                document.getElementById('dialog').innerText = "冒險王當之無愧！去找虎妹特訓吧！";
-                setTimeout(() => { window.location.href = 'level4.html'; }, 1500);
+        // ---------- 豐富的寶藏列表 (共8項) 每個都有名稱、知識說明、圖示 ----------
+        const TREASURES = [
+            { id: 0, icon: "♻️", name: "回收標章", fact: "塑膠、紙類回收可減少40%能源消耗！", carbonValue: 2.5 },
+            { id: 1, icon: "🔋", name: "廢電池回收桶", fact: "一顆電池污染土壤，回收節省稀有金屬開採碳排", carbonValue: 2.5 },
+            { id: 2, icon: "🏷️", name: "節能標章", fact: "一級能效電器比舊型省電30%以上", carbonValue: 2.5 },
+            { id: 3, icon: "🌿", name: "碳足跡標籤", fact: "產品生命週期碳排放透明化，鼓勵低碳消費", carbonValue: 2.5 },
+            { id: 4, icon: "💧", name: "省水標章", fact: "省水馬桶/龍頭每年節省數噸水，減少水處理碳排", carbonValue: 2.5 },
+            { id: 5, icon: "☀️", name: "太陽光電標章", fact: "校園太陽能板每年減少數噸CO₂排放", carbonValue: 2.5 },
+            { id: 6, icon: "🌳", name: "綠建築標章", fact: "綠建築可節能20~30%，降低空調照明需求", carbonValue: 2.5 },
+            { id: 7, icon: "🚲", name: "低碳運輸推廣", fact: "鼓勵騎單車、共乘，減少通勤碳足跡", carbonValue: 2.5 }
+        ];
+        
+        const TOTAL = TREASURES.length;
+        let collectedStatus = new Array(TOTAL).fill(false);   // 是否已收集
+        let collectedCount = 0;
+        let totalCarbonSaved = 0;
+        let isGameCompleted = false;
+        
+        // DOM 元素
+        const dialogEl = document.getElementById('dialog');
+        const collectedScoreSpan = document.getElementById('collectedScore');
+        const totalTreasuresSpan = document.getElementById('totalTreasures');
+        const progressHintSpan = document.getElementById('progressHint');
+        const collectProgressBar = document.getElementById('collectProgressBar');
+        const carbonReduceSpan = document.getElementById('carbonReduce');
+        const gameFeedbackDiv = document.getElementById('gameFeedback');
+        const treasuresGrid = document.getElementById('treasuresGrid');
+        
+        // 顯示總數
+        totalTreasuresSpan.innerText = TOTAL;
+        
+        // 更新 UI (進度條、分數、碳排、對話)
+        function updateStatsUI() {
+            collectedScoreSpan.innerText = collectedCount;
+            const percent = (collectedCount / TOTAL) * 100;
+            collectProgressBar.style.width = `${percent}%`;
+            progressHintSpan.innerText = `已找到 ${collectedCount} 項節能標章`;
+            carbonReduceSpan.innerText = totalCarbonSaved.toFixed(1);
+            
+            // 依據收集進度改變小龜對話
+            if (!isGameCompleted) {
+                if (collectedCount === TOTAL) {
+                    dialogEl.innerText = "🎉 太厲害了！校園節能寶藏全部收集完畢！減碳達人就是你！出發找虎妹特訓吧 💪";
+                    gameFeedbackDiv.innerHTML = "🏆 完美達成任務！所有節能標章都已找到，即將前往下一關！🏆";
+                    gameFeedbackDiv.classList.add("bg-yellow-100", "text-yellow-800", "border-yellow-300");
+                } else if (collectedCount >= TOTAL - 2) {
+                    dialogEl.innerText = `差最後 ${TOTAL - collectedCount} 個寶藏！校園節能快要完整了，加油！ 🌟`;
+                    gameFeedbackDiv.innerHTML = `✨ 進度 ${collectedCount}/${TOTAL}，再努力找到剩餘的節能標章 ✨`;
+                } else if (collectedCount >= TOTAL / 2) {
+                    dialogEl.innerText = `已經找到 ${collectedCount} 個寶藏！每個標章背後都是減碳故事，繼續探索校園吧～ 🌍`;
+                    gameFeedbackDiv.innerHTML = `🌱 收集 ${collectedCount}/${TOTAL} 項，已減少 ${totalCarbonSaved.toFixed(1)} kg 碳排放！`;
+                } else if (collectedCount > 0) {
+                    dialogEl.innerText = `找到 ${collectedCount} 個綠色標章囉！點擊其他圖示，學習節能知識並通關 💚`;
+                    gameFeedbackDiv.innerHTML = `🔍 繼續發掘！每個標章都是校園節能的重要拼圖。`;
+                } else {
+                    dialogEl.innerText = "校園裡到處都是節能寶藏！點擊 8 個「節能與回收標章」來通關！每點一個都能學到知識～";
+                    gameFeedbackDiv.innerHTML = "♻️ 點擊上方的圖示，收集所有環保標章，一起減少碳足跡！";
+                }
             }
         }
+        
+        // 產生閃光特效（點擊位置）
+        function createSparkle(x, y) {
+            const spark = document.createElement('div');
+            spark.innerText = '✨';
+            spark.className = 'sparkle';
+            spark.style.left = `${x}px`;
+            spark.style.top = `${y}px`;
+            spark.style.position = 'fixed';
+            document.body.appendChild(spark);
+            setTimeout(() => spark.remove(), 700);
+        }
+        
+        // 收集處理函式
+        function collectTreasure(index, event) {
+            if (isGameCompleted) {
+                gameFeedbackDiv.innerHTML = "🏁 遊戲已完成！即將前往下一關，請稍後～ 🌟";
+                return;
+            }
+            if (collectedStatus[index]) {
+                // 已經收集過的，不再重複收集但可顯示提示
+                gameFeedbackDiv.innerHTML = `⏳ 「${TREASURES[index].name}」已經收集過了！試試其他的節能標章吧 🌿`;
+                gameFeedbackDiv.classList.add("shake-badge");
+                setTimeout(() => gameFeedbackDiv.classList.remove("shake-badge"), 400);
+                return;
+            }
+            
+            // 獲取點擊座標特效
+            let clientX, clientY;
+            if (event.touches) {
+                clientX = event.touches[0].clientX;
+                clientY = event.touches[0].clientY;
+            } else {
+                clientX = event.clientX;
+                clientY = event.clientY;
+            }
+            if (clientX && clientY) createSparkle(clientX, clientY);
+            else {
+                const btnRect = event.target.closest('button')?.getBoundingClientRect();
+                if (btnRect) createSparkle(btnRect.left + btnRect.width/2, btnRect.top + btnRect.height/2);
+            }
+            
+            // 收集此寶藏
+            collectedStatus[index] = true;
+            collectedCount++;
+            const treasure = TREASURES[index];
+            totalCarbonSaved += treasure.carbonValue;
+            
+            // 視覺停用該按鈕，加上特殊樣式
+            const targetBtn = document.getElementById(`treasure_btn_${index}`);
+            if (targetBtn) {
+                targetBtn.disabled = true;
+                targetBtn.classList.add('collected-tag');
+                targetBtn.style.opacity = '0.5';
+                targetBtn.style.filter = 'grayscale(0.2)';
+                // 增加打勾標記
+                const originalIcon = targetBtn.querySelector('.treasure-icon');
+                if (originalIcon && !targetBtn.querySelector('.check-mark')) {
+                    const checkSpan = document.createElement('span');
+                    checkSpan.innerText = ' ✓';
+                    checkSpan.className = 'check-mark text-lg font-bold text-green-600 ml-1';
+                    originalIcon.parentNode?.appendChild(checkSpan);
+                }
+            }
+            
+            // 更新面板
+            updateStatsUI();
+            
+            // 顯示知識回饋
+            gameFeedbackDiv.innerHTML = `🎉 找到「${treasure.name}」！${treasure.fact} 減少 ${treasure.carbonValue} kg CO₂e ！`;
+            gameFeedbackDiv.classList.add("bg-green-100", "text-green-800", "border-green-300");
+            setTimeout(() => {
+                if (!isGameCompleted) {
+                    gameFeedbackDiv.classList.remove("bg-green-100", "text-green-800", "border-green-300");
+                    gameFeedbackDiv.classList.add("bg-emerald-50", "text-gray-600");
+                }
+            }, 1800);
+            
+            // 震動回饋（手機）
+            if (navigator.vibrate) navigator.vibrate(50);
+            
+            // 檢查是否完成所有收集
+            if (collectedCount === TOTAL) {
+                completeGame();
+            } else {
+                // 小龜對話更新因 updateStatsUI 已處理
+            }
+        }
+        
+        // 遊戲通關: 禁用所有按鈕，顯示最終對話，跳轉至 level4.html
+        function completeGame() {
+            if (isGameCompleted) return;
+            isGameCompleted = true;
+            
+            // 最後一次更新對話完成訊息
+            dialogEl.innerText = "冒險王當之無愧！校園節能標章全數收集，減碳成果豐碩！去找虎妹特訓吧！";
+            gameFeedbackDiv.innerHTML = `🎉🎉 大成功！總共減少 ${totalCarbonSaved.toFixed(1)} kg 碳排放！ 前往下一關 💪 🎉🎉`;
+            gameFeedbackDiv.classList.add("complete-final", "bg-gradient-to-r", "from-emerald-200", "to-green-200", "font-black");
+            
+            // 禁用所有未禁用的寶藏按鈕
+            for (let i = 0; i < TOTAL; i++) {
+                const btn = document.getElementById(`treasure_btn_${i}`);
+                if (btn && !btn.disabled) {
+                    btn.disabled = true;
+                    btn.classList.add('collected-tag');
+                }
+            }
+            
+            // 特效：全區歡呼
+            const rightPanel = document.querySelector('.md\\:w-7\\/12');
+            if (rightPanel) {
+                rightPanel.classList.add('transition-all', 'duration-300');
+                rightPanel.style.background = "radial-gradient(circle, rgba(167,243,208,0.6), rgba(209,250,229,0.8))";
+            }
+            
+            // 延遲跳轉至 level4.html (配合原系列)
+            setTimeout(() => {
+                window.location.href = 'level4.html';
+            }, 2000);
+        }
+        
+        // 渲染所有寶藏按鈕
+        function renderTreasures() {
+            treasuresGrid.innerHTML = '';
+            TREASURES.forEach((treasure, idx) => {
+                const isCollected = collectedStatus[idx];
+                const btn = document.createElement('button');
+                btn.id = `treasure_btn_${idx}`;
+                btn.className = `treasure-card bg-white rounded-2xl shadow-lg hover:shadow-xl flex flex-col items-center justify-center p-4 transition-all duration-150 focus:outline-none ${isCollected ? 'collected-tag opacity-60' : 'hover:bg-emerald-50 active:scale-95'}`;
+                btn.style.minWidth = '90px';
+                btn.style.minHeight = '110px';
+                
+                // 圖示區
+                const iconSpan = document.createElement('div');
+                iconSpan.className = 'treasure-icon text-5xl md:text-6xl mb-2';
+                iconSpan.innerText = treasure.icon;
+                
+                const nameSpan = document.createElement('div');
+                nameSpan.className = 'text-xs font-bold text-gray-700 mt-1 text-center';
+                nameSpan.innerText = treasure.name;
+                
+                const carbonBadge = document.createElement('div');
+                carbonBadge.className = 'text-[10px] text-green-600 bg-green-50 px-2 py-0.5 rounded-full mt-1';
+                carbonBadge.innerText = `-${treasure.carbonValue}kg`;
+                
+                btn.appendChild(iconSpan);
+                btn.appendChild(nameSpan);
+                btn.appendChild(carbonBadge);
+                
+                if (isCollected) {
+                    btn.disabled = true;
+                    const checkMark = document.createElement('span');
+                    checkMark.innerText = ' ✓✓';
+                    checkMark.className = 'text-green-700 font-black text-xs ml-1';
+                    nameSpan.appendChild(checkMark);
+                } else {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        collectTreasure(idx, e);
+                    });
+                    // 支援觸控
+                    btn.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        collectTreasure(idx, e);
+                    });
+                }
+                treasuresGrid.appendChild(btn);
+            });
+        }
+        
+        // 初始重置 (確保刷新後新遊戲)
+        function initGame() {
+            collectedStatus = new Array(TOTAL).fill(false);
+            collectedCount = 0;
+            totalCarbonSaved = 0;
+            isGameCompleted = false;
+            updateStatsUI();
+            renderTreasures();
+            
+            // 復原樣式、對話
+            gameFeedbackDiv.classList.remove("bg-green-100", "text-green-800", "border-green-300", "complete-final");
+            gameFeedbackDiv.classList.add("bg-emerald-50", "text-gray-600");
+            gameFeedbackDiv.innerHTML = "🌟 點擊任何一個標章，學習節能知識並收集！";
+            dialogEl.innerText = "校園裡到處都是節能寶藏！點擊 8 個「節能與回收標章」來通關！";
+            
+            // 右側背景重置
+            const rightPanel = document.querySelector('.md\\:w-7\\/12');
+            if (rightPanel) rightPanel.style.background = "";
+        }
+        
+        // 圖片備援機制
+        const monsImg = document.querySelector('img');
+        if (monsImg) {
+            monsImg.addEventListener('error', function() {
+                this.onerror = null;
+                this.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle fill='%2310b981' cx='50' cy='50' r='45'/%3E%3Ctext x='50' y='70' font-size='48' text-anchor='middle' fill='white'%3E🐢%3C/text%3E%3C/svg%3E";
+            });
+        }
+        
+        // 啟動遊戲
+        initGame();
+        
+        // 動態加入響應式網格調整
+        window.addEventListener('resize', () => {});
     </script>
 </body>
 </html>
