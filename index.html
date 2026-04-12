@@ -3,15 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>蕨積綠色宇宙：優雅律動</title>
+    <title>蕨積綠色宇宙：淨零大冒險</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
     <style>
-        body { background: #f8fafc; font-family: sans-serif; overflow: hidden; touch-action: none; }
-        .piano-gradient { background: linear-gradient(to bottom, #f1f5f9, #cbd5e1); }
+        body { background: #f0fdf4; font-family: sans-serif; overflow: hidden; touch-action: none; user-select: none; }
+        /* 定義角色浮動動畫 */
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        .character-float { animation: float 3s ease-in-out infinite; }
+        .game-screen { max-width: 480px; margin: 0 auto; h-screen; display: flex; flex-direction: column; position: relative; }
     </style>
 </head>
 <body>
@@ -21,77 +24,159 @@
         const { useState } = React;
         const { motion, AnimatePresence } = window.Motion;
 
+        // --- 全域角色設定 (加大、去背) ---
+        const CHARS = {
+            1: { id: 'fern', name: '阿蕨 Fern', title: '策略長', file: 'fern.png', dialogs: ['問題不急，先釐清脈絡。', '脈絡清晰，這就是邏輯的力量。', '做得好，去見小積吧。'] },
+            2: { id: 'brom', name: '小積 Brom', title: '營運總監', file: 'brom.png', dialogs: ['講人話，我幫你做到。', '噴水降溫！這就是落地執行！'] },
+            3: { id: 'mons', name: '小龜 Monstera', title: '活動部長', file: 'mons.png', dialogs: ['新路線？我第一個踩點！'] },
+            4: { id: 'sans', name: '虎妹 Sans', title: '健身教練', file: 'sans.png', dialogs: ['半夜特訓最安靜。'] },
+            5: { id: 'succ', name: '肉肉 Succ', title: 'Q彈教主', file: 'succ.png', dialogs: ['慢慢來，水要存。'] },
+            6: { id: 'ficus', name: '琴哥 Ficus', title: '氛圍大師', file: 'ficus.png', dialogs: ['今天想聽蕭邦嗎？'] },
+            7: { id: 'till', name: '空空 Till', title: '雲端特派', file: 'till.png', dialogs: ['哪裡都是我的座位。'] }
+        };
+
+        // --- 第一關資料 ---
+        const L1_ITEMS = [
+            { n: '工廠煙囪', t: 'fire', i: '🏭' }, { n: '教室電燈', t: 'bolt', i: '💡' }, { n: '牛肉漢堡', t: 'hidden', i: '🍔' }
+        ];
+
+        // --- 子元件：放大對話框 (RPG風格) ---
+        const RPGDialog = ({ char, msg, score }) => (
+            <div className="absolute bottom-0 left-0 right-0 bg-black/80 text-white p-6 backdrop-blur-sm border-t-4 border-green-400 z-50 rounded-t-3xl shadow-2xl">
+                <div className="flex items-center gap-4 mb-3 border-b border-white/20 pb-2 relative">
+                    <img src={char.file} className="w-16 h-16 rounded-full border-2 border-white/50" />
+                    <div>
+                        <h3 className="font-bold text-xl text-green-300">{char.name}</h3>
+                        <p className="text-xs text-gray-400">{char.title}</p>
+                    </div>
+                    {/* 分數移到對話框右下角，凸顯IP */}
+                    <div className="absolute right-0 bottom-1 font-mono text-4xl font-black text-green-400">{score}</div>
+                </div>
+                <p className="text-lg leading-relaxed h-16">{msg}</p>
+            </div>
+        );
+
+        // --- 子元件：放大角色人偶 ---
+        const CharacterSprite = ({ file, name }) => (
+            <motion.div 
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                className="absolute inset-0 flex items-center justify-center p-12 character-float z-0"
+            >
+                <img 
+                    src={file} 
+                    alt={name} 
+                    className="max-h-[70vh] w-auto object-contain drop-shadow-[0_20px_20px_rgba(0,0,0,0.3)]"
+                />
+            </motion.div>
+        );
+
         function App() {
-            const [level, setLevel] = useState(1); 
+            const [level, setLevel] = useState(1);
             const [score, setScore] = useState(0);
-            const [harmony, setHarmony] = useState(50); // 平衡值 0-100
-            const [msg, setMsg] = useState("琴哥：今天想聽巴哈，還是蕭邦？優雅的環境才能減少能源浪費。");
+            const [subStep, setSubStep] = useState(0);
+            const [dialogMsg, setDialogMsg] = useState(CHARS[1].dialogs[0]);
 
-            const tune = (value) => {
-                const newHarmony = harmony + value;
-                setHarmony(newHarmony);
-                if (newHarmony >= 40 && newHarmony <= 70) {
-                    setScore(score + 5);
-                    setMsg("琴哥：音律和諧，環境品質達到最佳狀態。");
+            // 下一關邏輯
+            const nextLevel = () => {
+                if (level < 7) {
+                    setLevel(level + 1);
+                    setSubStep(0);
+                    setDialogMsg(CHARS[level+1].dialogs[0]);
                 } else {
-                    setMsg("琴哥：噢...節奏亂了，太吵或太亮都會耗能喔。");
+                    setLevel(8); // 全員合照
                 }
+            };
 
-                if (score >= 250) { // 累積到一定分數過關
-                    setMsg("琴哥：這首曲子完成得真美。最後一關，空空在雲端等你。");
-                    setTimeout(() => setLevel(7), 2000);
+            // 第一關邏輯 (阿蕨)
+            const handleL1 = (type) => {
+                if (type === L1_ITEMS[subStep].t) {
+                    setScore(score + 10);
+                    setDialogMsg(CHARS[1].dialogs[1]);
+                    setTimeout(() => {
+                        if (subStep < L1_ITEMS.length - 1) {
+                            setSubStep(subStep + 1);
+                        } else {
+                            setDialogMsg(CHARS[1].dialogs[2]);
+                            setTimeout(nextLevel, 1500);
+                        }
+                    }, 1000);
+                } else {
+                    setScore(Math.max(0, score - 5));
+                    setDialogMsg("小積（亂入）：欸！那是插電的，別亂丟！");
                 }
             };
 
             return (
-                <div className="flex flex-col items-center h-screen p-4 max-w-md mx-auto relative piano-gradient">
-                    {/* 對話框 */}
-                    <div className="w-full bg-white rounded-2xl shadow-lg p-4 mt-2 border-2 border-slate-400 z-50 text-black">
-                        <div className="flex items-center gap-3">
-                            <img src={level === 6 ? 'ficus.png' : 'fern.png'} className="w-12 h-12 rounded-full border shadow-sm" />
-                            <div className="flex-1">
-                                <p className="font-bold text-slate-800 text-sm">{level === 6 ? '琴哥' : '阿蕨'}</p>
-                                <p className="text-gray-600 text-[10px] leading-tight">{msg}</p>
-                            </div>
-                        </div>
-                        <div className="text-right text-xl font-black text-slate-600">SCORE: {score}</div>
-                    </div>
+                <div className={`game-screen h-screen transition-colors duration-1000 ${level === 4 ? 'bg-slate-950' : ''}`}>
+                    
+                    {/* 背景裝飾 */}
+                    <div className="absolute top-10 left-10 text-9xl opacity-10">🌿</div>
 
-                    <div className="flex-1 flex flex-col items-center justify-center w-full relative">
-                        {level < 6 && (
-                            <button className="bg-white text-black p-4 rounded-xl shadow border-2 border-slate-200" onClick={() => setLevel(6)}>
-                                直接進入第六關琴哥挑戰
-                            </button>
+                    {/* 中央：凸顯 IP 人偶 */}
+                    <AnimatePresence mode="wait">
+                        {level <= 7 && (
+                            <CharacterSprite key={level} file={CHARS[level].file} name={CHARS[level].name} />
                         )}
+                    </AnimatePresence>
 
-                        {level === 6 && (
-                            <div className="w-full h-full flex flex-col items-center py-10">
-                                {/* 環境平衡表 */}
-                                <p className="text-xs text-slate-500 mb-2 font-bold">環境平衡指標 (保持在中央)</p>
-                                <div className="w-full h-8 bg-gray-200 rounded-full border-2 border-slate-300 relative overflow-hidden mb-12">
-                                    <div className="absolute inset-y-0 left-[40%] right-[30%] bg-green-200 opacity-50"></div> {/* 安全區 */}
-                                    <motion.div 
-                                        className="absolute top-0 bottom-0 w-2 bg-slate-800"
-                                        animate={{ left: `${harmony}%` }}
-                                    />
-                                </div>
-
-                                <div className="flex gap-10 mb-16">
-                                    <button onClick={()=>tune(-10)} className="text-5xl hover:scale-110 active:scale-95 transition">🎵</button>
-                                    <button onClick={()=>tune(10)} className="text-5xl hover:scale-110 active:scale-95 transition">🎶</button>
-                                </div>
-
-                                {/* 琴哥本體 */}
-                                <motion.div animate={{ rotate: [0, -2, 2, 0] }} transition={{ repeat: Infinity, duration: 4 }}>
-                                    <img src="ficus.png" className="w-36 h-36 rounded-full border-4 border-white shadow-2xl" />
-                                    <p className="font-serif text-slate-700 mt-4 text-center italic">優雅擔當</p>
+                    {/* 遊戲操作層 (物件加大) */}
+                    <div className="relative flex-1 flex flex-col items-center justify-center p-10 z-10">
+                        <AnimatePresence mode="wait">
+                            {level === 1 && (
+                                <motion.div key="l1" initial={{opacity:0, y: 50}} animate={{opacity:1, y: 0}} className="text-center w-full max-w-sm mt-[-100px]">
+                                    {/* 待分類物件 (加大) */}
+                                    <motion.div key={subStep} initial={{scale:0}} animate={{scale:1}} className="bg-white p-10 rounded-full shadow-2xl mb-12 border-8 border-green-100">
+                                        <div className="text-8xl">{L1_ITEMS[subStep].i}</div>
+                                        <div className="text-xl font-black mt-2 text-gray-700">{L1_ITEMS[subStep].n}</div>
+                                    </motion.div>
+                                    
+                                    {/* 按鈕 (加大、適合平板) */}
+                                    <div className="grid grid-cols-1 gap-4">
+                                        <button onClick={()=>handleL1('fire')} className="bg-red-500 text-white p-6 rounded-2xl shadow-xl font-bold text-xl active:scale-95 transition">🔥 噴火龍 (直接燃燒)</button>
+                                        <button onClick={()=>handleL1('bolt')} className="bg-yellow-400 text-gray-900 p-6 rounded-2xl shadow-xl font-bold text-xl active:scale-95 transition">⚡ 閃電俠 (消耗電力)</button>
+                                        <button onClick={()=>handleL1('hidden')} className="bg-blue-500 text-white p-6 rounded-2xl shadow-xl font-bold text-xl active:scale-95 transition">🧤 隱形手 (製造運輸)</button>
+                                    </div>
                                 </motion.div>
-                            </div>
-                        )}
+                            )}
+
+                            {level >= 2 && level <= 7 && (
+                                <motion.div key="skip" initial={{opacity:0}} animate={{opacity:1}} className="text-center">
+                                    <button 
+                                        onClick={nextLevel}
+                                        className="bg-white/50 border-4 border-dashed border-white p-10 rounded-full text-white font-bold"
+                                    >
+                                        第 {level} 關測試按鈕 (IP展示中)
+                                    </button>
+                                </motion.div>
+                            )}
+
+                            {level === 8 && (
+                                <motion.div key="end" initial={{scale:0}} animate={{scale:1}} className="text-center bg-white p-10 rounded-3xl shadow-2xl text-black max-w-sm">
+                                    <h2 className="text-4xl font-black mb-6 text-green-700">大圓滿！</h2>
+                                    <div className="flex flex-wrap justify-center gap-3 mb-10">
+                                        {[1,2,3,4,5,6,7].map(i => <img key={i} src={CHARS[i].file} className="w-14 h-14 rounded-full border-2 border-green-100" />)}
+                                    </div>
+                                    <p className="text-lg mb-10 text-gray-600">你已掌握了蕨積綠色宇宙的 7 大減碳智慧！</p>
+                                    <button onClick={()=>window.location.reload()} className="bg-green-600 text-white px-10 py-4 rounded-full font-bold text-xl shadow-lg">重新冒險</button>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
+
+                    {/* 下方：RPG風格放大對話框 */}
+                    <AnimatePresence>
+                        {level <= 7 && (
+                            <motion.div initial={{y: 200}} animate={{y: 0}} exit={{y: 200}}>
+                                <RPGDialog char={CHARS[level]} msg={dialogMsg} score={score} />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             );
         }
+
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
