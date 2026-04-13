@@ -19,7 +19,7 @@
             padding: 20px;
         }
         .card {
-            max-width: 600px;
+            max-width: 720px;
             width: 100%;
             background: #fef7e0;
             border-radius: 48px;
@@ -97,6 +97,39 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
+        /* 專業說明區塊 */
+        .pro-tips {
+            background: #f1f2e6;
+            border-left: 6px solid #3d5a38;
+            border-radius: 24px;
+            padding: 16px 20px;
+            margin: 20px 0 12px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: #2d3a1f;
+        }
+        .pro-tips p {
+            margin: 8px 0;
+        }
+        .pro-tips strong {
+            color: #1e4a1a;
+        }
+        .pro-tips .highlight {
+            background: #e0e5c3;
+            border-radius: 20px;
+            padding: 2px 10px;
+            display: inline-block;
+            font-weight: bold;
+        }
+        .site-warning {
+            background: #f9e2c7;
+            border-left: 6px solid #c06d2e;
+            margin-top: 16px;
+            padding: 14px 18px;
+            border-radius: 24px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -109,6 +142,11 @@
             <option value="outdoor">🌞 室外植生牆</option>
             <option value="indoor">🏠 室內植生牆</option>
         </select>
+    </div>
+
+    <!-- 動態專業說明區 (根據室內/室外改變內容) -->
+    <div id="proTips" class="pro-tips">
+        <!-- 預設室內說明會用 js 更新 -->
     </div>
 
     <div class="form-group">
@@ -129,17 +167,72 @@
 
     <div class="note">
         💡 本遊戲為概念展示與教學用途。<br>
-        實務工程中，植生牆密度約 40~100 株/m²，總規模常達數千至上萬株。
+        實務工程中，植生牆密度約 40~100 株/m²，總規模常達數千至上萬株。<br>
+        🌱 植生牆不是裝飾品 —— 它是一面會呼吸、能固碳、調節微氣候的「活系統」。
     </div>
 </div>
 
 <script>
+    // 室內專業說明
+    const indoorText = `
+        <p><strong>🏠 室內植生牆 · 關鍵考量</strong></p>
+        <p>🌬️ <strong>通風與氣流：</strong>室內空氣流通通常較弱，需搭配微風扇或空調循環，避免局部高濕誘發病蟲害。</p>
+        <p>☀️ <strong>光照計畫：</strong>多數室內植栽需 500~1500 lux 的散射光，建議輔助 LED 植物燈，光週期 12~14 小時。</p>
+        <p>🌱 <strong>植栽適應性：</strong>優先選擇耐陰、耐低濕的物種（如粗勒草、虎尾蘭、黃金葛），蕨類需額外留意濕度。</p>
+        <p>💧 <strong>給水與排水：</strong>室內蒸散較慢，澆水頻率降低，但需防止積水孳生蚊蠅，建議搭配自動滴灌系統。</p>
+        <p>🧱 <strong>結構荷重：</strong>確認牆面承載力，植生牆含水後每平方公尺可能增加 60~100 kg，需結構技師評估。</p>
+    `;
+
+    // 室外專業說明
+    const outdoorText = `
+        <p><strong>🌞 室外植生牆 · 關鍵考量</strong></p>
+        <p>🧭 <strong>方位與日照：</strong>南向/西向牆面夏季輻射熱高，需選耐旱、耐曬植物（如鵝掌藤、蔓榕）；北向或大樓遮陰處則適合蕨類與耐陰物種。</p>
+        <p>🌬️ <strong>季風與強風：</strong>東北季風或颱風易造成植株脫水或物理損傷，需設置防風網或選用低矮、具韌性的品種，並加強固定結構。</p>
+        <p>☔ <strong>雨水管理：</strong>戶外植生牆可利用雨水回收，但介質排水性必須良好，避免根系腐爛。</p>
+        <p>🌡️ <strong>溫度波動：</strong>夏季高溫與冬季低溫會影響生長，建議搭配耐候性強的原生或馴化植物，並考慮微氣候調控。</p>
+        <p>⚙️ <strong>維護成本：</strong>室外植生牆受風吹日曬，養護頻率較高，包含修剪、病蟲害監控與滴灌系統檢查。</p>
+    `;
+
     const areaSlider = document.getElementById('areaSlider');
     const areaValue = document.getElementById('areaValue');
     const areaDisplay = document.getElementById('areaDisplay');
     const totalPlantsSpan = document.getElementById('totalPlants');
     const warningDiv = document.getElementById('warningMsg');
     const nextBtn = document.getElementById('nextBtn');
+    const locationSelect = document.getElementById('location');
+    const proTipsDiv = document.getElementById('proTips');
+
+    // 更新說明區塊與面積/工時提醒
+    function updateProTips() {
+        const selected = locationSelect.value;
+        if (selected === 'indoor') {
+            proTipsDiv.innerHTML = indoorText;
+        } else {
+            proTipsDiv.innerHTML = outdoorText;
+        }
+        // 額外動態加上面積與工時關聯提醒（不覆蓋原有結構，用 append 方式加一行）
+        const currentArea = parseInt(areaSlider.value);
+        let工时Msg = '';
+        if (currentArea <= 10) {
+           工时Msg = `⏱️ 面積 ${currentArea} m²，估計施作工期約 1~2 個工作天（含基盤、介質、植栽）。`;
+        } else if (currentArea <= 20) {
+           工时Msg = `⏱️ 面積 ${currentArea} m²，估計施作工期約 3~5 個工作天，需調配人力與物料。`;
+        } else {
+           工时Msg = `⏱️ 面積 ${currentArea} m²，屬較大規模，建議分段施作，工期約 1~2 週並需專案管理。`;
+        }
+        // 避免重複添加工時提醒，先移除舊的 .work-tip
+        const oldTip = proTipsDiv.querySelector('.work-tip');
+        if (oldTip) oldTip.remove();
+        const workTip = document.createElement('div');
+        workTip.className = 'work-tip';
+        workTip.style.marginTop = '12px';
+        workTip.style.padding = '8px 12px';
+        workTip.style.background = '#e3e6cf';
+        workTip.style.borderRadius = '20px';
+        workTip.style.fontSize = '0.8rem';
+        workTip.innerHTML = `📐 ${工时Msg} 施作面積直接影響工時與成本，請審慎評估。`;
+        proTipsDiv.appendChild(workTip);
+    }
 
     function updatePlants() {
         const area = parseInt(areaSlider.value);
@@ -155,29 +248,36 @@
             warningDiv.style.display = 'none';
             nextBtn.disabled = false;
         }
+        // 更新專業區塊內的工時提醒
+        updateProTips();
     }
 
+    // 監聽地點切換以及面積滑動
+    locationSelect.addEventListener('change', () => {
+        updateProTips();
+        updatePlants();  // 確保工時重新計算
+    });
     areaSlider.addEventListener('input', updatePlants);
+    
+    // 初始化
+    updateProTips();
     updatePlants();
 
     nextBtn.addEventListener('click', () => {
         const area = parseInt(areaSlider.value);
-        const location = document.getElementById('location').value;
+        const location = locationSelect.value;
         const totalPlants = area * 40;
 
-        // 儲存到 localStorage
         localStorage.setItem('greenwall_area', area);
         localStorage.setItem('greenwall_location', location);
         localStorage.setItem('greenwall_total_plants', totalPlants);
 
-        // 確認儲存成功
         console.log('已儲存:', {
             area: localStorage.getItem('greenwall_area'),
             location: localStorage.getItem('greenwall_location'),
             total: localStorage.getItem('greenwall_total_plants')
         });
 
-        // 跳轉到第二步
         window.location.href = 'step2_plants.html';
     });
 </script>
