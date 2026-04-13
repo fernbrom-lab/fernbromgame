@@ -2,13 +2,14 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>植生牆遊戲 · 第三步：召集施工夥伴</title>
     <style>
         * {
             box-sizing: border-box;
             font-family: system-ui, 'Segoe UI', sans-serif;
             user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
         body {
             background: #1a472a;
@@ -32,6 +33,7 @@
             border-left: 8px solid #2e7d32;
             padding-left: 20px;
             margin-top: 0;
+            font-size: 1.6rem;
         }
         .summary {
             background: #e0f0da;
@@ -43,7 +45,7 @@
         }
         .two-columns {
             display: flex;
-            gap: 24px;
+            gap: 20px;
             flex-wrap: wrap;
         }
         .team-area {
@@ -63,41 +65,40 @@
         }
         .section-title {
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 1rem;
             margin-bottom: 16px;
             text-align: center;
         }
         .members-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 12px;
         }
         .member-card {
             background: white;
-            border-radius: 24px;
-            padding: 12px;
+            border-radius: 20px;
+            padding: 10px 8px;
             text-align: center;
-            cursor: grab;
-            transition: 0.1s;
+            cursor: pointer;
+            transition: 0.05s linear;
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
             border: 1px solid #cddba6;
+            -webkit-tap-highlight-color: transparent;
         }
         .member-card:active {
-            cursor: grabbing;
-        }
-        .member-card.dragging {
-            opacity: 0.4;
+            transform: scale(0.96);
+            background: #e8f0e0;
         }
         .member-avatar {
-            width: 70px;
-            height: 70px;
-            margin: 0 auto 8px;
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 6px;
             background: #d9e0c5;
             border-radius: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.5rem;
+            font-size: 2rem;
             overflow: hidden;
         }
         .member-avatar img {
@@ -106,21 +107,16 @@
             object-fit: cover;
         }
         .member-name {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: bold;
         }
-        .remove-icon {
+        .add-icon {
             font-size: 0.7rem;
-            color: #a35100;
+            color: #2b5e2f;
             margin-top: 4px;
-            cursor: pointer;
-            opacity: 0.6;
-        }
-        .remove-icon:hover {
-            opacity: 1;
         }
         .truck-icon {
-            font-size: 4rem;
+            font-size: 3rem;
             margin: 10px 0;
         }
         .truck-team {
@@ -129,15 +125,22 @@
             padding: 16px;
             min-height: 200px;
             margin: 16px 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
         }
         .truck-member {
             display: inline-flex;
             flex-direction: column;
             align-items: center;
-            margin: 6px;
             text-align: center;
             width: 70px;
-            position: relative;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .truck-member:active {
+            transform: scale(0.96);
         }
         .truck-member .member-avatar {
             width: 55px;
@@ -147,23 +150,23 @@
         .truck-member .member-name {
             font-size: 0.7rem;
         }
-        .truck-member .remove-icon {
+        .remove-icon {
             font-size: 0.65rem;
-            margin-top: 2px;
+            color: #a35100;
+            margin-top: 3px;
         }
         .counter {
             font-size: 1.5rem;
             font-weight: bold;
             color: #1a5a1a;
         }
-        .drop-zone {
-            border: 3px dashed #8aaa6e;
-            background: #f0f5ea;
-            transition: 0.1s;
-        }
-        .drop-zone.drag-over {
-            background: #d9e6b3;
-            border-color: #2b5e2f;
+        .warning {
+            background: #ffe0b5;
+            border-radius: 28px;
+            padding: 10px;
+            margin-top: 16px;
+            text-align: center;
+            font-size: 0.8rem;
         }
         button {
             background: #2b5e2f;
@@ -176,6 +179,7 @@
             cursor: pointer;
             width: 100%;
             margin-top: 20px;
+            -webkit-tap-highlight-color: transparent;
         }
         button:active {
             transform: scale(0.98);
@@ -183,6 +187,7 @@
         button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+            transform: none;
         }
         .btn-secondary {
             background: #7f8c5e;
@@ -193,19 +198,19 @@
             gap: 16px;
             margin-top: 24px;
         }
-        .warning {
-            background: #ffe0b5;
-            border-radius: 28px;
-            padding: 10px;
-            margin-top: 16px;
-            text-align: center;
-            font-size: 0.85rem;
-        }
         footer {
             text-align: center;
             font-size: 0.7rem;
             color: #8a9a6e;
             margin-top: 24px;
+        }
+        @media (max-width: 700px) {
+            .card { padding: 18px; }
+            h1 { font-size: 1.3rem; }
+            .members-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
+            .member-avatar { width: 50px; height: 50px; font-size: 1.6rem; }
+            .truck-member { width: 60px; }
+            .truck-member .member-avatar { width: 45px; height: 45px; }
         }
     </style>
 </head>
@@ -218,14 +223,14 @@
     <div class="two-columns">
         <!-- 左邊：七個小夥伴 -->
         <div class="team-area">
-            <div class="section-title">🌾 等待召集的夥伴</div>
+            <div class="section-title">🌾 等待召集的夥伴（點擊加入）</div>
             <div class="members-grid" id="membersGrid"></div>
-            <div class="warning">💡 直接拖曳夥伴到右邊貨車上！點擊 ✖ 可移除</div>
+            <div class="warning">💡 點擊夥伴 = 加入貨車｜點擊貨車上的夥伴 = 移除</div>
         </div>
 
         <!-- 右邊：貨車（施工團隊） -->
-        <div class="truck-area drop-zone" id="truckZone">
-            <div class="section-title">🚛 施工貨車</div>
+        <div class="truck-area">
+            <div class="section-title">🚛 施工貨車（點擊移除）</div>
             <div class="truck-icon">🚛</div>
             <div class="truck-team" id="truckTeam"></div>
             <div>👷 施工人數：<span class="counter" id="workerCount">0</span> / 7</div>
@@ -236,11 +241,11 @@
         <button id="backBtn" class="btn-secondary">⬅ 返回植物分配</button>
         <button id="nextBtn" disabled>🚧 出發施工！</button>
     </div>
-    <footer>🌱 人數越多，施工速度越快！最多 7 人。</footer>
+    <footer>🌱 人數越多，施工速度越快！最多 7 人。點擊即可加入/移除</footer>
 </div>
 
 <script>
-    // 夥伴資料（7位）- 根據您提供的名稱調整
+    // 夥伴資料（7位）
     const TEAM_MEMBERS = [
         { id: 0, name: "阿蕨", emoji: "🌿", imgFile: "brom.png" },
         { id: 1, name: "小積", emoji: "💧", imgFile: "fern.png" },
@@ -257,7 +262,7 @@
     let siteLocation = "";
     let quantities = [];
 
-    // 施工團隊（被拖曳進貨車的夥伴）
+    // 施工團隊（被選中的夥伴）
     let selectedWorkers = [];
 
     function loadPreviousData() {
@@ -281,11 +286,30 @@
     }
 
     // 渲染頭像（支援圖片）
-    function renderAvatar(imgFile, emoji, size = "70px") {
+    function renderAvatar(imgFile, emoji, size = "60px") {
         const sizeNum = parseInt(size);
         return `<img src="${imgFile}" 
                      onerror="this.style.display='none'; this.parentElement.innerHTML='${emoji}';"
                      style="width:${sizeNum}px; height:${sizeNum}px; object-fit:cover; border-radius:60px;">`;
+    }
+
+    // 加入夥伴
+    function addWorker(worker) {
+        if (selectedWorkers.some(w => w.id === worker.id)) {
+            // alert(`${worker.name} 已經在貨車上了！`);
+            return false;
+        }
+        if (selectedWorkers.length >= 7) {
+            alert('貨車最多只能載 7 人！');
+            return false;
+        }
+        selectedWorkers.push(worker);
+        return true;
+    }
+
+    // 移除夥伴
+    function removeWorker(workerId) {
+        selectedWorkers = selectedWorkers.filter(w => w.id !== workerId);
     }
 
     function renderMembers() {
@@ -293,51 +317,33 @@
         container.innerHTML = '';
         
         TEAM_MEMBERS.forEach(member => {
-            // 檢查是否已在貨車上
             const isSelected = selectedWorkers.some(w => w.id === member.id);
             if (isSelected) return;
             
             const card = document.createElement('div');
             card.className = 'member-card';
-            card.setAttribute('draggable', 'true');
             card.setAttribute('data-id', member.id);
-            card.setAttribute('data-name', member.name);
-            card.setAttribute('data-emoji', member.emoji);
-            card.setAttribute('data-img', member.imgFile);
             
             card.innerHTML = `
-                <div class="member-avatar" id="avatar_${member.id}"></div>
+                <div class="member-avatar" id="member_avatar_${member.id}"></div>
                 <div class="member-name">${member.name}</div>
+                <div class="add-icon">➕ 點擊加入</div>
             `;
             
-            // 放入頭像
-            const avatarDiv = card.querySelector(`#avatar_${member.id}`);
+            const avatarDiv = card.querySelector(`#member_avatar_${member.id}`);
             if (avatarDiv) {
-                avatarDiv.innerHTML = renderAvatar(member.imgFile, member.emoji, "70");
+                avatarDiv.innerHTML = renderAvatar(member.imgFile, member.emoji, "60");
             }
             
-            // 拖曳事件
-            card.addEventListener('dragstart', (e) => {
-                e.dataTransfer.setData('text/plain', JSON.stringify({
-                    id: member.id,
-                    name: member.name,
-                    emoji: member.emoji,
-                    imgFile: member.imgFile
-                }));
-                e.dataTransfer.effectAllowed = 'copy';
-                card.classList.add('dragging');
-            });
-            card.addEventListener('dragend', (e) => {
-                card.classList.remove('dragging');
+            card.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (addWorker(member)) {
+                    saveAndRender();
+                }
             });
             
             container.appendChild(card);
         });
-    }
-
-    function removeWorker(workerId) {
-        selectedWorkers = selectedWorkers.filter(w => w.id !== workerId);
-        saveAndRender();
     }
 
     function renderTruck() {
@@ -345,31 +351,28 @@
         container.innerHTML = '';
         
         if (selectedWorkers.length === 0) {
-            container.innerHTML = '<div style="color:#8a9a6e; text-align:center; padding:20px;">將夥伴拖曳到此處</div>';
+            container.innerHTML = '<div style="color:#8a9a6e; text-align:center; padding:20px;">點擊左邊夥伴加入貨車</div>';
         } else {
             selectedWorkers.forEach(worker => {
                 const div = document.createElement('div');
                 div.className = 'truck-member';
+                div.setAttribute('data-id', worker.id);
                 div.innerHTML = `
                     <div class="member-avatar" id="truck_avatar_${worker.id}"></div>
                     <div class="member-name">${worker.name}</div>
-                    <div class="remove-icon" data-id="${worker.id}">✖ 移除</div>
+                    <div class="remove-icon">✖ 點擊移除</div>
                 `;
                 container.appendChild(div);
                 
-                // 放入頭像
                 const avatarDiv = div.querySelector(`#truck_avatar_${worker.id}`);
                 if (avatarDiv) {
                     avatarDiv.innerHTML = renderAvatar(worker.imgFile, worker.emoji, "55");
                 }
-            });
-            
-            // 綁定移除事件
-            document.querySelectorAll('.remove-icon').forEach(el => {
-                el.addEventListener('click', (e) => {
+                
+                div.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    const id = parseInt(el.dataset.id);
-                    removeWorker(id);
+                    removeWorker(worker.id);
+                    saveAndRender();
                 });
             });
         }
@@ -383,49 +386,10 @@
     }
 
     function saveAndRender() {
-        // 儲存到 localStorage
         localStorage.setItem('greenwall_workers', JSON.stringify(selectedWorkers));
         localStorage.setItem('greenwall_worker_count', selectedWorkers.length);
         renderMembers();
         renderTruck();
-    }
-
-    function setupDragAndDrop() {
-        const truckZone = document.getElementById('truckZone');
-        
-        truckZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'copy';
-            truckZone.classList.add('drag-over');
-        });
-        
-        truckZone.addEventListener('dragleave', (e) => {
-            truckZone.classList.remove('drag-over');
-        });
-        
-        truckZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            truckZone.classList.remove('drag-over');
-            
-            const rawData = e.dataTransfer.getData('text/plain');
-            if (!rawData) return;
-            
-            const member = JSON.parse(rawData);
-            
-            // 檢查是否已在團隊中
-            if (selectedWorkers.some(w => w.id === member.id)) {
-                alert(`${member.name} 已經在貨車上了！`);
-                return;
-            }
-            
-            if (selectedWorkers.length >= 7) {
-                alert('貨車最多只能載 7 人！');
-                return;
-            }
-            
-            selectedWorkers.push(member);
-            saveAndRender();
-        });
     }
 
     function loadSavedWorkers() {
@@ -448,11 +412,9 @@
             return;
         }
         
-        // 儲存最終人數
         localStorage.setItem('greenwall_worker_count', selectedWorkers.length);
         localStorage.setItem('greenwall_workers', JSON.stringify(selectedWorkers));
         
-        // 跳轉到第四步
         window.location.href = 'step4_construction.html';
     }
 
@@ -461,7 +423,6 @@
     loadSavedWorkers();
     renderMembers();
     renderTruck();
-    setupDragAndDrop();
     
     document.getElementById('backBtn').onclick = goBack;
     document.getElementById('nextBtn').onclick = goToConstruction;
