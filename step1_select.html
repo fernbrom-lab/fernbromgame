@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>植生牆遊戲 · 第一步：面積與株數</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', sans-serif;
+        }
+        body {
+            background: #1a472a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .card {
+            max-width: 600px;
+            width: 100%;
+            background: #fef7e0;
+            border-radius: 48px;
+            padding: 32px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #1a3b1e;
+            border-left: 8px solid #2e7d32;
+            padding-left: 20px;
+            margin-top: 0;
+        }
+        .form-group {
+            margin: 24px 0;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+        }
+        select, input {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            border-radius: 60px;
+            border: 1px solid #b3cf9b;
+            background: white;
+        }
+        .info-box {
+            background: #e0f0da;
+            border-radius: 28px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #1a5a1a;
+        }
+        .info-box span {
+            font-size: 1.4rem;
+            color: #2b6e2f;
+        }
+        .warning {
+            background: #ffe0b5;
+            color: #a35100;
+            border-radius: 28px;
+            padding: 12px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        .note {
+            font-size: 0.75rem;
+            color: #5a6e4a;
+            text-align: center;
+            margin-top: 24px;
+            border-top: 1px solid #cddba6;
+            padding-top: 16px;
+        }
+        button {
+            background: #2b5e2f;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 60px;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 16px;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>🌿 第一步 · 植生牆規模</h1>
+    
+    <div class="form-group">
+        <label>📍 設置地點</label>
+        <select id="location">
+            <option value="outdoor">🌞 室外植生牆</option>
+            <option value="indoor">🏠 室內植生牆</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>📐 面積 (m²) : <span id="areaValue">10</span> m²</label>
+        <input type="range" id="areaSlider" min="1" max="20" value="10" step="1">
+    </div>
+
+    <div class="info-box">
+        <span id="areaDisplay">10</span> m² × 40 株/m² = <span id="totalPlants">400</span> 株<br>
+        🎮 遊戲中每株顯示為 1 個彩色方塊
+    </div>
+
+    <div class="warning" id="warningMsg" style="display:none;">
+        ⚠️ 為維持遊戲點陣圖效能，暫時限制總株數 ≤ 800 株（面積 ≤ 20 m²）
+    </div>
+
+    <button id="nextBtn">下一步 ▶ 選擇植物</button>
+
+    <div class="note">
+        💡 本遊戲為概念展示與教學用途。<br>
+        實務工程中，植生牆密度約 40~100 株/m²，總規模常達數千至上萬株。
+    </div>
+</div>
+
+<script>
+    const areaSlider = document.getElementById('areaSlider');
+    const areaValue = document.getElementById('areaValue');
+    const areaDisplay = document.getElementById('areaDisplay');
+    const totalPlantsSpan = document.getElementById('totalPlants');
+    const warningDiv = document.getElementById('warningMsg');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function updatePlants() {
+        const area = parseInt(areaSlider.value);
+        areaValue.innerText = area;
+        areaDisplay.innerText = area;
+        const total = area * 40;
+        totalPlantsSpan.innerText = total;
+
+        if (total > 800) {
+            warningDiv.style.display = 'block';
+            nextBtn.disabled = true;
+        } else {
+            warningDiv.style.display = 'none';
+            nextBtn.disabled = false;
+        }
+    }
+
+    areaSlider.addEventListener('input', updatePlants);
+    updatePlants();
+
+    nextBtn.addEventListener('click', () => {
+        const area = parseInt(areaSlider.value);
+        const location = document.getElementById('location').value;
+        const totalPlants = area * 40;
+
+        localStorage.setItem('greenwall_area', area);
+        localStorage.setItem('greenwall_location', location);
+        localStorage.setItem('greenwall_total_plants', totalPlants);
+
+        alert('下一步：選擇植物（將串接 step2_plants.html）');
+        // 未來改成 window.location.href = 'step2_plants.html';
+    });
+</script>
+</body>
+</html>
