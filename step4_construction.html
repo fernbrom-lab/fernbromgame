@@ -44,6 +44,7 @@
             flex-wrap: wrap;
             gap: 10px;
             font-size: 0.9rem;
+            color: #1a3b1e;
         }
         .plants-summary {
             background: #fff5e0;
@@ -56,6 +57,7 @@
             font-weight: bold;
             margin-bottom: 12px;
             font-size: 0.9rem;
+            color: #2b5e2f;
         }
         .plant-list {
             display: flex;
@@ -71,6 +73,7 @@
             padding: 6px 12px;
             border-radius: 40px;
             border: 1px solid #cddba6;
+            color: #1a3b1e;
         }
         .plant-color-box {
             width: 24px;
@@ -116,9 +119,15 @@
         }
         .click-hint {
             text-align: center;
-            font-size: 0.85rem;
-            color: #5a6e4a;
-            margin-top: 8px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #2b5e2f;
+            background: rgba(255,255,200,0.7);
+            display: inline-block;
+            width: auto;
+            margin: 8px auto 0;
+            padding: 6px 16px;
+            border-radius: 40px;
         }
         .worker-section {
             margin: 15px 0;
@@ -159,10 +168,11 @@
         .worker-name {
             font-size: 0.85rem;
             font-weight: bold;
+            color: #1a3b1e;
         }
         .worker-talk {
             font-size: 0.7rem;
-            color: #a35100;
+            color: #8b3a00;
             background: #fff0e0;
             border-radius: 20px;
             padding: 4px 10px;
@@ -170,20 +180,23 @@
             white-space: nowrap;
             overflow-x: auto;
             cursor: pointer;
+            font-weight: 500;
         }
+        /* 噴飛對話框 */
         .fly-talk {
             position: fixed;
-            background: #fff0e0;
-            color: #a35100;
+            background: #ffe8c0;
+            color: #5a1e00;
             padding: 6px 14px;
             border-radius: 30px;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             font-weight: bold;
             white-space: nowrap;
             z-index: 1000;
             pointer-events: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            border: 1px solid #ffcc88;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            border: 1px solid #cc8833;
+            text-shadow: 0 1px 0 rgba(255,255,200,0.5);
             animation: flyAway 1.2s ease-out forwards;
         }
         @keyframes flyAway {
@@ -228,15 +241,19 @@
         }
         footer {
             text-align: center;
-            font-size: 0.7rem;
-            color: #8a9a6e;
+            font-size: 0.75rem;
+            color: #5a6e4a;
             margin-top: 24px;
+            font-weight: 500;
         }
         .speed-badge {
             background: #2b5e2f20;
             border-radius: 30px;
             padding: 4px 12px;
             font-size: 0.8rem;
+        }
+        .warning-text {
+            color: #8b3a00;
         }
     </style>
 </head>
@@ -274,10 +291,10 @@
 <script>
     const WORKER_TALKS = [
         "😤 老鄧資遣我是你的損失！", "😤 老鄧資遣我是你的損失！",
-        "🤔 我做得快是傻子", "😤多虧去職訓不然我還不會做這個呢！", "🤔 我做得快是傻子", "🤔多虧去職訓不然我還不會做這個呢！",
-        "💔 我喜歡做工不代表要接受你的不公平", "🔧大叔你摸著良心問問自己！", "💔 我喜歡做工不代表要接受你的不公平", "🔧大叔你摸著良心問問自己！",
+        "🤔 我做得快是傻子，多虧去職訓不然我還不會做這個呢！", "🤔 我做得快是傻子，多虧去職訓不然我還不會做這個呢！",
+        "💔 我喜歡做工不代表要接受你的不公平，大叔你摸著良心問問自己！", "💔 我喜歡做工不代表要接受你的不公平，大叔你摸著良心問問自己！",
         "🌞 天氣熱要多喝水～", "⚠️ 作業中須注意工安！", "🌱 植物是生命也要尊重～",
-        "💪 今天也要努力施工！", "🍵 休息一下喝個茶吧", "🔧 工具要隨手收好","🍵 大哥一小時350阿",
+        "💪 今天也要努力施工！", "🍵 休息一下喝個茶吧", "🔧 工具要隨手收好",
         "🤝 團隊合作最重要！", "🌿 這面牆以後會很美", "💧 記得幫植物澆水",
         "🪴 每一株都是心血", "🏗️ 安全第一，品質至上", "😎 我種的植物最漂亮",
         "🌙 加班費記得多算一點", "🎵 邊唱歌邊工作最開心"
@@ -356,7 +373,7 @@
     function renderWorkers() {
         const container = document.getElementById('workerList');
         if (workers.length === 0) {
-            container.innerHTML = '<div style="color:#8a9a6e;">⚠️ 沒有夥伴，請返回第三步召集團隊</div>';
+            container.innerHTML = '<div style="color:#8b3a00;">⚠️ 沒有夥伴，請返回第三步召集團隊</div>';
             return;
         }
         const imgNames = ['brom.png', 'fern.png', 'ficus.png', 'mons.png', 'sans.png', 'succ.png', 'till.png'];
@@ -481,7 +498,6 @@
         localStorage.setItem('greenwall_construction_done', 'true');
         localStorage.setItem('greenwall_finished_pixels', finishedPixels);
         localStorage.setItem('greenwall_grid_colors', JSON.stringify(gridColors));
-        // 跳轉到第五步驗收與碳排評估
         window.location.href = 'step5_carbon.html';
     }
 
