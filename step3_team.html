@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>植生牆遊戲 · 第三步：召集施工夥伴</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', sans-serif;
+            user-select: none;
+        }
+        body {
+            background: #1a472a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .card {
+            max-width: 1000px;
+            width: 100%;
+            background: #fef7e0;
+            border-radius: 48px;
+            padding: 28px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #1a3b1e;
+            border-left: 8px solid #2e7d32;
+            padding-left: 20px;
+            margin-top: 0;
+        }
+        .summary {
+            background: #e0f0da;
+            border-radius: 28px;
+            padding: 12px 20px;
+            margin-bottom: 24px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        .two-columns {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+        .team-area {
+            flex: 2;
+            background: #fff5e0;
+            border-radius: 32px;
+            padding: 20px;
+            border: 2px dashed #b3cf9b;
+        }
+        .truck-area {
+            flex: 1;
+            background: #e8f0e0;
+            border-radius: 32px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid #8aaa6e;
+        }
+        .section-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .members-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 16px;
+        }
+        .member-card {
+            background: white;
+            border-radius: 24px;
+            padding: 12px;
+            text-align: center;
+            cursor: grab;
+            transition: 0.1s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            border: 1px solid #cddba6;
+        }
+        .member-card:active {
+            cursor: grabbing;
+        }
+        .member-card.dragging {
+            opacity: 0.4;
+        }
+        .member-avatar {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 8px;
+            background: #d9e0c5;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+        .member-name {
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .truck-icon {
+            font-size: 4rem;
+            margin: 10px 0;
+        }
+        .truck-team {
+            background: #cddba6;
+            border-radius: 28px;
+            padding: 16px;
+            min-height: 200px;
+            margin: 16px 0;
+        }
+        .truck-member {
+            display: inline-block;
+            margin: 6px;
+            text-align: center;
+            width: 60px;
+        }
+        .truck-member .member-avatar {
+            width: 50px;
+            height: 50px;
+            font-size: 1.8rem;
+        }
+        .truck-member .member-name {
+            font-size: 0.7rem;
+        }
+        .counter {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1a5a1a;
+        }
+        .drop-zone {
+            border: 3px dashed #8aaa6e;
+            background: #f0f5ea;
+            transition: 0.1s;
+        }
+        .drop-zone.drag-over {
+            background: #d9e6b3;
+            border-color: #2b5e2f;
+        }
+        button {
+            background: #2b5e2f;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 60px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background: #7f8c5e;
+            margin-top: 0;
+        }
+        .flex-btns {
+            display: flex;
+            gap: 16px;
+            margin-top: 24px;
+        }
+        .warning {
+            background: #ffe0b5;
+            border-radius: 28px;
+            padding: 10px;
+            margin-top: 16px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #8a9a6e;
+            margin-top: 24px;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>👥 第三步 · 召集施工夥伴</h1>
+
+    <div class="summary" id="summaryArea">載入中...</div>
+
+    <div class="two-columns">
+        <!-- 左邊：七個小夥伴 -->
+        <div class="team-area">
+            <div class="section-title">🌾 等待召集的夥伴</div>
+            <div class="members-grid" id="membersGrid"></div>
+            <div class="warning">💡 直接拖曳夥伴到右邊貨車上！</div>
+        </div>
+
+        <!-- 右邊：貨車（施工團隊） -->
+        <div class="truck-area drop-zone" id="truckZone">
+            <div class="section-title">🚛 施工貨車</div>
+            <div class="truck-icon">🚛</div>
+            <div class="truck-team" id="truckTeam"></div>
+            <div>👷 施工人數：<span class="counter" id="workerCount">0</span> / 7</div>
+        </div>
+    </div>
+
+    <div class="flex-btns">
+        <button id="backBtn" class="btn-secondary">⬅ 返回植物分配</button>
+        <button id="nextBtn" disabled>🚧 出發施工！</button>
+    </div>
+    <footer>🌱 人數越多，施工速度越快！最多 7 人。</footer>
+</div>
+
+<script>
+    // 夥伴資料（7位）
+    const TEAM_MEMBERS = [
+        { id: 0, name: "阿土伯", emoji: "👨‍🌾", imgFile: "farmer1.png" },
+        { id: 1, name: "綠手指", emoji: "👩‍🌾", imgFile: "farmer2.png" },
+        { id: 2, name: "小鐵", emoji: "🧑‍🌾", imgFile: "farmer3.png" },
+        { id: 3, name: "阿花", emoji: "👩‍🌾", imgFile: "farmer4.png" },
+        { id: 4, name: "大樹", emoji: "👨‍🌾", imgFile: "farmer5.png" },
+        { id: 5, name: "小葉", emoji: "🧑‍🌾", imgFile: "farmer6.png" },
+        { id: 6, name: "老農", emoji: "👨‍🌾", imgFile: "farmer7.png" }
+    ];
+
+    // 從 localStorage 讀取前兩步資料
+    let area = 0;
+    let totalPlants = 0;
+    let siteLocation = "";
+    let quantities = [];
+    let plantsData = [];
+
+    // 施工團隊（被拖曳進貨車的夥伴）
+    let selectedWorkers = [];
+
+    function loadPreviousData() {
+        area = parseInt(localStorage.getItem('greenwall_area')) || 10;
+        totalPlants = parseInt(localStorage.getItem('greenwall_total_plants')) || 400;
+        siteLocation = localStorage.getItem('greenwall_location') || 'outdoor';
+        
+        const storedQuantities = localStorage.getItem('greenwall_quantities');
+        if (storedQuantities) {
+            quantities = JSON.parse(storedQuantities);
+        } else {
+            quantities = [0, 0, 0, 0, 0, 0];
+        }
+        
+        const storedPlants = localStorage.getItem('greenwall_plants_data');
+        if (storedPlants) {
+            plantsData = JSON.parse(storedPlants);
+        }
+        
+        document.getElementById('summaryArea').innerHTML = `
+            📐 面積：${area} m² &nbsp;|&nbsp;
+            📍 ${siteLocation === 'outdoor' ? '室外' : '室內'} &nbsp;|&nbsp;
+            🧱 總株數：${totalPlants} 株 &nbsp;|&nbsp;
+            🌱 植物種類：${quantities.filter(q => q > 0).length} 種
+        `;
+    }
+
+    function renderMembers() {
+        const container = document.getElementById('membersGrid');
+        container.innerHTML = '';
+        
+        TEAM_MEMBERS.forEach(member => {
+            // 檢查是否已在貨車上
+            const isSelected = selectedWorkers.some(w => w.id === member.id);
+            if (isSelected) return; // 已在貨車上就不顯示在左邊
+            
+            const card = document.createElement('div');
+            card.className = 'member-card';
+            card.setAttribute('draggable', 'true');
+            card.setAttribute('data-id', member.id);
+            card.setAttribute('data-name', member.name);
+            card.setAttribute('data-emoji', member.emoji);
+            
+            card.innerHTML = `
+                <div class="member-avatar">${member.emoji}</div>
+                <div class="member-name">${member.name}</div>
+            `;
+            
+            // 拖曳事件
+            card.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', JSON.stringify({
+                    id: member.id,
+                    name: member.name,
+                    emoji: member.emoji
+                }));
+                e.dataTransfer.effectAllowed = 'copy';
+                card.classList.add('dragging');
+            });
+            card.addEventListener('dragend', (e) => {
+                card.classList.remove('dragging');
+            });
+            
+            container.appendChild(card);
+        });
+    }
+
+    function renderTruck() {
+        const container = document.getElementById('truckTeam');
+        container.innerHTML = '';
+        
+        if (selectedWorkers.length === 0) {
+            container.innerHTML = '<div style="color:#8a9a6e; text-align:center; padding:20px;">將夥伴拖曳到此處</div>';
+        } else {
+            selectedWorkers.forEach(worker => {
+                const div = document.createElement('div');
+                div.className = 'truck-member';
+                div.innerHTML = `
+                    <div class="member-avatar">${worker.emoji}</div>
+                    <div class="member-name">${worker.name}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        document.getElementById('workerCount').innerText = selectedWorkers.length;
+        
+        // 至少1人才能出發
+        const nextBtn = document.getElementById('nextBtn');
+        if (nextBtn) {
+            nextBtn.disabled = selectedWorkers.length === 0;
+        }
+    }
+
+    function setupDragAndDrop() {
+        const truckZone = document.getElementById('truckZone');
+        
+        truckZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+            truckZone.classList.add('drag-over');
+        });
+        
+        truckZone.addEventListener('dragleave', (e) => {
+            truckZone.classList.remove('drag-over');
+        });
+        
+        truckZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            truckZone.classList.remove('drag-over');
+            
+            const rawData = e.dataTransfer.getData('text/plain');
+            if (!rawData) return;
+            
+            const member = JSON.parse(rawData);
+            
+            // 檢查是否已在團隊中
+            if (selectedWorkers.some(w => w.id === member.id)) {
+                alert(`${member.name} 已經在貨車上了！`);
+                return;
+            }
+            
+            if (selectedWorkers.length >= 7) {
+                alert('貨車最多只能載 7 人！');
+                return;
+            }
+            
+            selectedWorkers.push(member);
+            renderMembers();
+            renderTruck();
+            
+            // 儲存到 localStorage
+            localStorage.setItem('greenwall_workers', JSON.stringify(selectedWorkers));
+        });
+    }
+
+    function goBack() {
+        window.location.href = 'step2_plants.html';
+    }
+
+    function goToConstruction() {
+        if (selectedWorkers.length === 0) {
+            alert('請至少選擇一位夥伴一起施工！');
+            return;
+        }
+        
+        // 儲存最終人數
+        localStorage.setItem('greenwall_worker_count', selectedWorkers.length);
+        localStorage.setItem('greenwall_workers', JSON.stringify(selectedWorkers));
+        
+        alert(`準備出發！${selectedWorkers.length} 位夥伴將一起施工。\n下一步：點陣圖施工（將串接 step4_construction.html）`);
+        // window.location.href = 'step4_construction.html';
+    }
+
+    // 讀取已儲存的團隊（如果有返回的話）
+    function loadSavedWorkers() {
+        const saved = localStorage.getItem('greenwall_workers');
+        if (saved) {
+            try {
+                selectedWorkers = JSON.parse(saved);
+                if (selectedWorkers.length > 7) selectedWorkers = selectedWorkers.slice(0, 7);
+            } catch(e) { selectedWorkers = []; }
+        }
+    }
+
+    // 初始化
+    loadPreviousData();
+    loadSavedWorkers();
+    renderMembers();
+    renderTruck();
+    setupDragAndDrop();
+    
+    document.getElementById('backBtn').onclick = goBack;
+    document.getElementById('nextBtn').onclick = goToConstruction;
+</script>
+</body>
+</html>
