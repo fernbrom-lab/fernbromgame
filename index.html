@@ -430,6 +430,52 @@
       text-align: center;
     }
 
+    /* 新增的兩個框框連結樣式 — 完全不影響既有內容 */
+    .game-links-section {
+      display: flex;
+      justify-content: center;
+      gap: 28px;
+      margin-top: 28px;
+      flex-wrap: wrap;
+    }
+    .game-card-link {
+      background: #fffdf9;
+      border: 1px solid #d4cfc2;
+      border-radius: 28px;
+      padding: 18px 32px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .game-card-link:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 22px rgba(61,90,56,0.12);
+      border-color: #b5aa92;
+      background: #ffffff;
+    }
+    .game-icon {
+      font-size: 2rem;
+    }
+    .game-text {
+      text-align: left;
+    }
+    .game-text h4 {
+      font-family: 'Noto Serif TC', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #3f6030;
+      margin-bottom: 4px;
+      letter-spacing: 0.02em;
+    }
+    .game-text p {
+      font-size: 0.75rem;
+      color: #8b7a64;
+      letter-spacing: 0.03em;
+    }
+
     @media (max-width: 860px) {
       .container {
         padding: 0 20px;
@@ -458,6 +504,15 @@
       }
       .hero-section h1 {
         font-size: 2rem;
+      }
+      .game-links-section {
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+      }
+      .game-card-link {
+        width: 80%;
+        justify-content: center;
       }
     }
 
@@ -587,7 +642,7 @@
         </div>
       </div>
 
-      <!-- ========= 調整後：好朋友標題＋插圖區（僅修改此區塊，其餘完全不變） ========= -->
+      <!-- ========= 好朋友標題＋插圖區 ========= -->
       <div class="friends-header-block">
         <div class="section-title">🌿 阿蕨與小積的好朋友們 🌿</div>
         <div class="hero-subhead">
@@ -681,10 +736,28 @@
         </div>
       </div>
 
-      <!-- 辦公室日常 (完全保持原樣) -->
+      <!-- 辦公室日常 (完全保持原樣，只在底下新增兩個框框連結) -->
       <div class="team-spirit">
         <div style="font-family:'Noto Serif TC'; font-weight:600; font-size:1.2rem; color:#4a6b3c;">🌱 蕨積辦公室日常 🌱</div>
         <div style="color: #5e5b52; margin-top: 10px;">這些好朋友們平常就在蕨積辦公室一起上班、一起光合作用、一起推廣「植物減碳」的綠色生活理念。<br>從洞洞西裝小龜到漂浮上班的空空，每個植物人都有獨一無二的綠色超能力，讓每一天充滿療癒與永續的靈感。</div>
+        
+        <!-- 新增的兩個框框連結（其餘完全不動） -->
+        <div class="game-links-section">
+          <a href="step1_select.html" class="game-card-link">
+            <div class="game-icon">🎮</div>
+            <div class="game-text">
+              <h4>植生牆遊戲</h4>
+              <p>從零打造一面會呼吸的牆・碳排與固碳體驗</p>
+            </div>
+          </a>
+          <a href="#" class="game-card-link" id="greenUniverseLink">
+            <div class="game-icon">🌍</div>
+            <div class="game-text">
+              <h4>蕨積綠色宇宙</h4>
+              <p>認識更多植物好朋友・永續生活靈感</p>
+            </div>
+          </a>
+        </div>
       </div>
     </div>
   </main>
@@ -754,6 +827,15 @@
           if (nav) nav.classList.toggle('scrolled', window.scrollY > 20);
         });
         if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+
+      // 「蕨積綠色宇宙」連結暫時提示，避免點擊無效
+      const universeLink = document.getElementById('greenUniverseLink');
+      if (universeLink) {
+        universeLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          alert('✨ 蕨積綠色宇宙即將上線，敬請期待 ✨');
+        });
       }
     });
   </script>
