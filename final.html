@@ -73,7 +73,6 @@
             width: 10px;
             height: 20px;
             background: linear-gradient(135deg, #fbbf24, #f97316);
-            position: fixed;
             top: -20px;
             animation: confettiFall 2s ease-out forwards;
             z-index: 100;
@@ -113,21 +112,21 @@
             </div>
         </div>
         
-        <!-- 植物人戰隊合影 (強化展示) -->
+        <!-- 植物人戰隊合影 -->
         <div class="w-full max-w-3xl mx-auto bg-white/20 backdrop-blur-md rounded-3xl p-4 shadow-2xl mb-8 border border-white/40 team-card transition-all">
             <img src="team.png" alt="FERN+ 植物人戰隊" onerror="this.src='https://placehold.co/800x400/2d6a4f/ffffff?text=🌱+FERN+TEAM+🌱'; this.onerror=null;" class="w-full h-auto rounded-2xl shadow-lg">
             <div class="text-center mt-3 text-white/80 text-sm font-medium flex justify-center gap-6 flex-wrap">
-                <span>🌿 阿蕨 </span>
-                <span>💧 小積 </span>
-                <span>🐢 小龜 </span>
-                <span>🐯 虎妹 </span>
-                <span>🌵 肉肉 </span>
-                <span>🎵 琴哥 </span>
-                <span>☁️ 空空 </span>
+                <span>🌿 阿蕨 Fern</span>
+                <span>🐢 小龜 Monstera</span>
+                <span>🐯 虎妹 Sans</span>
+                <span>🌵 肉肉 Succ</span>
+                <span>🎵 琴哥 Ficus</span>
+                 <span>💧 小積 Brom</span>
+                <span>☁️ 空空 Till</span>
             </div>
         </div>
         
-        <!-- 成就數據面板 (模擬總減碳量與任務完成度) -->
+        <!-- 成就數據面板 - 從 localStorage 讀取實際累積減碳量 -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
             <div class="bg-white/20 backdrop-blur-sm rounded-2xl p-4 border border-white/30">
                 <div class="text-4xl mb-1">🌍</div>
@@ -141,7 +140,7 @@
             </div>
             <div class="bg-white/20 backdrop-blur-sm rounded-2xl p-4 border border-white/30">
                 <div class="text-4xl mb-1">🌱</div>
-                <div class="text-2xl font-black"><span id="knowledgeCount">12</span>+</div>
+                <div class="text-2xl font-black"><span id="knowledgeCount">14</span>+</div>
                 <div class="text-sm font-medium">綠色智慧解鎖</div>
             </div>
         </div>
@@ -160,7 +159,7 @@
             </div>
         </div>
         
-        <!-- 行動呼籲按鈕 -->
+        <!-- 行動呼籲按鈕 - 重新冒險跳轉到 level1.html -->
         <button onclick="restartAdventure()" class="btn-glow bg-white text-green-800 px-12 py-5 rounded-full text-2xl font-black shadow-xl hover:bg-green-50 active:scale-95 transition-all flex items-center gap-3 mx-auto mb-6">
             <span>🌍</span> 重新冒險 <span>🌱</span>
         </button>
@@ -171,40 +170,53 @@
     </div>
     
     <script>
-        // ---------- 大圓滿增強: 動態數字滾動、落葉、彩帶、光粒子 ----------
+        // ==================== 大圓滿頁面 ====================
+        // 從 localStorage 讀取實際累積減碳量（由各關卡儲存）
         
-        // 模擬總減碳量 (根據前面關卡: 第一關~第七關累積估算，給予一個合理值 約 58~75 kg 之間)
-        // 使用 localStorage 可以讀取之前累積數據，如果沒有則生成驚喜值
         let totalCarbonReduction = 0;
         
-        // 嘗試從 localStorage 讀取總減碳 (如果之前關卡有儲存)
+        // 嘗試從 localStorage 讀取總減碳量
         try {
             let savedCarbon = localStorage.getItem('fern_total_carbon');
             if (savedCarbon && !isNaN(parseFloat(savedCarbon))) {
                 totalCarbonReduction = parseFloat(savedCarbon);
             } else {
-                // 模擬闖關成就總減碳：第一關(6題正確每題減2kg=12) 第二關(降100°C每度0.05=5kg) 第三關(8個標章各2.5=20kg) 第四關(10碳分子各2kg=20kg) 第五關(能量滿溢減碳象徵8kg) 第六關(平衡和諧減碳6kg) 第七關(3包裹各3.3=9.9kg) 總計約80.9kg 取78kg
-                totalCarbonReduction = 78.6;
+                // 如果沒有任何數據，顯示0並提示未完成任何關卡
+                totalCarbonReduction = 0;
+                console.log('尚未完成任何關卡，減碳量為0');
             }
-        } catch(e) { totalCarbonReduction = 76.2; }
+        } catch(e) { 
+            totalCarbonReduction = 0; 
+        }
         
-        // 確保顯示整數或一位小數
+        // 四捨五入到小數點後一位
+        totalCarbonReduction = Math.round(totalCarbonReduction * 10) / 10;
+        
+        // DOM 元素
         const carbonTotalElem = document.getElementById('carbonTotal');
         const missionsDoneElem = document.getElementById('missionsDone');
         const knowledgeCountElem = document.getElementById('knowledgeCount');
         
-        // 知識點數量隨機但呼應
-        const knowledgeUnlocked = 14;
+        // 計算通關數量（檢查各關卡完成標記）
+        let completedLevels = 0;
+        const levelKeys = ['fern_level1_completed', 'fern_level2_completed', 'fern_level3_completed', 
+                           'fern_level4_completed', 'fern_level5_completed', 'fern_level6_completed', 'fern_level7_completed'];
+        levelKeys.forEach(key => {
+            if (localStorage.getItem(key) === 'true') completedLevels++;
+        });
+        missionsDoneElem.innerText = `${completedLevels} / 7`;
+        
+        // 知識點數量（根據通關數量計算，每關約2個知識點）
+        const knowledgeUnlocked = Math.min(7 + completedLevels * 1, 20);
         knowledgeCountElem.innerText = knowledgeUnlocked;
-        missionsDoneElem.innerText = '7';
         
         // 數字滾動效果
-        function animateNumber(element, start, end, duration = 1500) {
+        function animateNumber(element, start, end, duration = 1600) {
             let startTime = null;
             const step = (timestamp) => {
                 if (!startTime) startTime = timestamp;
                 const progress = Math.min(1, (timestamp - startTime) / duration);
-                const current = Math.floor(progress * (end - start) + start);
+                const current = start + (progress * (end - start));
                 element.innerText = current.toFixed(1);
                 if (progress < 1) {
                     requestAnimationFrame(step);
@@ -218,7 +230,7 @@
         // 觸發數字滾動
         animateNumber(carbonTotalElem, 0, totalCarbonReduction, 1600);
         
-        // 落葉與花瓣飄落特效 (增加歡慶感)
+        // ==================== 慶祝特效 ====================
         function createFallingLeaf() {
             const leafContainer = document.getElementById('particlesContainer');
             const leaf = document.createElement('div');
@@ -234,10 +246,9 @@
             setTimeout(() => leaf.remove(), 7000);
         }
         
-        // 彩帶效果
         function createConfetti() {
             const container = document.getElementById('particlesContainer');
-            const confettiCount = 60;
+            const confettiCount = 50;
             for (let i = 0; i < confettiCount; i++) {
                 const conf = document.createElement('div');
                 conf.className = 'confetti';
@@ -253,7 +264,6 @@
             }
         }
         
-        // 漂浮光點
         function createGlowParticle() {
             const container = document.getElementById('particlesContainer');
             const particle = document.createElement('div');
@@ -268,44 +278,27 @@
             setTimeout(() => particle.remove(), 4000);
         }
         
-        // 開始慶祝動畫 (落葉間隔、彩帶爆發、光點)
         let leafInterval, glowInterval;
         function startCelebration() {
-            // 立即爆發彩帶
             createConfetti();
-            // 每0.5秒一片落葉
-            leafInterval = setInterval(() => {
-                createFallingLeaf();
-            }, 600);
-            // 每1秒光點
-            glowInterval = setInterval(() => {
-                createGlowParticle();
-            }, 900);
-            // 額外每2秒一次小型彩帶重複 (增加氣氛)
-            const extraConfetti = setInterval(() => {
-                if (document.hasFocus()) createConfetti();
-            }, 3800);
-            // 20秒後減緩特效但保留少量
+            leafInterval = setInterval(() => { createFallingLeaf(); }, 700);
+            glowInterval = setInterval(() => { createGlowParticle(); }, 1000);
+            const extraConfetti = setInterval(() => { if (document.hasFocus()) createConfetti(); }, 4000);
             setTimeout(() => {
                 clearInterval(leafInterval);
                 clearInterval(glowInterval);
                 clearInterval(extraConfetti);
-                // 再降頻率 保留一些落葉但不多
-                const gentleLeaf = setInterval(() => {
-                    if (Math.random() > 0.7) createFallingLeaf();
-                }, 1800);
+                const gentleLeaf = setInterval(() => { if (Math.random() > 0.7) createFallingLeaf(); }, 2000);
                 setTimeout(() => clearInterval(gentleLeaf), 10000);
-            }, 18000);
+            }, 20000);
         }
         
-        // 重新冒險功能: 清除localStorage中的碳數據可選，重置遊戲到第一關
+        // 重新冒險功能：跳轉到 level1.html
         function restartAdventure() {
-            // 保留一些用戶數據重置選項但直接跳轉到第一關 (index.html或level1.html)
-            // 按照原遊戲入口 index.html 為第一關起始
-            window.location.href = 'index.html';
+            window.location.href = 'level1.html';
         }
         
-        // 如果圖片加載失敗，替代團隊圖片預案
+        // 圖片備援
         const teamImg = document.querySelector('img');
         if (teamImg) {
             teamImg.addEventListener('error', () => {
@@ -313,41 +306,16 @@
             });
         }
         
-        // 頁面加載額外動畫
         window.addEventListener('load', () => {
             startCelebration();
-            // 添加一個淡入動畫
             const mainCard = document.querySelector('.relative.z-20');
             if (mainCard) mainCard.classList.add('bounce-in');
-            
-            // 創造小型煙火效果（隨機生成閃光）
-            for(let i=0;i<12;i++) {
-                setTimeout(() => createGlowParticle(), i * 200);
+            for(let i = 0; i < 10; i++) {
+                setTimeout(() => createGlowParticle(), i * 150);
             }
         });
         
-        // 監聽重新冒險按鈕
-        const restartBtn = document.querySelector('button');
-        if (restartBtn) {
-            restartBtn.addEventListener('click', (e) => {
-                // 播放點擊效果，避免多次跳轉
-                e.preventDefault();
-                restartAdventure();
-            });
-        }
-        
-        // 響應窗口尺寸變化時，重新調整部分飄落葉片不影響
-        window.addEventListener('resize', () => {
-            // 無需額外操作
-        });
-        
-        // 補充localStorage可以存最終碳量 (可選)
-        if (typeof(Storage) !== "undefined") {
-            localStorage.setItem('fern_final_carbon', totalCarbonReduction.toFixed(1));
-            localStorage.setItem('fern_completed', 'true');
-        }
-        
-        // 如果用戶點擊任何成就區，顯示小驚喜訊息
+        // 點擊成就區顯示驚喜
         const statCards = document.querySelectorAll('.grid > div');
         statCards.forEach(card => {
             card.addEventListener('click', () => {
@@ -359,26 +327,23 @@
             });
         });
         
-        // 增加背景自動播放安靜的森林音頻? 不需要但提供視覺而已
-        console.log('🎉 綠色宇宙圓滿達成，感謝冒險者！');
+        // 儲存最終數據到 localStorage
+        if (typeof(Storage) !== "undefined") {
+            localStorage.setItem('fern_final_carbon', totalCarbonReduction.toFixed(1));
+            localStorage.setItem('fern_completed', 'true');
+        }
+        
+        console.log(`🎉 綠色宇宙圓滿達成！總減碳量：${totalCarbonReduction}kg，通關：${completedLevels}/7 關`);
     </script>
     
-    <!-- 額外確保動畫不受限 -->
     <style>
         @keyframes fade-up {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-up {
             animation: fade-up 0.6s ease-out;
         }
-        /* 滾動條隱藏保持乾淨 */
         ::-webkit-scrollbar {
             width: 0px;
             background: transparent;
