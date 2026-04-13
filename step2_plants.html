@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>植生牆遊戲 · 第二步：選擇植物與數量</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', sans-serif;
+        }
+        body {
+            background: #1a472a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .card {
+            max-width: 900px;
+            width: 100%;
+            background: #fef7e0;
+            border-radius: 48px;
+            padding: 28px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #1a3b1e;
+            border-left: 8px solid #2e7d32;
+            padding-left: 20px;
+            margin-top: 0;
+        }
+        .summary {
+            background: #e0f0da;
+            border-radius: 28px;
+            padding: 16px;
+            margin-bottom: 24px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .summary span {
+            font-size: 1.6rem;
+            color: #1a5a1a;
+        }
+        .plant-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .plant-card {
+            background: white;
+            border-radius: 28px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #cddba6;
+        }
+        .plant-img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 20px;
+            background: #d9e0c5;
+            margin-bottom: 10px;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .plant-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .plant-trait {
+            font-size: 0.7rem;
+            color: #6b7a54;
+            margin: 6px 0;
+        }
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 12px 0;
+        }
+        .quantity-control button {
+            width: 36px;
+            height: 36px;
+            border-radius: 30px;
+            background: #2b5e2f;
+            color: white;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            margin: 0;
+        }
+        .quantity-control button:active {
+            transform: scale(0.95);
+        }
+        .quantity-control span {
+            font-size: 1.3rem;
+            font-weight: bold;
+            min-width: 40px;
+        }
+        .warning {
+            background: #ffe0b5;
+            border-radius: 28px;
+            padding: 12px;
+            margin: 16px 0;
+            text-align: center;
+            color: #a35100;
+        }
+        .flex-btns {
+            display: flex;
+            gap: 16px;
+            margin-top: 24px;
+        }
+        button {
+            background: #2b5e2f;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 60px;
+            cursor: pointer;
+            flex: 1;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background: #7f8c5e;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #8a9a6e;
+            margin-top: 24px;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>🌱 第二步 · 選擇植物與數量</h1>
+
+    <div class="summary" id="summaryArea">
+        載入中...
+    </div>
+
+    <div class="plant-grid" id="plantGrid"></div>
+
+    <div id="warningMsg" class="warning" style="display:none;">
+        ⚠️ 尚未分配完所有株數，請將總數分配給六種植物。
+    </div>
+
+    <div class="flex-btns">
+        <button id="backBtn" class="btn-secondary">⬅ 返回面積</button>
+        <button id="nextBtn" disabled>下一步 ▶ 施工團隊</button>
+    </div>
+    <footer>💡 每種植物都可混合種植，總數需等於第一步計算的總株數</footer>
+</div>
+
+<script>
+    // 六種植物資料（檔名請換成您的 .png）
+    const PLANTS = [
+        { id: 0, name: "🍃 綠葉鵝掌藤", trait: "超級好養，怎麼選都不會出事", imgFile: "schefflera.png", emoji: "🌿" },
+        { id: 1, name: "💧 蔓榕", trait: "水不能斷，室內太陽少會長不好", imgFile: "ficus.png", emoji: "🌱" },
+        { id: 2, name: "🏠 粗勒草", trait: "室內王者，不能放室外", imgFile: "aglaonema.png", emoji: "🍀" },
+        { id: 3, name: "🌿 腎蕨", trait: "要時間適應，適應後跟雜草一樣", imgFile: "asplenium.png", emoji: "🍃" },
+        { id: 4, name: "🦌 鹿角蕨", trait: "比較貴，需要持續關心", imgFile: "platycerium.png", emoji: "🌾" },
+        { id: 5, name: "💦 積水鳳梨", trait: "給水方式不一樣，需持續關心", imgFile: "bromeliad.png", emoji: "🌸" }
+    ];
+
+    let totalPlants = 0;      // 從第一步讀取
+    let location = "";
+    let area = 0;
+    let quantities = [0, 0, 0, 0, 0, 0];  // 每種植物的株數
+
+    function loadFromStorage() {
+        totalPlants = parseInt(localStorage.getItem('greenwall_total_plants')) || 400;
+        location = localStorage.getItem('greenwall_location') || 'outdoor';
+        area = parseInt(localStorage.getItem('greenwall_area')) || 10;
+    }
+
+    function updateSummary() {
+        const allocated = quantities.reduce((a, b) => a + b, 0);
+        const remaining = totalPlants - allocated;
+        document.getElementById('summaryArea').innerHTML = `
+            📐 面積：${area} m² &nbsp;|&nbsp;
+            📍 ${location === 'outdoor' ? '室外' : '室內'} &nbsp;|&nbsp;
+            🧱 總株數：<span>${totalPlants}</span> 株<br>
+            ✅ 已分配：${allocated} 株 &nbsp;|&nbsp;
+            ⏳ 剩餘：${remaining} 株
+        `;
+        
+        const nextBtn = document.getElementById('nextBtn');
+        const warningDiv = document.getElementById('warningMsg');
+        if (allocated === totalPlants && totalPlants > 0) {
+            nextBtn.disabled = false;
+            warningDiv.style.display = 'none';
+        } else {
+            nextBtn.disabled = true;
+            if (totalPlants > 0) warningDiv.style.display = 'block';
+            else warningDiv.style.display = 'none';
+        }
+    }
+
+    function changeQuantity(plantId, delta) {
+        const newVal = quantities[plantId] + delta;
+        if (newVal < 0) return;
+        const currentAllocated = quantities.reduce((a, b) => a + b, 0);
+        const newAllocated = currentAllocated + delta;
+        if (newAllocated > totalPlants) return;
+        quantities[plantId] = newVal;
+        updateSummary();
+        renderPlantGrid();
+    }
+
+    function renderPlantGrid() {
+        const container = document.getElementById('plantGrid');
+        container.innerHTML = '';
+        PLANTS.forEach((plant, idx) => {
+            const card = document.createElement('div');
+            card.className = 'plant-card';
+            
+            // 圖片區：優先使用真實圖片，若無則顯示 emoji 佔位
+            const imgHtml = `
+                <div class="plant-img">
+                    <img src="images/${plant.imgFile}" 
+                         onerror="this.style.display='none'; this.parentElement.innerHTML='${plant.emoji}';"
+                         style="width:100%; height:100%; object-fit:cover; border-radius:20px;">
+                </div>
+            `;
+            
+            card.innerHTML = `
+                ${imgHtml}
+                <div class="plant-name">${plant.name}</div>
+                <div class="plant-trait">${plant.trait}</div>
+                <div class="quantity-control">
+                    <button onclick="changeQuantity(${idx}, -1)">−</button>
+                    <span>${quantities[idx]}</span>
+                    <button onclick="changeQuantity(${idx}, 1)">+</button>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function saveAndNext() {
+        const allocated = quantities.reduce((a, b) => a + b, 0);
+        if (allocated !== totalPlants) {
+            alert(`請分配完所有株數！剩餘 ${totalPlants - allocated} 株未分配。`);
+            return;
+        }
+        // 儲存每種植物的數量
+        localStorage.setItem('greenwall_quantities', JSON.stringify(quantities));
+        localStorage.setItem('greenwall_plants_data', JSON.stringify(PLANTS.map((p, i) => ({
+            name: p.name,
+            trait: p.trait,
+            quantity: quantities[i],
+            imgFile: p.imgFile
+        }))));
+        alert('下一步：施工團隊（將串接 step3_team.html）');
+        // window.location.href = 'step3_team.html';
+    }
+
+    function goBack() {
+        window.location.href = 'step1_select.html';
+    }
+
+    // 初始化
+    loadFromStorage();
+    if (totalPlants > 0) {
+        // 平均分配初始值（讓玩家不用從零開始點）
+        const avg = Math.floor(totalPlants / PLANTS.length);
+        let remainder = totalPlants;
+        for (let i = 0; i < PLANTS.length; i++) {
+            quantities[i] = avg;
+            remainder -= avg;
+        }
+        quantities[0] += remainder; // 把餘數加給第一種
+    }
+    updateSummary();
+    renderPlantGrid();
+
+    // 綁定全域函數（讓按鈕 onclick 可用）
+    window.changeQuantity = changeQuantity;
+    document.getElementById('backBtn').onclick = goBack;
+    document.getElementById('nextBtn').onclick = saveAndNext;
+</script>
+</body>
+</html>
