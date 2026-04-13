@@ -54,9 +54,12 @@
         }
         .plant-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 16px;
             margin: 20px 0;
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 4px;
         }
         .plant-card {
             background: white;
@@ -68,50 +71,53 @@
         }
         .plant-img {
             width: 100%;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 20px;
+            height: 100px;
             background: #d9e0c5;
             margin-bottom: 10px;
-            font-size: 2rem;
+            font-size: 2.5rem;
             display: flex;
             align-items: center;
             justify-content: center;
+            border-radius: 20px;
         }
         .plant-name {
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
         .plant-trait {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: #6b7a54;
             margin: 6px 0;
         }
-        .quantity-control {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
+        .quantity-input {
             margin: 12px 0;
         }
-        .quantity-control button {
-            width: 36px;
-            height: 36px;
-            border-radius: 30px;
+        .quantity-input input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1rem;
+            text-align: center;
+            border-radius: 40px;
+            border: 1px solid #b3cf9b;
+            background: #fef9e6;
+        }
+        .percent-bar {
+            background: #e0e0d0;
+            border-radius: 20px;
+            height: 8px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .percent-fill {
             background: #2b5e2f;
-            color: white;
-            border: none;
-            font-size: 1.3rem;
-            cursor: pointer;
-            margin: 0;
+            height: 100%;
+            width: 0%;
+            transition: width 0.1s;
         }
-        .quantity-control button:active {
-            transform: scale(0.95);
-        }
-        .quantity-control span {
-            font-size: 1.3rem;
-            font-weight: bold;
-            min-width: 40px;
+        .percent-text {
+            font-size: 0.7rem;
+            color: #5a6e4a;
+            margin-top: 4px;
         }
         .warning {
             background: #ffe0b5;
@@ -147,6 +153,20 @@
         .btn-secondary {
             background: #7f8c5e;
         }
+        .quick-btns {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .quick-btn {
+            background: #cddba6;
+            color: #2b5e2f;
+            font-size: 0.8rem;
+            padding: 6px 12px;
+            margin: 0;
+            flex: none;
+        }
         footer {
             text-align: center;
             font-size: 0.7rem;
@@ -160,12 +180,11 @@
     <h1>🌱 第二步 · 選擇植物與數量</h1>
 
     <div id="mainContent">
-        <!-- 動態內容會顯示在這裡 -->
+        <!-- 動態內容 -->
     </div>
 </div>
 
 <script>
-    // 六種植物資料
     const PLANTS = [
         { id: 0, name: "🍃 綠葉鵝掌藤", trait: "超級好養，怎麼選都不會出事", emoji: "🌿" },
         { id: 1, name: "💧 蔓榕", trait: "水不能斷，室內太陽少會長不好", emoji: "🌱" },
@@ -175,23 +194,181 @@
         { id: 5, name: "💦 積水鳳梨", trait: "給水方式不一樣，需持續關心", emoji: "🌸" }
     ];
 
+    let totalPlants = 0;
+    let location = "";
+    let area = 0;
+    let quantities = [0, 0, 0, 0, 0, 0];
+
     function loadFromStorage() {
-        const totalPlants = localStorage.getItem('greenwall_total_plants');
-        const location = localStorage.getItem('greenwall_location');
-        const area = localStorage.getItem('greenwall_area');
-        
-        console.log('讀取到的資料:', { totalPlants, location, area });
+        totalPlants = parseInt(localStorage.getItem('greenwall_total_plants'));
+        location = localStorage.getItem('greenwall_location');
+        area = parseInt(localStorage.getItem('greenwall_area'));
         
         if (!totalPlants || !location || !area) {
-            return { success: false, message: '找不到第一步的資料，請先設定面積與株數。' };
+            return false;
+        }
+        return true;
+    }
+
+    function updateQuantitiesFromInputs() {
+        for (let i = 0; i < PLANTS.length; i++) {
+            const input = document.getElementById(`qty_${i}`);
+            if (input) {
+                let val = parseInt(input.value);
+                if (isNaN(val)) val = 0;
+                quantities[i] = Math.max(0, val);
+            }
+        }
+        updateSummaryAndUI();
+    }
+
+    function updateSummaryAndUI() {
+        const allocated = quantities.reduce((a, b) => a + b, 0);
+        const remaining = totalPlants - allocated;
+        
+        document.getElementById('summaryArea').innerHTML = `
+            📐 面積：${area} m² &nbsp;|&nbsp;
+            📍 ${location === 'outdoor' ? '室外' : '室內'} &nbsp;|&nbsp;
+            🧱 總株數：<span>${totalPlants}</span> 株<br>
+            ✅ 已分配：<span id="allocatedCount">${allocated}</span> 株 &nbsp;|&nbsp;
+            ⏳ 剩餘：<span id="remainingCount">${remaining}</span> 株
+        `;
+        
+        // 更新每個植物的百分比條
+        for (let i = 0; i < PLANTS.length; i++) {
+            const percent = totalPlants > 0 ? (quantities[i] / totalPlants * 100) : 0;
+            const fillBar = document.getElementById(`percent_fill_${i}`);
+            const percentText = document.getElementById(`percent_text_${i}`);
+            if (fillBar) fillBar.style.width = `${percent}%`;
+            if (percentText) percentText.innerText = `${quantities[i]} 株 (${percent.toFixed(1)}%)`;
         }
         
-        return {
-            success: true,
-            totalPlants: parseInt(totalPlants),
-            location: location,
-            area: parseInt(area)
-        };
+        const nextBtn = document.getElementById('nextBtn');
+        const warningDiv = document.getElementById('warningMsg');
+        if (allocated === totalPlants && totalPlants > 0) {
+            nextBtn.disabled = false;
+            warningDiv.style.display = 'none';
+        } else {
+            nextBtn.disabled = true;
+            if (totalPlants > 0) warningDiv.style.display = 'block';
+            else warningDiv.style.display = 'none';
+        }
+    }
+
+    function autoBalance() {
+        const avg = Math.floor(totalPlants / PLANTS.length);
+        let remainder = totalPlants;
+        for (let i = 0; i < PLANTS.length; i++) {
+            quantities[i] = avg;
+            remainder -= avg;
+        }
+        quantities[0] += remainder;
+        
+        for (let i = 0; i < PLANTS.length; i++) {
+            const input = document.getElementById(`qty_${i}`);
+            if (input) input.value = quantities[i];
+        }
+        updateSummaryAndUI();
+    }
+
+    function clearAll() {
+        for (let i = 0; i < PLANTS.length; i++) {
+            quantities[i] = 0;
+            const input = document.getElementById(`qty_${i}`);
+            if (input) input.value = 0;
+        }
+        updateSummaryAndUI();
+    }
+
+    function saveAndNext() {
+        const allocated = quantities.reduce((a, b) => a + b, 0);
+        if (allocated !== totalPlants) {
+            alert(`請分配完所有株數！剩餘 ${totalPlants - allocated} 株未分配。`);
+            return;
+        }
+        localStorage.setItem('greenwall_quantities', JSON.stringify(quantities));
+        localStorage.setItem('greenwall_plants_data', JSON.stringify(PLANTS.map((p, i) => ({
+            name: p.name,
+            trait: p.trait,
+            quantity: quantities[i]
+        }))));
+        alert('下一步：施工團隊（將串接 step3_team.html）');
+        // window.location.href = 'step3_team.html';
+    }
+
+    function goBack() {
+        window.location.href = 'step1_select.html';
+    }
+
+    function renderMainPage() {
+        const container = document.getElementById('mainContent');
+        
+        // 平均分配初始值
+        const avg = Math.floor(totalPlants / PLANTS.length);
+        let remainder = totalPlants;
+        for (let i = 0; i < PLANTS.length; i++) {
+            quantities[i] = avg;
+            remainder -= avg;
+        }
+        quantities[0] += remainder;
+        
+        let plantsHtml = '';
+        for (let i = 0; i < PLANTS.length; i++) {
+            const p = PLANTS[i];
+            plantsHtml += `
+                <div class="plant-card">
+                    <div class="plant-img">${p.emoji}</div>
+                    <div class="plant-name">${p.name}</div>
+                    <div class="plant-trait">${p.trait}</div>
+                    <div class="quantity-input">
+                        <input type="number" id="qty_${i}" value="${quantities[i]}" min="0" step="1" placeholder="株數">
+                    </div>
+                    <div class="percent-bar">
+                        <div class="percent-fill" id="percent_fill_${i}" style="width:${(quantities[i]/totalPlants*100)}%"></div>
+                    </div>
+                    <div class="percent-text" id="percent_text_${i}">${quantities[i]} 株 (${(quantities[i]/totalPlants*100).toFixed(1)}%)</div>
+                </div>
+            `;
+        }
+        
+        container.innerHTML = `
+            <div class="summary" id="summaryArea">計算中...</div>
+            <div class="quick-btns">
+                <button class="quick-btn" id="balanceBtn">⚖️ 平均分配</button>
+                <button class="quick-btn" id="clearBtn">🗑️ 全部歸零</button>
+            </div>
+            <div class="plant-grid" id="plantGrid">
+                ${plantsHtml}
+            </div>
+            <div id="warningMsg" class="warning" style="display:none;">
+                ⚠️ 尚未分配完所有株數，請將總數分配給六種植物。
+            </div>
+            <div class="flex-btns">
+                <button id="backBtn" class="btn-secondary">⬅ 返回面積</button>
+                <button id="nextBtn" disabled>下一步 ▶ 施工團隊</button>
+            </div>
+            <footer>💡 直接輸入數字更快速！總數需等於 ${totalPlants} 株</footer>
+        `;
+        
+        // 綁定輸入事件
+        for (let i = 0; i < PLANTS.length; i++) {
+            const input = document.getElementById(`qty_${i}`);
+            if (input) {
+                input.addEventListener('input', () => {
+                    let val = parseInt(input.value);
+                    if (isNaN(val)) val = 0;
+                    quantities[i] = val;
+                    updateSummaryAndUI();
+                });
+            }
+        }
+        
+        document.getElementById('balanceBtn').onclick = autoBalance;
+        document.getElementById('clearBtn').onclick = clearAll;
+        document.getElementById('backBtn').onclick = goBack;
+        document.getElementById('nextBtn').onclick = saveAndNext;
+        
+        updateSummaryAndUI();
     }
 
     function renderErrorPage(message) {
@@ -207,136 +384,11 @@
         });
     }
 
-    function renderMainPage(data) {
-        const { totalPlants, location, area } = data;
-        let quantities = [0, 0, 0, 0, 0, 0];
-        
-        // 平均分配初始值
-        const avg = Math.floor(totalPlants / PLANTS.length);
-        let remainder = totalPlants;
-        for (let i = 0; i < PLANTS.length; i++) {
-            quantities[i] = avg;
-            remainder -= avg;
-        }
-        quantities[0] += remainder;
-        
-        function updateSummary() {
-            const allocated = quantities.reduce((a, b) => a + b, 0);
-            const remaining = totalPlants - allocated;
-            document.getElementById('summaryArea').innerHTML = `
-                📐 面積：${area} m² &nbsp;|&nbsp;
-                📍 ${location === 'outdoor' ? '室外' : '室內'} &nbsp;|&nbsp;
-                🧱 總株數：<span>${totalPlants}</span> 株<br>
-                ✅ 已分配：${allocated} 株 &nbsp;|&nbsp;
-                ⏳ 剩餘：${remaining} 株
-            `;
-            
-            const nextBtn = document.getElementById('nextBtn');
-            const warningDiv = document.getElementById('warningMsg');
-            if (allocated === totalPlants && totalPlants > 0) {
-                nextBtn.disabled = false;
-                warningDiv.style.display = 'none';
-            } else {
-                nextBtn.disabled = true;
-                if (totalPlants > 0) warningDiv.style.display = 'block';
-                else warningDiv.style.display = 'none';
-            }
-        }
-        
-        function changeQuantity(plantId, delta) {
-            const newVal = quantities[plantId] + delta;
-            if (newVal < 0) return;
-            const currentAllocated = quantities.reduce((a, b) => a + b, 0);
-            const newAllocated = currentAllocated + delta;
-            if (newAllocated > totalPlants) return;
-            quantities[plantId] = newVal;
-            updateSummary();
-            renderPlantGrid();
-        }
-        
-        function renderPlantGrid() {
-            const container = document.getElementById('plantGrid');
-            if (!container) return;
-            container.innerHTML = '';
-            PLANTS.forEach((plant, idx) => {
-                const card = document.createElement('div');
-                card.className = 'plant-card';
-                card.innerHTML = `
-                    <div class="plant-img" style="background:#d9e0c5; display:flex; align-items:center; justify-content:center; font-size:2.5rem;">
-                        ${plant.emoji}
-                    </div>
-                    <div class="plant-name">${plant.name}</div>
-                    <div class="plant-trait">${plant.trait}</div>
-                    <div class="quantity-control">
-                        <button class="qty-minus" data-idx="${idx}" data-delta="-1">−</button>
-                        <span>${quantities[idx]}</span>
-                        <button class="qty-plus" data-idx="${idx}" data-delta="1">+</button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-            
-            document.querySelectorAll('.qty-minus').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const idx = parseInt(btn.dataset.idx);
-                    changeQuantity(idx, -1);
-                });
-            });
-            document.querySelectorAll('.qty-plus').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const idx = parseInt(btn.dataset.idx);
-                    changeQuantity(idx, 1);
-                });
-            });
-        }
-        
-        function saveAndNext() {
-            const allocated = quantities.reduce((a, b) => a + b, 0);
-            if (allocated !== totalPlants) {
-                alert(`請分配完所有株數！剩餘 ${totalPlants - allocated} 株未分配。`);
-                return;
-            }
-            localStorage.setItem('greenwall_quantities', JSON.stringify(quantities));
-            localStorage.setItem('greenwall_plants_data', JSON.stringify(PLANTS.map((p, i) => ({
-                name: p.name,
-                trait: p.trait,
-                quantity: quantities[i]
-            }))));
-            alert('下一步：施工團隊（將串接 step3_team.html）');
-            // window.location.href = 'step3_team.html';
-        }
-        
-        function goBack() {
-            window.location.href = 'step1_select.html';
-        }
-        
-        const container = document.getElementById('mainContent');
-        container.innerHTML = `
-            <div class="summary" id="summaryArea">計算中...</div>
-            <div class="plant-grid" id="plantGrid"></div>
-            <div id="warningMsg" class="warning" style="display:none;">
-                ⚠️ 尚未分配完所有株數，請將總數分配給六種植物。
-            </div>
-            <div class="flex-btns">
-                <button id="backBtn" class="btn-secondary">⬅ 返回面積</button>
-                <button id="nextBtn" disabled>下一步 ▶ 施工團隊</button>
-            </div>
-            <footer>💡 每種植物都可混合種植，總數需等於第一步計算的總株數</footer>
-        `;
-        
-        updateSummary();
-        renderPlantGrid();
-        
-        document.getElementById('backBtn').onclick = goBack;
-        document.getElementById('nextBtn').onclick = saveAndNext;
-    }
-    
     // 執行
-    const storageData = loadFromStorage();
-    if (!storageData.success) {
-        renderErrorPage(storageData.message);
+    if (!loadFromStorage()) {
+        renderErrorPage('找不到第一步的資料，請先設定面積與株數。');
     } else {
-        renderMainPage(storageData);
+        renderMainPage();
     }
 </script>
 </body>
