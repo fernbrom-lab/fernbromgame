@@ -195,15 +195,15 @@
         { id: 5, name: "💦 積水鳳梨", trait: "給水方式不一樣，需持續關心", emoji: "🌸" }
     ];
 
-    // 全域變數（避免使用 location 這個保留字）
+    // 全域變數
     let totalPlants = 0;
-    let siteLocation = "";  // 改用 siteLocation
+    let siteLocation = "";
     let area = 0;
     let quantities = [0, 0, 0, 0, 0, 0];
 
     function loadFromStorage() {
         totalPlants = parseInt(localStorage.getItem('greenwall_total_plants'));
-        siteLocation = localStorage.getItem('greenwall_location');  // 改用 siteLocation
+        siteLocation = localStorage.getItem('greenwall_location');
         area = parseInt(localStorage.getItem('greenwall_area'));
         
         console.log('讀取資料:', { totalPlants, siteLocation, area });
@@ -293,14 +293,17 @@
             alert(`請分配完所有株數！剩餘 ${totalPlants - allocated} 株未分配。`);
             return;
         }
+        
+        // 儲存植物分配資料
         localStorage.setItem('greenwall_quantities', JSON.stringify(quantities));
         localStorage.setItem('greenwall_plants_data', JSON.stringify(PLANTS.map((p, i) => ({
             name: p.name,
             trait: p.trait,
             quantity: quantities[i]
         }))));
-        alert('下一步：施工團隊（將串接 step3_team.html）');
-        // window.location.href = 'step3_team.html';
+        
+        // 真正跳轉到第三步
+        window.location.href = 'step3_team.html';
     }
 
     function goBack() {
