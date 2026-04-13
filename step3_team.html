@@ -98,10 +98,26 @@
             align-items: center;
             justify-content: center;
             font-size: 2.5rem;
+            overflow: hidden;
+        }
+        .member-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
         .member-name {
             font-size: 0.8rem;
             font-weight: bold;
+        }
+        .remove-icon {
+            font-size: 0.7rem;
+            color: #a35100;
+            margin-top: 4px;
+            cursor: pointer;
+            opacity: 0.6;
+        }
+        .remove-icon:hover {
+            opacity: 1;
         }
         .truck-icon {
             font-size: 4rem;
@@ -115,18 +131,25 @@
             margin: 16px 0;
         }
         .truck-member {
-            display: inline-block;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
             margin: 6px;
             text-align: center;
-            width: 60px;
+            width: 70px;
+            position: relative;
         }
         .truck-member .member-avatar {
-            width: 50px;
-            height: 50px;
+            width: 55px;
+            height: 55px;
             font-size: 1.8rem;
         }
         .truck-member .member-name {
             font-size: 0.7rem;
+        }
+        .truck-member .remove-icon {
+            font-size: 0.65rem;
+            margin-top: 2px;
         }
         .counter {
             font-size: 1.5rem;
@@ -197,7 +220,7 @@
         <div class="team-area">
             <div class="section-title">🌾 等待召集的夥伴</div>
             <div class="members-grid" id="membersGrid"></div>
-            <div class="warning">💡 直接拖曳夥伴到右邊貨車上！</div>
+            <div class="warning">💡 直接拖曳夥伴到右邊貨車上！點擊 ✖ 可移除</div>
         </div>
 
         <!-- 右邊：貨車（施工團隊） -->
@@ -217,15 +240,15 @@
 </div>
 
 <script>
-    // 夥伴資料（7位）
+    // 夥伴資料（7位）- 根據您提供的名稱調整
     const TEAM_MEMBERS = [
-        { id: 0, name: "阿土伯", emoji: "👨‍🌾", imgFile: "farmer1.png" },
-        { id: 1, name: "綠手指", emoji: "👩‍🌾", imgFile: "farmer2.png" },
-        { id: 2, name: "小鐵", emoji: "🧑‍🌾", imgFile: "farmer3.png" },
-        { id: 3, name: "阿花", emoji: "👩‍🌾", imgFile: "farmer4.png" },
-        { id: 4, name: "大樹", emoji: "👨‍🌾", imgFile: "farmer5.png" },
-        { id: 5, name: "小葉", emoji: "🧑‍🌾", imgFile: "farmer6.png" },
-        { id: 6, name: "老農", emoji: "👨‍🌾", imgFile: "farmer7.png" }
+        { id: 0, name: "阿蕨", emoji: "🌿", imgFile: "brom.png" },
+        { id: 1, name: "小積", emoji: "💧", imgFile: "fern.png" },
+        { id: 2, name: "琴哥", emoji: "🎸", imgFile: "ficus.png" },
+        { id: 3, name: "小龜", emoji: "🐢", imgFile: "mons.png" },
+        { id: 4, name: "虎妹", emoji: "🐯", imgFile: "sans.png" },
+        { id: 5, name: "肉肉", emoji: "🌵", imgFile: "succ.png" },
+        { id: 6, name: "空空", emoji: "🎈", imgFile: "till.png" }
     ];
 
     // 從 localStorage 讀取前兩步資料
@@ -233,7 +256,6 @@
     let totalPlants = 0;
     let siteLocation = "";
     let quantities = [];
-    let plantsData = [];
 
     // 施工團隊（被拖曳進貨車的夥伴）
     let selectedWorkers = [];
@@ -250,17 +272,20 @@
             quantities = [0, 0, 0, 0, 0, 0];
         }
         
-        const storedPlants = localStorage.getItem('greenwall_plants_data');
-        if (storedPlants) {
-            plantsData = JSON.parse(storedPlants);
-        }
-        
         document.getElementById('summaryArea').innerHTML = `
             📐 面積：${area} m² &nbsp;|&nbsp;
             📍 ${siteLocation === 'outdoor' ? '室外' : '室內'} &nbsp;|&nbsp;
             🧱 總株數：${totalPlants} 株 &nbsp;|&nbsp;
             🌱 植物種類：${quantities.filter(q => q > 0).length} 種
         `;
+    }
+
+    // 渲染頭像（支援圖片）
+    function renderAvatar(imgFile, emoji, size = "70px") {
+        const sizeNum = parseInt(size);
+        return `<img src="${imgFile}" 
+                     onerror="this.style.display='none'; this.parentElement.innerHTML='${emoji}';"
+                     style="width:${sizeNum}px; height:${sizeNum}px; object-fit:cover; border-radius:60px;">`;
     }
 
     function renderMembers() {
@@ -270,7 +295,7 @@
         TEAM_MEMBERS.forEach(member => {
             // 檢查是否已在貨車上
             const isSelected = selectedWorkers.some(w => w.id === member.id);
-            if (isSelected) return; // 已在貨車上就不顯示在左邊
+            if (isSelected) return;
             
             const card = document.createElement('div');
             card.className = 'member-card';
@@ -278,18 +303,26 @@
             card.setAttribute('data-id', member.id);
             card.setAttribute('data-name', member.name);
             card.setAttribute('data-emoji', member.emoji);
+            card.setAttribute('data-img', member.imgFile);
             
             card.innerHTML = `
-                <div class="member-avatar">${member.emoji}</div>
+                <div class="member-avatar" id="avatar_${member.id}"></div>
                 <div class="member-name">${member.name}</div>
             `;
+            
+            // 放入頭像
+            const avatarDiv = card.querySelector(`#avatar_${member.id}`);
+            if (avatarDiv) {
+                avatarDiv.innerHTML = renderAvatar(member.imgFile, member.emoji, "70");
+            }
             
             // 拖曳事件
             card.addEventListener('dragstart', (e) => {
                 e.dataTransfer.setData('text/plain', JSON.stringify({
                     id: member.id,
                     name: member.name,
-                    emoji: member.emoji
+                    emoji: member.emoji,
+                    imgFile: member.imgFile
                 }));
                 e.dataTransfer.effectAllowed = 'copy';
                 card.classList.add('dragging');
@@ -300,6 +333,11 @@
             
             container.appendChild(card);
         });
+    }
+
+    function removeWorker(workerId) {
+        selectedWorkers = selectedWorkers.filter(w => w.id !== workerId);
+        saveAndRender();
     }
 
     function renderTruck() {
@@ -313,20 +351,43 @@
                 const div = document.createElement('div');
                 div.className = 'truck-member';
                 div.innerHTML = `
-                    <div class="member-avatar">${worker.emoji}</div>
+                    <div class="member-avatar" id="truck_avatar_${worker.id}"></div>
                     <div class="member-name">${worker.name}</div>
+                    <div class="remove-icon" data-id="${worker.id}">✖ 移除</div>
                 `;
                 container.appendChild(div);
+                
+                // 放入頭像
+                const avatarDiv = div.querySelector(`#truck_avatar_${worker.id}`);
+                if (avatarDiv) {
+                    avatarDiv.innerHTML = renderAvatar(worker.imgFile, worker.emoji, "55");
+                }
+            });
+            
+            // 綁定移除事件
+            document.querySelectorAll('.remove-icon').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = parseInt(el.dataset.id);
+                    removeWorker(id);
+                });
             });
         }
         
         document.getElementById('workerCount').innerText = selectedWorkers.length;
         
-        // 至少1人才能出發
         const nextBtn = document.getElementById('nextBtn');
         if (nextBtn) {
             nextBtn.disabled = selectedWorkers.length === 0;
         }
+    }
+
+    function saveAndRender() {
+        // 儲存到 localStorage
+        localStorage.setItem('greenwall_workers', JSON.stringify(selectedWorkers));
+        localStorage.setItem('greenwall_worker_count', selectedWorkers.length);
+        renderMembers();
+        renderTruck();
     }
 
     function setupDragAndDrop() {
@@ -363,12 +424,18 @@
             }
             
             selectedWorkers.push(member);
-            renderMembers();
-            renderTruck();
-            
-            // 儲存到 localStorage
-            localStorage.setItem('greenwall_workers', JSON.stringify(selectedWorkers));
+            saveAndRender();
         });
+    }
+
+    function loadSavedWorkers() {
+        const saved = localStorage.getItem('greenwall_workers');
+        if (saved) {
+            try {
+                selectedWorkers = JSON.parse(saved);
+                if (selectedWorkers.length > 7) selectedWorkers = selectedWorkers.slice(0, 7);
+            } catch(e) { selectedWorkers = []; }
+        }
     }
 
     function goBack() {
@@ -385,19 +452,8 @@
         localStorage.setItem('greenwall_worker_count', selectedWorkers.length);
         localStorage.setItem('greenwall_workers', JSON.stringify(selectedWorkers));
         
-        alert(`準備出發！${selectedWorkers.length} 位夥伴將一起施工。\n下一步：點陣圖施工（將串接 step4_construction.html）`);
-        // window.location.href = 'step4_construction.html';
-    }
-
-    // 讀取已儲存的團隊（如果有返回的話）
-    function loadSavedWorkers() {
-        const saved = localStorage.getItem('greenwall_workers');
-        if (saved) {
-            try {
-                selectedWorkers = JSON.parse(saved);
-                if (selectedWorkers.length > 7) selectedWorkers = selectedWorkers.slice(0, 7);
-            } catch(e) { selectedWorkers = []; }
-        }
+        // 跳轉到第四步
+        window.location.href = 'step4_construction.html';
     }
 
     // 初始化
