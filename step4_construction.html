@@ -26,6 +26,7 @@
             border-radius: 48px;
             padding: 28px;
             box-shadow: 0 20px 35px rgba(0,0,0,0.3);
+            position: relative;
         }
         h1 {
             color: #1a3b1e;
@@ -101,6 +102,7 @@
             padding: 8px;
             margin: 20px 0;
             text-align: center;
+            position: relative;
         }
         canvas {
             background: #8b6946;
@@ -137,7 +139,6 @@
             gap: 10px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
             border: 1px solid #cddba6;
-            position: relative;
         }
         .worker-avatar {
             width: 45px;
@@ -169,6 +170,36 @@
             white-space: nowrap;
             overflow-x: auto;
             cursor: pointer;
+        }
+        /* 噴飛對話框動畫 */
+        .fly-talk {
+            position: fixed;
+            background: #fff0e0;
+            color: #a35100;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            white-space: nowrap;
+            z-index: 1000;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            border: 1px solid #ffcc88;
+            animation: flyAway 1.2s ease-out forwards;
+        }
+        @keyframes flyAway {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+            30% {
+                opacity: 1;
+                transform: translate(20px, -40px) scale(1.1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(50px, -100px) scale(0.8);
+            }
         }
         .flex-btns {
             display: flex;
@@ -208,13 +239,6 @@
             padding: 4px 12px;
             font-size: 0.8rem;
         }
-        .chat-bubble {
-            animation: fadeIn 0.3s ease;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
     </style>
 </head>
 <body>
@@ -223,7 +247,6 @@
 
     <div class="info-bar" id="infoBar">載入中...</div>
 
-    <!-- 植物照片與數量區 -->
     <div class="plants-summary" id="plantsSummary">
         <div class="plants-summary-title">🌱 本次植生牆植物組合</div>
         <div class="plant-list" id="plantList"></div>
@@ -235,10 +258,9 @@
 
     <div class="canvas-container">
         <canvas id="greenCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; aspect-ratio:600/400"></canvas>
-        <div class="click-hint">✨ 點擊方格 = 施工 / 更換花色 ✨</div>
+        <div class="click-hint">✨ 點擊牆面 = 施工種植！工人語錄會噴飛 ✨</div>
     </div>
 
-    <!-- 施工夥伴 + 碎碎念區 -->
     <div class="worker-section">
         <div class="worker-list" id="workerList"></div>
     </div>
@@ -247,20 +269,18 @@
         <button id="resetBtn" class="btn-secondary">🔄 重新施工</button>
         <button id="completeBtn" disabled>✅ 完成施工 & 驗收</button>
     </div>
-    <footer>🌱 點擊夥伴對話框可以更換碎碎念！</footer>
+    <footer>🌱 點擊牆面：增加顏色進度 + 隨機工人語錄噴飛！</footer>
 </div>
 
 <script>
-    // ⭐ 工地語錄庫（老鄧系列加重複出現機率）
+    // 工地語錄庫（老鄧系列加重）
     const WORKER_TALKS = [
-        // 老鄧經典四句（放兩倍增加出現機率）
         "😤 老鄧資遣我是你的損失！",
         "😤 老鄧資遣我是你的損失！",
         "🤔 我做得快是傻子，多虧去職訓不然我還不會做這個呢！",
         "🤔 我做得快是傻子，多虧去職訓不然我還不會做這個呢！",
         "💔 我喜歡做工不代表要接受你的不公平，大叔你摸著良心問問自己！",
         "💔 我喜歡做工不代表要接受你的不公平，大叔你摸著良心問問自己！",
-        // 其他工地語錄
         "🌞 天氣熱要多喝水～",
         "⚠️ 作業中須注意工安！",
         "🌱 植物是生命也要尊重～",
@@ -274,12 +294,9 @@
         "🏗️ 安全第一，品質至上",
         "😎 我種的植物最漂亮",
         "🌙 加班費記得多算一點",
-        "🎵 邊唱歌邊工作最開心",
-        "🙏 平安下班最重要",
-        "📦 材料要節省不要浪費"
+        "🎵 邊唱歌邊工作最開心"
     ];
 
-    // 植物資料（六種）
     const PLANTS = [
         { id: 0, name: "綠葉鵝掌藤", color: "#5b8c5a", imgFile: "schefflera.png", emoji: "🌿" },
         { id: 1, name: "蔓榕", color: "#6f9e6f", imgFile: "ficus.png", emoji: "🌱" },
@@ -289,23 +306,8 @@
         { id: 5, name: "積水鳳梨", color: "#d98c5f", imgFile: "bromeliad.png", emoji: "🌸" }
     ];
 
-    // 從 localStorage 讀取資料
-    let area = 0;
-    let totalPlants = 0;
-    let siteLocation = "";
-    let quantities = [];
-    let workers = [];
-    let workerCount = 0;
-
-    // 施工狀態
-    let gridColors = [];
-    let finishedPixels = 0;
-    let canvas = null;
-    let ctx = null;
-    let cols = 0;
-    let rows = 0;
-
-    // 每個工人的對話內容
+    let area = 0, totalPlants = 0, siteLocation = "", quantities = [], workers = [], workerCount = 0;
+    let gridColors = [], finishedPixels = 0, canvas = null, ctx = null, cols = 0, rows = 0;
     let workerTalks = [];
 
     function loadData() {
@@ -314,30 +316,17 @@
         siteLocation = localStorage.getItem('greenwall_location') || 'outdoor';
         
         const storedQuantities = localStorage.getItem('greenwall_quantities');
-        if (storedQuantities) {
-            quantities = JSON.parse(storedQuantities);
-        } else {
-            quantities = [0, 0, 0, 0, 0, 0];
-        }
+        quantities = storedQuantities ? JSON.parse(storedQuantities) : [0, 0, 0, 0, 0, 0];
         
         const storedWorkers = localStorage.getItem('greenwall_workers');
-        if (storedWorkers) {
-            workers = JSON.parse(storedWorkers);
-            workerCount = workers.length;
-        } else {
-            workers = [];
-            workerCount = 0;
-        }
+        workers = storedWorkers ? JSON.parse(storedWorkers) : [];
+        workerCount = workers.length;
         
-        // 初始化工人對話
         if (workerTalks.length !== workerCount) {
             workerTalks = [];
-            for (let i = 0; i < workerCount; i++) {
-                workerTalks.push(getRandomTalk());
-            }
+            for (let i = 0; i < workerCount; i++) workerTalks.push(getRandomTalk());
         }
         
-        // 顯示資訊
         document.getElementById('infoBar').innerHTML = `
             <span>📐 ${area} m²</span>
             <span>🌱 ${totalPlants} 株</span>
@@ -358,16 +347,25 @@
         renderWorkers();
     }
 
+    // 噴飛語錄動畫
+    function flyTalk(text, x, y) {
+        const div = document.createElement('div');
+        div.className = 'fly-talk';
+        div.textContent = '💬 ' + text;
+        div.style.left = (x - 60) + 'px';
+        div.style.top = (y - 30) + 'px';
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 1200);
+    }
+
     function renderPlantsSummary() {
         const container = document.getElementById('plantList');
         if (!container) return;
-        
         container.innerHTML = '';
         for (let i = 0; i < PLANTS.length; i++) {
             const p = PLANTS[i];
             const qty = quantities[i];
             if (qty === 0) continue;
-            
             const div = document.createElement('div');
             div.className = 'plant-item';
             div.innerHTML = `
@@ -379,32 +377,23 @@
             `;
             container.appendChild(div);
         }
-        
-        if (container.children.length === 0) {
-            container.innerHTML = '<div style="color:#8a9a6e;">無植物資料</div>';
-        }
     }
 
     function renderWorkers() {
         const container = document.getElementById('workerList');
         if (!container) return;
-        
         if (workers.length === 0) {
             container.innerHTML = '<div style="color:#8a9a6e;">⚠️ 沒有夥伴，請返回第三步召集團隊</div>';
             return;
         }
-        
         const imgNames = ['brom.png', 'fern.png', 'ficus.png', 'mons.png', 'sans.png', 'succ.png', 'till.png'];
-        
         container.innerHTML = workers.map((worker, idx) => {
             const imgFile = imgNames[worker.id % imgNames.length];
             const talk = workerTalks[idx] || getRandomTalk();
             return `
                 <div class="worker-card">
                     <div class="worker-avatar">
-                        <img src="${imgFile}" 
-                             onerror="this.style.display='none'; this.parentElement.innerHTML='${worker.emoji || '👨‍🌾'}';"
-                             style="width:100%; height:100%; object-fit:cover;">
+                        <img src="${imgFile}" onerror="this.style.display='none'; this.parentElement.innerHTML='${worker.emoji || '👨‍🌾'}';">
                     </div>
                     <div>
                         <div class="worker-name">${worker.name}</div>
@@ -413,41 +402,27 @@
                 </div>
             `;
         }).join('');
-        
-        // 綁定點擊對話框更換語錄
         document.querySelectorAll('.worker-talk').forEach(el => {
             el.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const idx = parseInt(el.dataset.idx);
-                if (!isNaN(idx)) {
-                    refreshWorkerTalk(idx);
-                }
+                if (!isNaN(idx)) refreshWorkerTalk(idx);
             });
         });
     }
 
-    // 根據累積數量決定某個索引的植物顏色
     function getPlantColorForIndex(index) {
         let cumulative = 0;
         for (let i = 0; i < quantities.length; i++) {
             cumulative += quantities[i];
-            if (index < cumulative) {
-                return PLANTS[i].color;
-            }
+            if (index < cumulative) return PLANTS[i].color;
         }
         return "#88aa66";
     }
 
     function initGridColors() {
         gridColors = [];
-        for (let i = 0; i < totalPlants; i++) {
-            gridColors.push(getPlantColorForIndex(i));
-        }
-    }
-
-    function randomizeColor(index) {
-        const randomPlant = PLANTS[Math.floor(Math.random() * PLANTS.length)];
-        gridColors[index] = randomPlant.color;
+        for (let i = 0; i < totalPlants; i++) gridColors.push(getPlantColorForIndex(i));
     }
 
     function drawPixelWall() {
@@ -458,13 +433,14 @@
         for (let row = 0; row < rows; row++) {
             for (let col = 0; col < cols; col++) {
                 const idx = row * cols + col;
-                if (idx >= totalPlants) continue;
+                if (idx >= totalPlants) {
+                    ctx.fillStyle = "#555555";
+                    ctx.fillRect(col * cellW, row * cellH, cellW, cellH);
+                    continue;
+                }
                 
-                let isFinished = idx < finishedPixels;
-                let color;
-                
-                if (isFinished) {
-                    color = gridColors[idx];
+                if (idx < finishedPixels) {
+                    const color = gridColors[idx];
                     const r = parseInt(color.slice(1,3), 16);
                     const g = parseInt(color.slice(3,5), 16);
                     const b = parseInt(color.slice(5,7), 16);
@@ -484,7 +460,6 @@
         if (finishedPixels >= totalPlants) {
             ctx.font = "bold 24px monospace";
             ctx.fillStyle = "#ffffaa";
-            ctx.shadowBlur = 0;
             ctx.fillText("✓ 完工", 20, 50);
         }
     }
@@ -496,56 +471,51 @@
         drawPixelWall();
         
         const completeBtn = document.getElementById('completeBtn');
-        if (completeBtn) {
-            completeBtn.disabled = (finishedPixels < totalPlants);
-        }
+        if (completeBtn) completeBtn.disabled = (finishedPixels < totalPlants);
     }
 
+    // 核心施工邏輯：點擊增加進度 + 噴飛語錄
     function handleCanvasClick(e) {
         if (finishedPixels >= totalPlants) return;
         
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        
+        // 獲取點擊座標（用於噴飛語錄）
         let clientX, clientY;
         if (e.touches) {
             clientX = e.touches[0].clientX;
             clientY = e.touches[0].clientY;
+            e.preventDefault();
         } else {
             clientX = e.clientX;
             clientY = e.clientY;
         }
         
-        const canvasX = (clientX - rect.left) * scaleX;
-        const canvasY = (clientY - rect.top) * scaleY;
+        // 施工進度增加（人數越多增加越多格）
+        let increment = Math.max(1, workerCount);
+        let newFinished = Math.min(totalPlants, finishedPixels + increment);
         
-        const cellW = canvas.width / cols;
-        const cellH = canvas.height / rows;
-        
-        const col = Math.floor(canvasX / cellW);
-        const row = Math.floor(canvasY / cellH);
-        const idx = row * cols + col;
-        
-        if (idx >= 0 && idx < totalPlants && idx < finishedPixels) {
-            randomizeColor(idx);
-            drawPixelWall();
-        } else if (idx >= 0 && idx < totalPlants && idx >= finishedPixels) {
-            let increment = Math.max(1, workerCount);
-            let newFinished = Math.min(totalPlants, finishedPixels + increment);
-            for (let i = finishedPixels; i < newFinished; i++) {
-                if (gridColors[i] === "#8b6946" || !gridColors[i]) {
-                    gridColors[i] = getPlantColorForIndex(i);
-                }
+        // 為新完成的格子設定顏色
+        for (let i = finishedPixels; i < newFinished; i++) {
+            if (!gridColors[i] || gridColors[i] === "#8b6946") {
+                gridColors[i] = getPlantColorForIndex(i);
             }
-            finishedPixels = newFinished;
-            updateProgress();
+        }
+        
+        finishedPixels = newFinished;
+        updateProgress();
+        
+        // 隨機選一位工人，噴飛他的語錄
+        if (workers.length > 0) {
+            const randomIdx = Math.floor(Math.random() * workers.length);
+            const talk = workerTalks[randomIdx] || getRandomTalk();
+            flyTalk(talk, clientX, clientY);
             
-            // 隨機讓一個工人換一句話（施工時碎念）
-            if (workers.length > 0) {
-                const randomWorker = Math.floor(Math.random() * workers.length);
-                refreshWorkerTalk(randomWorker);
-            }
+            // 順便讓這位工人換一句新台詞（增加趣味）
+            setTimeout(() => {
+                refreshWorkerTalk(randomIdx);
+            }, 100);
+        } else {
+            // 沒有工人時噴預設語錄
+            flyTalk("👷 快找夥伴來幫忙！", clientX, clientY);
         }
     }
 
@@ -554,7 +524,6 @@
             finishedPixels = 0;
             initGridColors();
             updateProgress();
-            // 重置工人對話
             for (let i = 0; i < workerCount; i++) {
                 workerTalks[i] = getRandomTalk();
             }
@@ -572,7 +541,8 @@
         localStorage.setItem('greenwall_finished_pixels', finishedPixels);
         localStorage.setItem('greenwall_grid_colors', JSON.stringify(gridColors));
         
-        window.location.href = 'step5_carbon.html';
+        alert('施工完成！即將進入驗收與碳排評估');
+        // window.location.href = 'step5_carbon.html';
     }
 
     function initCanvas() {
