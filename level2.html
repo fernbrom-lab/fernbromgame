@@ -2,57 +2,33 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>蕨積綠色宇宙 - 第二關：降溫大作戰</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
         body {
             background: linear-gradient(145deg, #d9eef5 0%, #b2d9f0 100%);
+            min-height: 100vh;
         }
-        /* 角色漂浮動畫 */
+        @media (max-width: 768px) {
+            body {
+                overflow-y: auto;
+            }
+            .mobile-stack {
+                flex-direction: column !important;
+            }
+        }
         .character-float {
             animation: float 3.5s ease-in-out infinite;
         }
         @keyframes float {
-            0% { transform: translateY(0px); }
+            0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-12px); }
-            100% { transform: translateY(0px); }
-        }
-        /* 設備搖晃發熱動畫 */
-        .heat-shake {
-            animation: heatShake 0.4s ease-in-out infinite;
-        }
-        @keyframes heatShake {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(4deg); }
-            75% { transform: rotate(-4deg); }
-        }
-        /* 噴水水花特效 */
-        .splash {
-            position: fixed;
-            pointer-events: none;
-            z-index: 100;
-            font-size: 2rem;
-            animation: splashFly 0.8s ease-out forwards;
-        }
-        @keyframes splashFly {
-            0% {
-                opacity: 1;
-                transform: scale(0.5) translateY(0px);
-            }
-            100% {
-                opacity: 0;
-                transform: scale(1.8) translateY(-80px);
-            }
-        }
-        /* 按鈕點擊回饋 */
-        .btn-clicked {
-            transform: scale(0.94);
-            transition: transform 0.07s ease;
         }
         .bubble-glow {
             box-shadow: 0 20px 35px -12px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.3) inset;
@@ -68,6 +44,32 @@
             70% { box-shadow: 0 0 0 15px rgba(59,130,246,0); background-color: #bfdbfe; }
             100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); background-color: transparent; }
         }
+        .splash {
+            position: fixed;
+            pointer-events: none;
+            z-index: 100;
+            font-size: 2rem;
+            animation: splashFly 0.8s ease-out forwards;
+        }
+        @keyframes splashFly {
+            0% { opacity: 1; transform: scale(0.5) translateY(0px); }
+            100% { opacity: 0; transform: scale(1.8) translateY(-80px); }
+        }
+        .btn-clicked {
+            transform: scale(0.94);
+            transition: transform 0.07s ease;
+        }
+        .knowledge-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .knowledge-scroll::-webkit-scrollbar-track {
+            background: #1e293b;
+            border-radius: 10px;
+        }
+        .knowledge-scroll::-webkit-scrollbar-thumb {
+            background: #4ade80;
+            border-radius: 10px;
+        }
         button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
@@ -75,319 +77,307 @@
         }
     </style>
 </head>
-<body class="h-screen w-full overflow-hidden antialiased">
+<body>
 
-    <div class="h-screen w-full flex flex-col md:flex-row relative">
-        
-        <!-- 左侧小積 Brom 區域 (藍色調) -->
-        <div class="w-full md:w-5/12 bg-gradient-to-br from-sky-600 to-blue-700 flex flex-col items-center justify-center p-5 relative shadow-2xl z-10">
-            <!-- 裝飾雲朵背景 -->
-            <div class="absolute inset-0 opacity-10 pointer-events-none">
-                <div class="absolute top-8 left-4 text-8xl">☁️</div>
-                <div class="absolute bottom-16 right-6 text-9xl rotate-12">💧</div>
-                <div class="absolute top-1/3 left-10 text-7xl">🌊</div>
+<div class="w-full min-h-screen flex flex-col md:flex-row mobile-stack">
+    
+    <!-- 左側：節能知識庫（電腦版顯示） -->
+    <div class="hidden md:block md:w-4/12 bg-sky-900/85 backdrop-blur-sm border-r border-white/20 p-4 overflow-y-auto shadow-2xl" style="min-height: 100vh;">
+        <div class="sticky top-3">
+            <div class="flex items-center gap-2 mb-4 pb-2 border-b border-sky-500/50">
+                <span class="text-2xl">📚</span>
+                <h3 class="font-black text-white text-base">節能降溫知識庫</h3>
+                <span class="text-[10px] bg-sky-500/40 px-2 py-0.5 rounded-full text-sky-100">先讀再玩</span>
             </div>
             
-            <!-- 小積角色圖標 + 浮動動畫 -->
-            <div class="character-float relative z-20">
-                <div class="bg-white/20 backdrop-blur-sm rounded-full p-3 shadow-2xl">
-                    <img src="brom.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/6177/6177480.png'; this.onerror=null;" class="w-36 h-36 md:w-44 md:h-44 object-contain drop-shadow-xl">
+            <div class="space-y-3 text-white/90 text-xs">
+                <div class="bg-sky-800/40 rounded-lg p-2">
+                    <h4 class="font-bold text-sky-300 text-sm">💡 為什麼設備過熱會耗電？</h4>
+                    <p class="text-gray-200 text-xs leading-relaxed mt-1">設備溫度每升高10°C，耗電量約增加5-10%。過熱也會縮短設備壽命，造成更多電子廢棄物。</p>
                 </div>
-            </div>
-            
-            <!-- 對話氣泡 (毛玻璃) 動態內容 -->
-            <div class="mt-6 w-full max-w-sm relative z-20 transition-all duration-300">
-                <div class="bg-white/95 backdrop-blur-sm rounded-3xl p-5 shadow-2xl border-l-[10px] border-sky-700 bubble-glow">
-                    <div class="flex items-start gap-2">
-                        <span class="text-3xl">💧</span>
-                        <div class="flex-1">
-                            <h3 class="font-black text-xl text-gray-800 tracking-tight">小積 Brom · 節能急診</h3>
-                            <p id="dialog" class="text-gray-700 font-medium mt-1 leading-relaxed text-base">設備過熱好耗電！快幫我噴水降溫～ 🌡️</p>
-                        </div>
+                <div class="bg-sky-800/40 rounded-lg p-2">
+                    <h4 class="font-bold text-sky-300 text-sm">🌡️ 溫度與碳排的關係</h4>
+                    <p class="text-gray-200 text-xs">電腦/伺服器溫度降低1°C，可減少約0.05kg CO₂e。降溫100°C = 減少5kg碳排！</p>
+                </div>
+                <div class="bg-sky-800/40 rounded-lg p-2">
+                    <h4 class="font-bold text-sky-300 text-sm">💧 校園節能小撇步</h4>
+                    <ul class="text-gray-200 text-xs list-disc list-inside mt-1 space-y-0.5">
+                        <li>放學後關閉電腦總電源</li>
+                        <li>保持通風口暢通</li>
+                        <li>定期清理灰塵</li>
+                        <li>使用省電模式</li>
+                    </ul>
+                </div>
+                <div class="bg-sky-800/40 rounded-lg p-2">
+                    <h4 class="font-bold text-sky-300 text-sm">🎯 本關挑戰</h4>
+                    <p class="text-gray-200 text-xs">點擊噴水按鈕5次，將電腦從<span class="text-yellow-200">100°C降溫至0°C</span>，共減少5kg碳排放！</p>
+                </div>
+                <div class="bg-sky-800/40 rounded-lg p-2">
+                    <h4 class="font-bold text-sky-300 text-sm">🧠 小測驗</h4>
+                    <p class="text-gray-200 text-xs">💭 下列哪個方式最能幫助電腦節能？</p>
+                    <div class="mt-1 space-y-1 text-xs">
+                        <label class="flex items-center gap-2 cursor-pointer text-gray-200"><input type="radio" name="quiz" value="a"> A. 一直開著不關機</label>
+                        <label class="flex items-center gap-2 cursor-pointer text-gray-200"><input type="radio" name="quiz" value="b"> B. 設定自動休眠</label>
+                        <label class="flex items-center gap-2 cursor-pointer text-gray-200"><input type="radio" name="quiz" value="c"> C. 把亮度調到最高</label>
                     </div>
+                    <p id="quizFeedback" class="text-xs mt-2 text-sky-300"></p>
                 </div>
-                <div class="absolute -bottom-2 left-8 w-4 h-4 bg-white/95 rotate-45 rounded-sm"></div>
             </div>
             
-            <!-- 節能小提示 -->
-            <div class="absolute bottom-4 left-0 right-0 text-center text-white/70 text-xs font-medium md:block hidden">
-                💡 每降溫10°C ≈ 減少0.5kg碳排放 | 一起綠能降溫
+            <div class="mt-4 p-2 bg-sky-800/40 rounded-lg border border-sky-500/30">
+                <p class="text-sky-200 text-[10px] flex items-center gap-1">
+                    <span>💡</span> 節能知識幫助你更有效降溫！
+                </p>
             </div>
         </div>
-
-        <!-- 右側遊戲主區域 精緻溫度控制台 -->
-        <div class="w-full md:w-7/12 bg-white/40 backdrop-blur-sm flex flex-col items-center justify-center p-6 overflow-y-auto">
-            <div class="w-full max-w-lg mx-auto">
-                <!-- 節能績效面板 -->
-                <div class="mb-5 bg-white/70 rounded-2xl p-4 shadow-md border border-white/50 backdrop-blur-sm">
-                    <div class="flex justify-between items-center flex-wrap gap-2">
-                        <div class="flex items-center gap-2">
-                            <span class="text-2xl">🌍</span>
-                            <span class="font-black text-gray-700 text-md">累積減碳量</span>
-                        </div>
-                        <div class="bg-blue-800 text-white px-4 py-1.5 rounded-full font-black text-xl">
-                            <span id="carbonSaved">0</span> kg CO₂e
-                        </div>
+    </div>
+    
+    <!-- 中間：小積角色區 -->
+    <div class="w-full md:w-4/12 bg-gradient-to-br from-sky-600 to-blue-700 flex flex-col items-center justify-center p-5 shadow-2xl" style="min-height: 350px;">
+        <div class="character-float">
+            <div class="bg-white/20 backdrop-blur-sm rounded-full p-3 shadow-2xl">
+                <img src="brom.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/6177/6177480.png';" class="w-28 h-28 md:w-36 md:h-36 object-contain drop-shadow-xl">
+            </div>
+        </div>
+        <div class="mt-4 w-full max-w-xs">
+            <div class="bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-2xl border-l-[8px] border-sky-700 bubble-glow">
+                <div class="flex items-start gap-2">
+                    <span class="text-2xl">💧</span>
+                    <div class="flex-1">
+                        <h3 class="font-black text-gray-800">小積 Brom · 節能急診</h3>
+                        <p id="dialog" class="text-gray-700 font-medium mt-1 text-sm">設備過熱好耗電！快幫我噴水降溫～ 🌡️</p>
                     </div>
-                    <div class="flex justify-between text-xs text-gray-600 font-semibold mt-2">
-                        <span>💧 噴水降溫進度</span>
-                        <span id="tempProgressText">目標降溫 100°C</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-3 mt-2 overflow-hidden">
-                        <div id="coolProgressBar" class="temperature-bar-fill bg-gradient-to-r from-cyan-500 to-blue-600 h-3 rounded-full" style="width: 0%"></div>
-                    </div>
-                </div>
-
-                <!-- 主要設備降溫卡片 -->
-                <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 border border-sky-100 transition-all duration-300">
-                    <div class="text-center">
-                        <!-- 動態設備圖標 (依據溫度改變表情) -->
-                        <div id="deviceIcon" class="text-[140px] md:text-[160px] mb-2 transition-all duration-300 drop-shadow-2xl inline-block">🖥️🔥</div>
-                        <!-- 溫度計顯示區 -->
-                        <div class="mt-2 mb-4 flex flex-col items-center">
-                            <div class="flex items-baseline gap-2 bg-gray-100 px-5 py-2 rounded-full shadow-inner">
-                                <span class="text-3xl font-black text-gray-800" id="temperatureValue">100</span>
-                                <span class="text-xl font-bold text-gray-600">°C</span>
-                                <span class="ml-2 text-2xl" id="tempEmoji">🌡️🔥</span>
-                            </div>
-                            <div class="w-full max-w-xs mt-3 h-4 bg-red-200 rounded-full overflow-hidden">
-                                <div id="tempFillBar" class="h-full bg-gradient-to-r from-red-500 to-orange-400 rounded-full transition-all duration-300" style="width: 100%"></div>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-2">💧 每次噴水降溫 20°C・節能又減碳</p>
-                        </div>
-                        
-                        <!-- 噴水巨無霸按鈕 -->
-                        <button id="coolBtn" class="group relative bg-gradient-to-br from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-black py-6 px-8 rounded-full text-3xl shadow-2xl transition-all duration-150 flex items-center justify-center gap-4 mx-auto border border-white/40 w-full md:w-2/3 active:scale-95">
-                            <span class="text-4xl drop-shadow">💧</span>
-                            <span>噴 水 降 溫</span>
-                        </button>
-                        
-                        <!-- 動態回饋與提示區 -->
-                        <div id="feedbackZone" class="mt-6 text-sm font-semibold text-gray-600 bg-sky-50 p-3 rounded-xl transition-all border border-sky-200">
-                            🌊 點擊噴水，讓設備恢復涼爽、降低碳排！
-                        </div>
-                        
-                        <!-- 剩餘噴水次數提醒 -->
-                        <div class="mt-3 text-xs text-gray-400 flex justify-center gap-3">
-                            <span>💧 目標降溫：<span id="remainingCool">100</span>°C</span>
-                            <span>⚡ 節能效率：+2kg CO₂e / 次</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 趣味裝飾腳印 -->
-                <div class="text-center mt-5 text-gray-400 text-xs font-medium flex justify-center gap-4">
-                    <span>💧 水冷散熱</span>
-                    <span>🌱 低碳機房</span>
-                    <span>⚡ 地球降溫夥伴</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        // ---------- 遊戲核心狀態 ----------
-        const INIT_TEMP = 100;        // 初始溫度100°C
-        const COOL_PER_CLICK = 20;    // 每點擊一次降20°C
-        const CARBON_PER_DEGREE = 0.05; // 每降1°C減少0.05 kg CO₂e (降100°C = 5kg, 配合教育意義)
+    <!-- 右側：遊戲區（降溫控制台） -->
+    <div class="w-full md:w-4/12 bg-white/40 backdrop-blur-sm flex flex-col items-center justify-center p-5" style="min-height: 400px;">
+        <div class="w-full max-w-md mx-auto">
+            <!-- 績效面板 -->
+            <div class="mb-4 bg-white/70 rounded-xl p-3 shadow-md">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-1">
+                        <span class="text-xl">🌍</span>
+                        <span class="font-black text-gray-700 text-sm">累積減碳量</span>
+                    </div>
+                    <div class="bg-blue-800 text-white px-3 py-0.5 rounded-full font-black">
+                        <span id="carbonSaved">0</span> kg
+                    </div>
+                </div>
+                <div class="flex justify-between text-xs text-gray-600 font-semibold mt-1">
+                    <span>💧 噴水降溫進度</span>
+                    <span id="tempProgressText">目標降溫 100°C</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2 mt-1 overflow-hidden">
+                    <div id="coolProgressBar" class="temperature-bar-fill bg-gradient-to-r from-cyan-500 to-blue-600 h-2 rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- 降溫卡片 -->
+            <div class="bg-white rounded-2xl shadow-xl p-5 border border-sky-100">
+                <div class="text-center">
+                    <div id="deviceIcon" class="text-8xl mb-2 drop-shadow-2xl">🖥️🔥</div>
+                    
+                    <div class="mt-2 mb-4 flex flex-col items-center">
+                        <div class="flex items-baseline gap-2 bg-gray-100 px-4 py-2 rounded-full shadow-inner">
+                            <span class="text-3xl font-black text-gray-800" id="temperatureValue">100</span>
+                            <span class="text-xl font-bold text-gray-600">°C</span>
+                            <span class="ml-2 text-2xl" id="tempEmoji">🌡️🔥</span>
+                        </div>
+                        <div class="w-full max-w-xs mt-3 h-3 bg-red-200 rounded-full overflow-hidden">
+                            <div id="tempFillBar" class="h-full bg-gradient-to-r from-red-500 to-orange-400 rounded-full transition-all duration-300" style="width: 100%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">💧 每次噴水降溫 20°C</p>
+                    </div>
+                    
+                    <button id="coolBtn" class="bg-gradient-to-br from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-black py-4 px-6 rounded-full text-2xl shadow-xl flex items-center justify-center gap-3 mx-auto w-full md:w-3/4 transition-all active:scale-95">
+                        <span class="text-3xl">💧</span>
+                        <span>噴 水 降 溫</span>
+                    </button>
+                    
+                    <div id="feedbackZone" class="mt-4 text-sm font-semibold text-gray-600 bg-sky-50 p-2 rounded-lg">
+                        🌊 點擊噴水，讓設備恢復涼爽！
+                    </div>
+                    
+                    <div class="mt-3 text-xs text-gray-400 flex justify-center gap-3">
+                        <span>💧 剩餘降溫：<span id="remainingCool">100</span>°C</span>
+                        <span>⚡ 每降20°C = 1kg 減碳</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function(){
+        // 遊戲設定
+        const INIT_TEMP = 100;
+        const COOL_PER_CLICK = 20;
+        const CARBON_PER_CLICK = 1;  // 每降20°C = 1kg
         
         let currentTemp = INIT_TEMP;
-        let isCompleted = false;        // 是否已完成任務
-        let totalCarbonSaved = 0;
+        let isCompleted = false;
+        let hasSaved = false;  // 防止重複儲存減碳量
         
         // DOM 元素
         const dialogEl = document.getElementById('dialog');
         const deviceIcon = document.getElementById('deviceIcon');
-        const temperatureValueSpan = document.getElementById('temperatureValue');
+        const temperatureSpan = document.getElementById('temperatureValue');
         const tempEmojiSpan = document.getElementById('tempEmoji');
         const tempFillBar = document.getElementById('tempFillBar');
-        const coolProgressBar = document.getElementById('coolProgressBar');  // 總降溫進度條
+        const coolProgressBar = document.getElementById('coolProgressBar');
         const carbonSavedSpan = document.getElementById('carbonSaved');
         const feedbackZone = document.getElementById('feedbackZone');
-        const remainingCoolSpan = document.getElementById('remainingCool');
+        const remainingSpan = document.getElementById('remainingCool');
         const coolBtn = document.getElementById('coolBtn');
         
-        // 輔助函式：更新所有UI (溫度、圖標、對話、進度條、碳排)
-        function updateAllUI() {
-            // 更新溫度顯示
-            temperatureValueSpan.innerText = currentTemp;
+        // 儲存減碳量到 localStorage（僅第一次通關）
+        function saveCarbonToLocal(carbonEarned) {
+            if (hasSaved) return;
+            let currentTotal = localStorage.getItem('fern_total_carbon');
+            currentTotal = currentTotal ? parseFloat(currentTotal) : 0;
+            const newTotal = currentTotal + carbonEarned;
+            localStorage.setItem('fern_total_carbon', newTotal);
+            localStorage.setItem('fern_level2_completed', 'true');
+            hasSaved = true;
+            console.log(`🌱 第二關儲存減碳量：${carbonEarned}kg，累積總和：${newTotal}kg`);
+        }
+        
+        // 更新 UI
+        function updateUI() {
             const cooledAmount = INIT_TEMP - currentTemp;
-            const remainingCool = currentTemp;
-            remainingCoolSpan.innerText = remainingCool;
+            const remaining = currentTemp;
+            remainingSpan.innerText = remaining;
             
-            // 溫度填充條寬度 (紅條)
+            // 溫度條
             const tempPercent = (currentTemp / INIT_TEMP) * 100;
             tempFillBar.style.width = `${tempPercent}%`;
-            // 降溫進度條 (藍色節能進度: 已降溫度/初始溫度)
-            const coolProgressPercent = (cooledAmount / INIT_TEMP) * 100;
-            coolProgressBar.style.width = `${coolProgressPercent}%`;
             
-            // 依據溫度改變設備圖標與對話表情
+            // 降溫進度條
+            const coolProgress = (cooledAmount / INIT_TEMP) * 100;
+            coolProgressBar.style.width = `${coolProgress}%`;
+            
+            // 減碳量顯示
+            const carbonSaved = cooledAmount * 0.05;
+            carbonSavedSpan.innerText = carbonSaved.toFixed(1);
+            
+            // 設備圖標與對話
             if (currentTemp <= 0) {
                 deviceIcon.innerText = '🖥️❄️✨';
                 tempEmojiSpan.innerText = '❄️🧊';
                 if (!isCompleted) {
-                    feedbackZone.innerHTML = '🎉 設備冷卻成功！超棒減碳成果！準備前往下一關～ 🎉';
-                    feedbackZone.classList.add('bg-green-100', 'text-green-800', 'border-green-300');
+                    feedbackZone.innerHTML = '🎉 設備冷卻成功！減碳達標！準備前往下一關～';
+                    feedbackZone.className = 'mt-4 text-sm font-semibold bg-green-100 text-green-800 p-2 rounded-lg';
                 }
             } else if (currentTemp <= 40) {
                 deviceIcon.innerText = '🖥️🌿';
                 tempEmojiSpan.innerText = '😌💨';
-                feedbackZone.innerHTML = '💚 快涼下來了！再噴幾次水就能達成完美節能！';
-                feedbackZone.classList.remove('bg-red-100');
-                feedbackZone.classList.add('bg-sky-100', 'text-sky-800');
+                feedbackZone.innerHTML = '💚 快涼下來了！再噴幾次就能達成完美節能！';
+                feedbackZone.className = 'mt-4 text-sm font-semibold bg-sky-100 text-sky-800 p-2 rounded-lg';
             } else if (currentTemp <= 70) {
                 deviceIcon.innerText = '🖥️🌡️';
                 tempEmojiSpan.innerText = '😅🔥';
                 feedbackZone.innerHTML = '🌊 溫度還是偏高，繼續噴水，節省更多電力！';
-                feedbackZone.classList.remove('bg-red-100');
-                feedbackZone.classList.add('bg-amber-50', 'text-amber-800');
+                feedbackZone.className = 'mt-4 text-sm font-semibold bg-amber-50 text-amber-800 p-2 rounded-lg';
             } else {
                 deviceIcon.innerText = '🖥️🔥';
                 tempEmojiSpan.innerText = '🥵🔥';
-                feedbackZone.innerHTML = '⚠️ 高溫警報！耗電暴增，快點擊噴水降溫，減少碳排！';
-                feedbackZone.classList.add('bg-red-100', 'text-red-700', 'border-red-200');
+                feedbackZone.innerHTML = '⚠️ 高溫警報！耗電暴增，快點擊噴水降溫！';
+                feedbackZone.className = 'mt-4 text-sm font-semibold bg-red-100 text-red-700 p-2 rounded-lg';
             }
             
-            // 碳排累積顯示 (根據已降溫度 * 每度減碳係數)
-            const totalCooled = INIT_TEMP - Math.max(0, currentTemp);
-            totalCarbonSaved = +(totalCooled * CARBON_PER_DEGREE).toFixed(2);
-            carbonSavedSpan.innerText = totalCarbonSaved;
+            temperatureSpan.innerText = currentTemp;
             
-            // 動態對話 (小積 Brom 會隨溫度變化鼓勵玩家)
+            // 小積對話
             if (!isCompleted) {
                 if (currentTemp <= 0) {
-                    dialogEl.innerText = '❄️ 完美降溫！你真是節能高手！我們成功減少碳足跡～ 🌍✨';
+                    dialogEl.innerText = '❄️ 完美降溫！減少碳足跡～ 🌍✨';
                 } else if (currentTemp <= 30) {
-                    dialogEl.innerText = '💪 快成功了！再噴個幾次，電腦就不會浪費電啦！太棒了！';
+                    dialogEl.innerText = '💪 快成功了！再噴幾次！太棒了！';
                 } else if (currentTemp <= 60) {
-                    dialogEl.innerText = '🌊 水冷有感！溫度降下來了，繼續保持，省電救地球！';
+                    dialogEl.innerText = '🌊 水冷有感！溫度降下來了，繼續保持！';
                 } else if (currentTemp <= 85) {
-                    dialogEl.innerText = '🔥 還是有點燙！噴水降溫不僅省電還能減碳，多噴幾次吧！';
+                    dialogEl.innerText = '🔥 還是有點燙！噴水降溫也能減碳！';
                 } else {
-                    dialogEl.innerText = '🆘 設備過熱耗電激增！快點擊噴水💧，每降一度都在減少碳排！';
+                    dialogEl.innerText = '🆘 設備過熱耗電！快點擊噴水💧';
                 }
-            } else {
-                dialogEl.innerText = '🌟 任務完成！機房能耗大幅降低，一起前往下一關實踐綠行動！';
             }
         }
         
-        // 產生水花特效 (增加趣味)
-        function createSplashEffect(x, y) {
-            const splashDiv = document.createElement('div');
-            splashDiv.innerText = '💧';
-            splashDiv.className = 'splash';
-            splashDiv.style.left = `${x}px`;
-            splashDiv.style.top = `${y}px`;
-            splashDiv.style.position = 'fixed';
-            document.body.appendChild(splashDiv);
-            setTimeout(() => {
-                splashDiv.remove();
-            }, 800);
+        // 水花特效
+        function createSplash(x, y) {
+            const splash = document.createElement('div');
+            splash.innerText = '💧';
+            splash.className = 'splash';
+            splash.style.left = x + 'px';
+            splash.style.top = y + 'px';
+            document.body.appendChild(splash);
+            setTimeout(() => splash.remove(), 800);
         }
         
-        // 噴水按鈕點擊回饋動畫
-        function animateButton(btn) {
-            btn.classList.add('btn-clicked');
-            setTimeout(() => {
-                btn.classList.remove('btn-clicked');
-            }, 120);
-        }
-        
-        // 核心降溫邏輯
+        // 降溫處理
         function handleCoolDown(event) {
-            if (isCompleted) {
-                // 已經過關，不讓噴水，提示前往下一關
-                feedbackZone.innerHTML = '🏁 任務已完成！即將前往下一關，請稍後～ 🌿';
-                feedbackZone.classList.add('bg-gray-200', 'text-gray-600');
-                return;
-            }
-            
+            if (isCompleted) return;
             if (currentTemp <= 0) {
-                // 安全機制，理論上已經完成任務
                 completeGame();
                 return;
             }
             
-            // 產生水花特效 (取得滑鼠或觸控座標)
-            let clientX, clientY;
+            // 取得座標產生特效
+            let x, y;
             if (event.touches) {
-                clientX = event.touches[0].clientX;
-                clientY = event.touches[0].clientY;
+                x = event.touches[0].clientX;
+                y = event.touches[0].clientY;
             } else {
-                clientX = event.clientX;
-                clientY = event.clientY;
+                x = event.clientX;
+                y = event.clientY;
             }
-            if (clientX && clientY) createSplashEffect(clientX, clientY);
-            else {
-                // fallback 置中效果
-                const rect = coolBtn.getBoundingClientRect();
-                createSplashEffect(rect.left + rect.width/2, rect.top + rect.height/2);
-            }
+            if (x && y) createSplash(x, y);
             
-            // 按鈕點擊動畫
-            animateButton(coolBtn);
+            // 按鈕動畫
+            coolBtn.classList.add('btn-clicked');
+            setTimeout(() => coolBtn.classList.remove('btn-clicked'), 120);
+            if (navigator.vibrate) navigator.vibrate(50);
             
-            // 執行降溫
+            // 降溫
             let newTemp = currentTemp - COOL_PER_CLICK;
             if (newTemp < 0) newTemp = 0;
             currentTemp = newTemp;
             
-            // 更新所有UI
-            updateAllUI();
+            updateUI();
             
-            // 檢查是否完成任務 (溫度歸零)
             if (currentTemp <= 0 && !isCompleted) {
                 completeGame();
-            } else {
-                // 未完成時，根據溫度給特殊語音級反饋
-                if (currentTemp <= 40) {
-                    const msg = `🌬️ 降溫到 ${currentTemp}°C 了！減碳 ${totalCarbonSaved}kg，再努力一下！`;
-                    feedbackZone.innerHTML = `💚 ${msg}`;
-                } else if (currentTemp <= 70) {
-                    feedbackZone.innerHTML = `💧 噴水成功！目前溫度 ${currentTemp}°C，累積減碳 ${totalCarbonSaved}kg，繼續保持！`;
-                } else {
-                    feedbackZone.innerHTML = `💦 好燙！溫度 ${currentTemp}°C，再噴幾次！每次降溫都在守護地球 🌎`;
-                }
-                // 短暫振動感（非強制，提升觸感）
-                if (navigator.vibrate) navigator.vibrate(50);
             }
         }
         
-        // 遊戲完成: 慶祝動畫、禁用按鈕、跳轉 level3.html
+        // 通關
         function completeGame() {
             if (isCompleted) return;
             isCompleted = true;
             
-            // 最後一次更新UI (確保溫度為0時的完美呈現)
-            updateAllUI();
+            // 計算減碳量：初始100°C → 0°C = 5kg
+            const totalCarbon = 5;
+            saveCarbonToLocal(totalCarbon);
             
-            // 設備圖標轉為雪花獎盃
+            updateUI();
             deviceIcon.innerText = '🏆❄️🖥️';
-            // 顯示完成對話與提示
-            dialogEl.innerText = '執行力滿分！設備完美降溫，碳排放大幅下降！快去找小龜冒險吧！ 🌟';
-            feedbackZone.innerHTML = '🎉🎉 狂賀！成功降溫至0°C，總減碳量 ' + totalCarbonSaved + ' kg CO₂e！ 即將前往第三關 🎉🎉';
-            feedbackZone.classList.add('complete-pulse', 'bg-blue-100', 'border-blue-400', 'font-extrabold');
+            dialogEl.innerText = '執行力滿分！設備完美降溫！快去找小龜冒險吧！ 🌟';
+            feedbackZone.innerHTML = `🎉 成功降溫至0°C！減碳 ${totalCarbon}kg！前往第三關 🎉`;
+            feedbackZone.classList.add('complete-pulse', 'bg-blue-100');
             
-            // 禁用按鈕
             coolBtn.disabled = true;
-            coolBtn.style.opacity = '0.7';
-            coolBtn.style.cursor = 'default';
+            coolBtn.style.opacity = '0.6';
             
-            // 觸發慶祝動畫 加背景閃光 (可選)
-            const rightPanel = document.querySelector('.md\\:w-7\\/12');
-            if (rightPanel) {
-                rightPanel.classList.add('complete-pulse');
-                setTimeout(() => rightPanel.classList.remove('complete-pulse'), 800);
-            }
-            
-            // 延遲跳轉至 level3.html (和第一關連貫)
             setTimeout(() => {
                 window.location.href = 'level3.html';
             }, 2000);
         }
         
-        // 添加觸摸/滑鼠事件，同時確保手機與電腦都可用
+        // 綁定事件
         function bindEvents() {
             coolBtn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -399,59 +389,64 @@
             });
         }
         
-        // 初始化遊戲狀態
-        function initGame() {
-            currentTemp = INIT_TEMP;
-            isCompleted = false;
-            totalCarbonSaved = 0;
-            updateAllUI();
-            coolBtn.disabled = false;
-            coolBtn.style.opacity = '1';
-            feedbackZone.classList.remove('complete-pulse', 'bg-green-100', 'bg-blue-100');
-            feedbackZone.classList.add('bg-sky-50');
-            feedbackZone.innerHTML = '🌊 點擊噴水，讓設備恢復涼爽、降低碳排！';
-            dialogEl.innerText = '設備過熱好耗電！快幫我噴水降溫～ 每降20°C省下可觀碳排！';
-        }
+        // 測驗互動
+        const quizRadios = document.querySelectorAll('input[name="quiz"]');
+        const quizFeedback = document.getElementById('quizFeedback');
+        quizRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'b') {
+                    quizFeedback.innerHTML = '✅ 正確！設定自動休眠最能節能省碳。';
+                    quizFeedback.className = 'text-xs mt-2 text-emerald-400';
+                } else {
+                    quizFeedback.innerHTML = '❌ 再想想！哪個選項最節能？';
+                    quizFeedback.className = 'text-xs mt-2 text-rose-400';
+                }
+            });
+        });
         
-        // 模擬圖片載入失敗備援 (brom.png 存在但以防萬一)
-        const bromImg = document.querySelector('img');
-        if (bromImg) {
-            bromImg.addEventListener('error', function() {
-                this.onerror = null;
-                this.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle fill='%233b82f6' cx='50' cy='50' r='45'/%3E%3Ctext x='50' y='70' font-size='48' text-anchor='middle' fill='white'%3E💧%3C/text%3E%3C/svg%3E";
+        // 隱藏重置功能（雙擊中間角色區7次）
+        let resetCount = 0;
+        let resetTimer = null;
+        const roleArea = document.querySelector('.bg-gradient-to-br.from-sky-600');
+        if (roleArea) {
+            roleArea.addEventListener('dblclick', () => {
+                resetCount++;
+                if (resetTimer) clearTimeout(resetTimer);
+                resetTimer = setTimeout(() => { resetCount = 0; }, 1000);
+                if (resetCount >= 7) {
+                    if (confirm('⚠️ 確定重置所有遊戲數據？')) {
+                        localStorage.removeItem('fern_total_carbon');
+                        localStorage.removeItem('fern_level1_completed');
+                        localStorage.removeItem('fern_level2_completed');
+                        alert('✅ 數據已重置！');
+                        window.location.reload();
+                    }
+                    resetCount = 0;
+                }
             });
         }
         
-        // 啟動遊戲
-        initGame();
-        bindEvents();
-        
-        // 增加窗口resize時無影響，不做額外處理
-        // 額外酷炫: 根據溫度動態改變整體氛圍 (微調背景)
-        function updateBackgroundByTemp() {
-            const rightBg = document.querySelector('.bg-white\\/40');
-            if (!rightBg) return;
-            if (currentTemp > 70) {
-                rightBg.style.background = "radial-gradient(circle at 20% 40%, rgba(254, 202, 202, 0.4), rgba(255,240,220,0.2))";
-            } else if (currentTemp > 30) {
-                rightBg.style.background = "radial-gradient(circle at 10% 30%, rgba(186, 230, 253, 0.5), rgba(220, 245, 235, 0.3))";
-            } else {
-                rightBg.style.background = "radial-gradient(circle at 30% 70%, rgba(167, 243, 208, 0.5), rgba(219, 234, 254, 0.4))";
-            }
+        // 初始化
+        function init() {
+            currentTemp = INIT_TEMP;
+            isCompleted = false;
+            hasSaved = false;
+            updateUI();
+            coolBtn.disabled = false;
+            coolBtn.style.opacity = '1';
         }
         
-        // 監聽溫度變化 (透過setInterval或每次更新UI時調用)
-        const origUpdate = updateAllUI;
-        window.updateAllUI = function() {
-            origUpdate();
-            updateBackgroundByTemp();
-        };
-        updateAllUI = window.updateAllUI;
-        // 重新綁定初始化後背景
-        updateAllUI();
+        // 圖片備援
+        const img = document.querySelector('img');
+        if (img) {
+            img.onerror = () => {
+                img.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle fill='%233b82f6' cx='50' cy='50' r='45'/%3E%3Ctext x='50' y='70' font-size='48' text-anchor='middle' fill='white'%3E💧%3C/text%3E%3C/svg%3E";
+            };
+        }
         
-        // 增加友善導引: 如果在遊戲中多次點擊最後成功前會有足夠趣味
-        // 防止快速點擊時過度震動 (不影響)
-    </script>
+        init();
+        bindEvents();
+    })();
+</script>
 </body>
 </html>
