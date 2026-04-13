@@ -169,7 +169,7 @@
 </div>
 
 <script>
-    // 六種植物資料（檔名請換成您的 .png）
+    // 六種植物資料
     const PLANTS = [
         { id: 0, name: "🍃 綠葉鵝掌藤", trait: "超級好養，怎麼選都不會出事", imgFile: "schefflera.png", emoji: "🌿" },
         { id: 1, name: "💧 蔓榕", trait: "水不能斷，室內太陽少會長不好", imgFile: "ficus.png", emoji: "🌱" },
@@ -179,15 +179,23 @@
         { id: 5, name: "💦 積水鳳梨", trait: "給水方式不一樣，需持續關心", imgFile: "bromeliad.png", emoji: "🌸" }
     ];
 
-    let totalPlants = 0;      // 從第一步讀取
+    let totalPlants = 0;
     let location = "";
     let area = 0;
-    let quantities = [0, 0, 0, 0, 0, 0];  // 每種植物的株數
+    let quantities = [0, 0, 0, 0, 0, 0];
 
     function loadFromStorage() {
-        totalPlants = parseInt(localStorage.getItem('greenwall_total_plants')) || 400;
-        location = localStorage.getItem('greenwall_location') || 'outdoor';
-        area = parseInt(localStorage.getItem('greenwall_area')) || 10;
+        totalPlants = parseInt(localStorage.getItem('greenwall_total_plants'));
+        location = localStorage.getItem('greenwall_location');
+        area = parseInt(localStorage.getItem('greenwall_area'));
+        
+        // 檢查是否有資料，沒有的話跳回第一步
+        if (!totalPlants || !location || !area) {
+            alert('請先從第一步開始設定面積與株數！');
+            window.location.href = 'step1_select.html';
+            return false;
+        }
+        return true;
     }
 
     function updateSummary() {
@@ -231,26 +239,33 @@
             const card = document.createElement('div');
             card.className = 'plant-card';
             
-            // 圖片區：優先使用真實圖片，若無則顯示 emoji 佔位
-            const imgHtml = `
-                <div class="plant-img">
-                    <img src="images/${plant.imgFile}" 
-                         onerror="this.style.display='none'; this.parentElement.innerHTML='${plant.emoji}';"
-                         style="width:100%; height:100%; object-fit:cover; border-radius:20px;">
-                </div>
-            `;
-            
             card.innerHTML = `
-                ${imgHtml}
+                <div class="plant-img" style="background:#d9e0c5; display:flex; align-items:center; justify-content:center; font-size:2.5rem;">
+                    ${plant.emoji}
+                </div>
                 <div class="plant-name">${plant.name}</div>
                 <div class="plant-trait">${plant.trait}</div>
                 <div class="quantity-control">
-                    <button onclick="changeQuantity(${idx}, -1)">−</button>
+                    <button class="qty-minus" data-idx="${idx}" data-delta="-1">−</button>
                     <span>${quantities[idx]}</span>
-                    <button onclick="changeQuantity(${idx}, 1)">+</button>
+                    <button class="qty-plus" data-idx="${idx}" data-delta="1">+</button>
                 </div>
             `;
             container.appendChild(card);
+        });
+        
+        // 重新綁定按鈕事件
+        document.querySelectorAll('.qty-minus').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(btn.dataset.idx);
+                changeQuantity(idx, -1);
+            });
+        });
+        document.querySelectorAll('.qty-plus').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(btn.dataset.idx);
+                changeQuantity(idx, 1);
+            });
         });
     }
 
@@ -260,7 +275,6 @@
             alert(`請分配完所有株數！剩餘 ${totalPlants - allocated} 株未分配。`);
             return;
         }
-        // 儲存每種植物的數量
         localStorage.setItem('greenwall_quantities', JSON.stringify(quantities));
         localStorage.setItem('greenwall_plants_data', JSON.stringify(PLANTS.map((p, i) => ({
             name: p.name,
@@ -269,7 +283,7 @@
             imgFile: p.imgFile
         }))));
         alert('下一步：施工團隊（將串接 step3_team.html）');
-        // window.location.href = 'step3_team.html';
+        // 未來改成 window.location.href = 'step3_team.html';
     }
 
     function goBack() {
@@ -277,24 +291,24 @@
     }
 
     // 初始化
-    loadFromStorage();
-    if (totalPlants > 0) {
-        // 平均分配初始值（讓玩家不用從零開始點）
+    if (!loadFromStorage()) {
+        // 已經在 loadFromStorage 內跳轉，停止執行
+    } else {
+        // 平均分配初始值
         const avg = Math.floor(totalPlants / PLANTS.length);
         let remainder = totalPlants;
         for (let i = 0; i < PLANTS.length; i++) {
             quantities[i] = avg;
             remainder -= avg;
         }
-        quantities[0] += remainder; // 把餘數加給第一種
+        quantities[0] += remainder;
+        
+        updateSummary();
+        renderPlantGrid();
+        
+        document.getElementById('backBtn').onclick = goBack;
+        document.getElementById('nextBtn').onclick = saveAndNext;
     }
-    updateSummary();
-    renderPlantGrid();
-
-    // 綁定全域函數（讓按鈕 onclick 可用）
-    window.changeQuantity = changeQuantity;
-    document.getElementById('backBtn').onclick = goBack;
-    document.getElementById('nextBtn').onclick = saveAndNext;
 </script>
 </body>
 </html>
