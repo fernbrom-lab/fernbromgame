@@ -66,7 +66,6 @@
             background: #4ade80;
             border-radius: 10px;
         }
-        /* 手機觸控優化 */
         @media (max-width: 768px) {
             .answer-btn {
                 padding: 1rem !important;
@@ -83,7 +82,7 @@
     <div class="w-full md:w-5/12 flex flex-col md:flex-row">
         
         <!-- 角色區 -->
-        <div class="w-full md:w-2/3 bg-gradient-to-br from-emerald-600 to-green-700 flex flex-col items-center justify-center p-4 relative shadow-2xl z-10">
+        <div class="w-full md:w-1/2 bg-gradient-to-br from-emerald-600 to-green-700 flex flex-col items-center justify-center p-4 relative shadow-2xl z-10">
             <div class="absolute inset-0 opacity-10 pointer-events-none">
                 <div class="absolute top-10 left-5 text-8xl">🍃</div>
                 <div class="absolute bottom-20 right-8 text-9xl rotate-45">🌿</div>
@@ -91,7 +90,7 @@
             
             <div class="character-float relative z-20">
                 <div class="bg-white/20 backdrop-blur-sm rounded-full p-2 shadow-2xl">
-                    <img src="fern.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1995/1995572.png';" class="w-28 h-28 md:w-36 md:h-36 object-contain drop-shadow-xl">
+                    <img src="fern.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1995/1995572.png';" class="w-28 h-28 md:w-32 md:h-32 object-contain drop-shadow-xl">
                 </div>
             </div>
             
@@ -112,16 +111,54 @@
             </div>
         </div>
         
-        <!-- 📚 知識側邊欄（電腦版顯示，手機版隱藏） -->
-        <div class="hidden md:block md:w-1/3 bg-emerald-900/60 backdrop-blur-sm border-l border-white/20 p-3 overflow-y-auto shadow-2xl z-20 knowledge-scroll" style="max-height: 100vh;">
+        <!-- 📚 知識側邊欄（電腦版顯示，手機版隱藏）- 直接寫入 HTML 確保顯示 -->
+        <div class="hidden md:block md:w-1/2 bg-emerald-900/80 backdrop-blur-sm border-l border-white/20 p-3 overflow-y-auto shadow-2xl z-20 knowledge-scroll" style="max-height: 100vh;">
             <div class="sticky top-3">
-                <div class="flex items-center gap-1 mb-3 pb-2 border-b border-emerald-500/50">
-                    <span class="text-xl">📚</span>
-                    <h3 class="font-black text-white text-sm">碳盤查知識庫</h3>
+                <div class="flex items-center gap-2 mb-3 pb-2 border-b border-emerald-500/50">
+                    <span class="text-2xl">📚</span>
+                    <h3 class="font-black text-white text-base">碳盤查知識庫</h3>
                 </div>
                 
-                <div id="knowledgeContent" class="space-y-3 text-white/80 text-xs">
-                    <!-- 知識內容會由 JavaScript 動態填入，確保內容存在 -->
+                <!-- 知識內容直接寫在這裡，保證顯示 -->
+                <div class="space-y-3 text-white/90 text-xs">
+                    <div class="bg-emerald-800/40 rounded-lg p-2">
+                        <h4 class="font-bold text-emerald-300 flex items-center gap-1 text-sm">📊 什麼是碳盤查？</h4>
+                        <p class="text-gray-200 text-xs leading-relaxed mt-1">碳盤查是計算組織或產品「溫室氣體排放量」的過程，分為三個範疇：<span class="text-emerald-300 font-semibold">Scope 1（直接）、Scope 2（能源間接）、Scope 3（其他間接）</span>。</p>
+                    </div>
+
+                    <div class="bg-emerald-800/40 rounded-lg p-2">
+                        <h4 class="font-bold text-emerald-300 flex items-center gap-1 text-sm">🏭 Scope 1 直接排放</h4>
+                        <p class="text-gray-200 text-xs leading-relaxed">公司「直接」控制的排放源，如：<span class="text-yellow-200">工廠鍋爐、公司車隊、冷氣洩漏、製程排放</span>。</p>
+                        <div class="mt-1 text-emerald-300 text-[10px]">✅ 範例：自有貨車、工廠煙囪</div>
+                    </div>
+
+                    <div class="bg-emerald-800/40 rounded-lg p-2">
+                        <h4 class="font-bold text-emerald-300 flex items-center gap-1 text-sm">⚡ Scope 2 能源間接</h4>
+                        <p class="text-gray-200 text-xs leading-relaxed">外購<span class="text-yellow-200">電力、蒸氣、熱能</span>產生的排放。雖然不是自己燒，但用電就要負責！</p>
+                        <div class="mt-1 text-emerald-300 text-[10px]">✅ 範例：辦公室用電、空調</div>
+                    </div>
+
+                    <div class="bg-emerald-800/40 rounded-lg p-2">
+                        <h4 class="font-bold text-emerald-300 flex items-center gap-1 text-sm">🌍 Scope 3 其他間接</h4>
+                        <p class="text-gray-200 text-xs leading-relaxed">上下游供應鏈：<span class="text-yellow-200">員工通勤、商務旅行、產品運輸、廢棄物處理、供應商生產</span>等。</p>
+                        <div class="mt-1 text-emerald-300 text-[10px]">✅ 範例：員工出差飛機、漢堡供應鏈</div>
+                    </div>
+
+                    <div class="bg-emerald-800/40 rounded-lg p-2">
+                        <h4 class="font-bold text-emerald-300 flex items-center gap-1 text-sm">🎯 本關挑戰</h4>
+                        <p class="text-gray-200 text-xs leading-relaxed">將6個項目正確分類到 Scope 1 或 Scope 2/3，<span class="text-yellow-200">每答對一題 +10分、+2kg 減碳量</span>！</p>
+                    </div>
+
+                    <div class="bg-emerald-800/40 rounded-lg p-2">
+                        <h4 class="font-bold text-emerald-300 flex items-center gap-1 text-sm">🧠 小測驗</h4>
+                        <p class="text-gray-200 text-xs">💭 下列哪一項屬於 Scope 1 直接排放？</p>
+                        <div class="mt-1 space-y-1 text-xs">
+                            <label class="flex items-center gap-2 cursor-pointer text-gray-200"><input type="radio" name="quiz" value="a" class="quiz-radio"> A. 員工開車上班</label>
+                            <label class="flex items-center gap-2 cursor-pointer text-gray-200"><input type="radio" name="quiz" value="b" class="quiz-radio"> B. 工廠煙囪排放</label>
+                            <label class="flex items-center gap-2 cursor-pointer text-gray-200"><input type="radio" name="quiz" value="c" class="quiz-radio"> C. 購買的電力</label>
+                        </div>
+                        <p id="quizFeedback" class="text-xs mt-2 text-emerald-300"></p>
+                    </div>
                 </div>
                 
                 <div class="mt-4 p-2 bg-emerald-800/30 rounded-lg border border-emerald-500/30">
@@ -204,18 +241,15 @@
         const TOTAL_QS = QUESTIONS.length;
         const MAX_SCORE = TOTAL_QS * 10;
         
-        // 遊戲狀態
         let currentIndex = 0;
         let currentScore = 0;
         let waitingForNext = false;
         let answeredCorrect = false;
         let hasCompleted = false;
         
-        // localStorage 設定
         const STORAGE_KEY = 'fern_total_carbon';
         const LEVEL1_KEY = 'fern_level1_completed';
         
-        // DOM 元素
         const dialogEl = document.getElementById('dialog');
         const itemIconEl = document.getElementById('item-icon');
         const itemDescEl = document.getElementById('item-description');
@@ -229,54 +263,8 @@
         
         totalScoreSpan.innerText = MAX_SCORE;
         
-        // ========== 知識庫內容（碳盤查相關）- 直接寫入 HTML 確保顯示 ==========
-        function loadKnowledge() {
-            const container = document.getElementById('knowledgeContent');
-            if (!container) return;
-            
-            // 直接設定 HTML 內容
-            container.innerHTML = `
-                <div class="bg-emerald-800/30 rounded-lg p-2">
-                    <h4 class="font-bold text-emerald-300 flex items-center gap-1 text-sm">📊 什麼是碳盤查？</h4>
-                    <p class="text-gray-200 text-xs leading-relaxed mt-1">碳盤查是計算組織或產品「溫室氣體排放量」的過程，分為三個範疇：<span class="text-emerald-300 font-semibold">Scope 1（直接）、Scope 2（能源間接）、Scope 3（其他間接）</span>。</p>
-                </div>
-
-                <div class="bg-emerald-800/30 rounded-lg p-2">
-                    <h4 class="font-bold text-emerald-300 flex items-center gap-1 text-sm">🏭 Scope 1 直接排放</h4>
-                    <p class="text-gray-200 text-xs leading-relaxed">公司「直接」控制的排放源，如：<span class="text-yellow-200">工廠鍋爐、公司車隊、冷氣洩漏、製程排放</span>。</p>
-                    <div class="mt-1 text-emerald-300 text-[10px]">✅ 範例：自有貨車、工廠煙囪</div>
-                </div>
-
-                <div class="bg-emerald-800/30 rounded-lg p-2">
-                    <h4 class="font-bold text-emerald-300 flex items-center gap-1 text-sm">⚡ Scope 2 能源間接</h4>
-                    <p class="text-gray-200 text-xs leading-relaxed">外購<span class="text-yellow-200">電力、蒸氣、熱能</span>產生的排放。雖然不是自己燒，但用電就要負責！</p>
-                    <div class="mt-1 text-emerald-300 text-[10px]">✅ 範例：辦公室用電、空調</div>
-                </div>
-
-                <div class="bg-emerald-800/30 rounded-lg p-2">
-                    <h4 class="font-bold text-emerald-300 flex items-center gap-1 text-sm">🌍 Scope 3 其他間接</h4>
-                    <p class="text-gray-200 text-xs leading-relaxed">上下游供應鏈：<span class="text-yellow-200">員工通勤、商務旅行、產品運輸、廢棄物處理、供應商生產</span>等。</p>
-                    <div class="mt-1 text-emerald-300 text-[10px]">✅ 範例：員工出差飛機、漢堡供應鏈</div>
-                </div>
-
-                <div class="bg-emerald-800/30 rounded-lg p-2">
-                    <h4 class="font-bold text-emerald-300 flex items-center gap-1 text-sm">🎯 本關挑戰</h4>
-                    <p class="text-gray-200 text-xs leading-relaxed">將6個項目正確分類到 Scope 1 或 Scope 2/3，<span class="text-yellow-200">每答對一題 +10分、+2kg 減碳量</span>！</p>
-                </div>
-
-                <div class="bg-emerald-800/30 rounded-lg p-2">
-                    <h4 class="font-bold text-emerald-300 flex items-center gap-1 text-sm">🧠 小測驗</h4>
-                    <p class="text-gray-200 text-xs">💭 下列哪一項屬於 Scope 1 直接排放？</p>
-                    <div class="mt-1 space-y-1 text-xs">
-                        <label class="flex items-center gap-2 cursor-pointer text-gray-200"><input type="radio" name="quiz" value="a" class="quiz-radio"> A. 員工開車上班</label>
-                        <label class="flex items-center gap-2 cursor-pointer text-gray-200"><input type="radio" name="quiz" value="b" class="quiz-radio"> B. 工廠煙囪排放</label>
-                        <label class="flex items-center gap-2 cursor-pointer text-gray-200"><input type="radio" name="quiz" value="c" class="quiz-radio"> C. 購買的電力</label>
-                    </div>
-                    <p id="quizFeedback" class="text-xs mt-2 text-emerald-300"></p>
-                </div>
-            `;
-            
-            // 綁定測驗事件
+        // 綁定測驗事件（因為知識區是直接寫在 HTML 中的）
+        function bindQuizEvents() {
             const quizRadios = document.querySelectorAll('.quiz-radio');
             const quizFeedback = document.getElementById('quizFeedback');
             quizRadios.forEach(radio => {
@@ -296,7 +284,6 @@
             });
         }
         
-        // 更新 UI
         function updateUI() {
             itemIconEl.innerText = QUESTIONS[currentIndex].icon;
             itemDescEl.innerText = QUESTIONS[currentIndex].description;
@@ -334,7 +321,6 @@
             }
         }
         
-        // 儲存減碳量到 localStorage（僅第一次通關）
         function saveCarbonToLocal(carbonEarned) {
             if (hasCompleted) return;
             
@@ -424,7 +410,7 @@
             progressBarFill.style.width = `${newProgressPercent}%`;
         }
         
-        // ========== 隱藏重置功能（雙擊左側區域7次）==========
+        // 隱藏重置功能（雙擊左側區域7次）
         let resetClickCount = 0;
         let resetTimer = null;
         function setupHiddenReset() {
@@ -470,8 +456,7 @@
             progressBarFill.style.width = "0%";
             progressFractionSpan.innerText = `第1 / ${TOTAL_QS}題`;
             
-            // 載入知識內容
-            loadKnowledge();
+            bindQuizEvents();
             setupHiddenReset();
         }
         
