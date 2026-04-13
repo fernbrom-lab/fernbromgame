@@ -165,11 +165,19 @@
         const location = document.getElementById('location').value;
         const totalPlants = area * 40;
 
+        // 儲存到 localStorage
         localStorage.setItem('greenwall_area', area);
         localStorage.setItem('greenwall_location', location);
         localStorage.setItem('greenwall_total_plants', totalPlants);
 
-        // 真正跳轉到第二步
+        // 確認儲存成功
+        console.log('已儲存:', {
+            area: localStorage.getItem('greenwall_area'),
+            location: localStorage.getItem('greenwall_location'),
+            total: localStorage.getItem('greenwall_total_plants')
+        });
+
+        // 跳轉到第二步
         window.location.href = 'step2_plants.html';
     });
 </script>
