@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>蕨積綠色宇宙 - 第一關：碳盤查分類</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700;800&display=swap" rel="stylesheet">
@@ -14,10 +14,20 @@
         }
         body {
             background: linear-gradient(145deg, #e8f5e9 0%, #c8e6c9 100%);
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
             height: 100%;
+            min-height: 100vh;
+        }
+        /* 允許手機版滾動 */
+        @media (max-width: 768px) {
+            body {
+                overflow-y: auto;
+                height: auto;
+            }
+            .mobile-scroll {
+                overflow-y: visible;
+            }
         }
         .character-float {
             animation: float 3.5s ease-in-out infinite;
@@ -66,22 +76,24 @@
             background: #4ade80;
             border-radius: 10px;
         }
+        /* 手機版按鈕加大 */
         @media (max-width: 768px) {
             .answer-btn {
                 padding: 1rem !important;
                 font-size: 1rem !important;
+            }
+            .game-container {
+                padding-bottom: 20px;
             }
         }
     </style>
 </head>
 <body>
 
-<div class="h-screen w-full flex flex-col md:flex-row relative">
-    
-    <!-- 左中右三欄：知識庫 | 阿蕨角色 | 遊戲區 -->
+<div class="w-full min-h-screen flex flex-col md:flex-row">
     
     <!-- 📚 左側：知識側邊欄（電腦版顯示，手機版隱藏） -->
-    <div class="hidden md:block md:w-4/12 bg-emerald-900/85 backdrop-blur-sm border-r border-white/20 p-4 overflow-y-auto shadow-2xl z-20 knowledge-scroll">
+    <div class="hidden md:block md:w-4/12 bg-emerald-900/85 backdrop-blur-sm border-r border-white/20 p-4 overflow-y-auto shadow-2xl z-20 knowledge-scroll" style="min-height: 100vh;">
         <div class="sticky top-3">
             <div class="flex items-center gap-2 mb-4 pb-2 border-b border-emerald-500/50">
                 <span class="text-2xl">📚</span>
@@ -89,7 +101,6 @@
                 <span class="text-[10px] bg-emerald-500/40 px-2 py-0.5 rounded-full text-emerald-100">先讀再玩</span>
             </div>
             
-            <!-- 知識內容直接寫在這裡 -->
             <div class="space-y-3 text-white/90 text-xs">
                 <div class="bg-emerald-800/40 rounded-lg p-2">
                     <h4 class="font-bold text-emerald-300 flex items-center gap-1 text-sm">📊 什麼是碳盤查？</h4>
@@ -140,7 +151,7 @@
     </div>
     
     <!-- 中間：阿蕨角色區 -->
-    <div class="w-full md:w-4/12 bg-gradient-to-br from-emerald-600 to-green-700 flex flex-col items-center justify-center p-4 relative shadow-2xl z-10">
+    <div class="w-full md:w-4/12 bg-gradient-to-br from-emerald-600 to-green-700 flex flex-col items-center justify-center p-4 relative shadow-2xl z-10" style="min-height: 320px;">
         <div class="absolute inset-0 opacity-10 pointer-events-none">
             <div class="absolute top-10 left-5 text-8xl">🍃</div>
             <div class="absolute bottom-20 right-8 text-9xl rotate-45">🌿</div>
@@ -170,7 +181,7 @@
     </div>
 
     <!-- 右側：遊戲區 -->
-    <div class="w-full md:w-4/12 bg-white/40 backdrop-blur-sm flex flex-col items-center justify-center p-4" style="flex: 1; min-height: 0;">
+    <div class="w-full md:w-4/12 bg-white/40 backdrop-blur-sm flex flex-col items-center justify-center p-4 game-container" style="min-height: 400px;">
         <div class="w-full max-w-md mx-auto">
             <!-- 分數與進度 -->
             <div class="mb-3 bg-white/70 rounded-xl p-2 shadow-md">
@@ -283,16 +294,18 @@
             });
         }
         
+        // 更新UI - 根據 currentIndex 刷新題目
         function updateUI() {
-            itemIconEl.innerText = QUESTIONS[currentIndex].icon;
-            itemDescEl.innerText = QUESTIONS[currentIndex].description;
+            const q = QUESTIONS[currentIndex];
+            itemIconEl.innerText = q.icon;
+            itemDescEl.innerText = q.description;
             progressFractionSpan.innerText = `第${currentIndex+1} / ${TOTAL_QS}題`;
             const progressPercent = (currentIndex / TOTAL_QS) * 100;
             progressBarFill.style.width = `${progressPercent}%`;
             scoreValueSpan.innerText = currentScore;
             
             feedbackTipDiv.className = "mt-3 text-xs font-semibold text-gray-500 bg-gray-100 p-2 rounded-lg";
-            feedbackTipDiv.innerHTML = `🌱 目前項目：${QUESTIONS[currentIndex].description} — 請選擇分類`;
+            feedbackTipDiv.innerHTML = `🌱 目前項目：${q.description} — 請選擇分類`;
         }
         
         function shakeCard() {
@@ -369,18 +382,17 @@
                 setDialogMessage(`✨ 漂亮！下一題來囉～ 繼續挑戰！`);
                 setTimeout(() => {
                     loadNextQuestion();
-                }, 1200);
+                }, 1000);
             }
         }
         
-        function handleIncorrect(selectedType) {
+        function handleIncorrect() {
             if (waitingForNext) return;
             if (answeredCorrect) return;
             
             const currentQ = QUESTIONS[currentIndex];
-            let errorMessage = `❌ ${currentQ.errorMsg}`;
             
-            setDialogMessage(errorMessage, true);
+            setDialogMessage(`❌ ${currentQ.errorMsg}`, true);
             feedbackTipDiv.innerHTML = `⚠️ 答錯了！ ${currentQ.errorMsg.substring(0, 80)}`;
             feedbackTipDiv.classList.add('bg-red-100', 'text-red-700', 'border', 'border-red-200');
             feedbackTipDiv.classList.remove('bg-gray-100', 'text-gray-500');
@@ -388,25 +400,27 @@
         }
         
         function loadNextQuestion() {
+            // 移到下一題
             currentIndex++;
             if (currentIndex >= TOTAL_QS) return;
             
+            // 重置狀態
             answeredCorrect = false;
             waitingForNext = false;
             
+            // 重新啟用按鈕
             scope1Btn.disabled = false;
             otherBtn.disabled = false;
             
+            // 更新畫面
             updateUI();
             
+            // 更新對話
             const nextQ = QUESTIONS[currentIndex];
             setDialogMessage(`🌿 那麼這一項呢？「${nextQ.description}」屬於哪種排放？`, false);
             feedbackTipDiv.innerHTML = `💡 思考排放源是否為公司自有/控制。點擊正確分類獲得10分！`;
             feedbackTipDiv.classList.remove('bg-green-100', 'bg-red-100', 'text-green-800', 'text-red-700');
             feedbackTipDiv.classList.add('bg-gray-100', 'text-gray-500');
-            
-            const newProgressPercent = (currentIndex / TOTAL_QS) * 100;
-            progressBarFill.style.width = `${newProgressPercent}%`;
         }
         
         // 隱藏重置功能（雙擊中間角色區7次）
@@ -464,7 +478,7 @@
             if (answeredCorrect) { setDialogMessage("這題已經答對囉！等待下一題～", false); return; }
             const currentQ = QUESTIONS[currentIndex];
             if (currentQ.correctType === "scope1") handleCorrect();
-            else handleIncorrect("scope1");
+            else handleIncorrect();
         });
         
         otherBtn.addEventListener('click', () => {
@@ -472,7 +486,7 @@
             if (answeredCorrect) { setDialogMessage("這題已經答對囉！等待下一題～", false); return; }
             const currentQ = QUESTIONS[currentIndex];
             if (currentQ.correctType === "other") handleCorrect();
-            else handleIncorrect("other");
+            else handleIncorrect();
         });
         
         const fernImg = document.querySelector('img');
