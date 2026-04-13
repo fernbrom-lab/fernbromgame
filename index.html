@@ -1,511 +1,761 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>蕨積綠色宇宙 - 碳排分類挑戰</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
-    <style>
-        * {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        }
-        body {
-            background: linear-gradient(145deg, #eaf7e6 0%, #c8e6c9 100%);
-        }
-        /* 自定义弹跳与漂浮动画 */
-        .character-float {
-            animation: float 3.5s ease-in-out infinite;
-        }
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-12px); }
-            100% { transform: translateY(0px); }
-        }
-        .bubble-glow {
-            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.3) inset;
-        }
-        .card-hover {
-            transition: all 0.2s ease;
-        }
-        .card-hover:active {
-            transform: scale(0.97);
-        }
-        .shake-animation {
-            animation: shake 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
-        }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-6px); }
-            75% { transform: translateX(6px); }
-        }
-        .pulse-green {
-            animation: pulse-green 0.5s ease-out;
-        }
-        @keyframes pulse-green {
-            0% { box-shadow: 0 0 0 0 rgba(34,197,94,0.5); background-color: #dcfce7; }
-            70% { box-shadow: 0 0 0 12px rgba(34,197,94,0); background-color: #bbf7d0; }
-            100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); background-color: transparent; }
-        }
-        .progress-bar-fill {
-            transition: width 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-        }
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-        /* 自定义滚动条 */
-        ::-webkit-scrollbar {
-            width: 4px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #e2e8f0;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #4ade80;
-            border-radius: 10px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>蕨積 — 植物 x 工程 x 碳生活</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;900&family=Noto+Sans+TC:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* ===== 共用樣式 ===== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --ink: #1a1a14;
+      --moss: #3d5a38;
+      --fern: #5a7a4a;
+      --sage: #8aab7a;
+      --mist: #d4e4c8;
+      --cream: #f5f0e8;
+      --stone: #9a9080;
+      --paper: #faf7f2;
+    }
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ----- 導覽列 (完整保留) ----- */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 4vw; height: 72px;
+      background: rgba(250,247,242,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(90,122,74,0.12);
+    }
+    nav.scrolled { box-shadow: 0 2px 24px rgba(61,90,56,0.10); }
+
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0; }
+    .logo-mark { width: 38px; height: 38px; flex-shrink: 0; }
+    .logo-mark img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .logo-text {
+      font-family: 'Noto Serif TC', serif;
+      font-weight: 900;
+      font-size: 1.35rem;
+      color: var(--moss);
+      letter-spacing: 0.05em;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .logo-text span {
+      display: block;
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      color: var(--stone);
+      margin-top: 2px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+      align-items: center;
+      white-space: nowrap;
+    }
+    .nav-links li {
+      position: relative;
+      padding: 0 2px;
+    }
+    .nav-links a {
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      color: var(--ink);
+      text-decoration: none;
+      padding-bottom: 3px;
+      opacity: 0.75;
+      display: inline-block;
+    }
+    .nav-links a:hover {
+      opacity: 1;
+      color: var(--fern);
+    }
+    .nav-contact {
+      padding: 8px 20px !important;
+      border: 1px solid var(--fern) !important;
+      border-radius: 2px;
+      color: var(--fern) !important;
+      opacity: 1 !important;
+      margin-left: 0.5rem;
+    }
+    .nav-contact:hover {
+      background: var(--fern);
+      color: white !important;
+    }
+    .has-dropdown > a::after { display: none; }
+
+    .nav-links li .dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 18px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(250,247,242,0.98);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(90,122,74,0.14);
+      border-top: 2px solid var(--fern);
+      box-shadow: 0 12px 40px rgba(61,90,56,0.12);
+      min-width: 148px;
+      list-style: none;
+      padding: 8px 0;
+      z-index: 300;
+    }
+    .nav-links li:hover .dropdown,
+    .nav-links li:focus-within .dropdown {
+      display: block;
+    }
+    .nav-links li .dropdown::before {
+      content: '';
+      position: absolute;
+      top: -7px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 6px solid var(--fern);
+    }
+    .dropdown li a {
+      display: block;
+      padding: 10px 20px;
+      font-size: 0.78rem;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      color: var(--ink);
+      opacity: 0.7;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+    .dropdown li a:hover {
+      opacity: 1;
+      color: var(--fern);
+      padding-left: 26px;
+      background: rgba(90,122,74,0.04);
+    }
+    .dropdown li + li { border-top: 1px solid rgba(90,122,74,0.08); }
+
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+      width: 40px; height: 40px;
+      cursor: pointer;
+      background: none; border: none;
+      flex-shrink: 0;
+    }
+    .hamburger span {
+      display: block;
+      width: 24px; height: 1.5px;
+      background: var(--moss);
+      transition: transform 0.2s ease;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
+    .mobile-menu {
+      position: fixed; top: 72px; left: 0; right: 0; bottom: 0;
+      background: #faf7f2;
+      border-bottom: 1px solid rgba(90,122,74,0.15);
+      padding: 0 6vw 40px;
+      z-index: 99;
+      overflow-y: auto;
+      transform: translateX(100%);
+      visibility: hidden;
+      transition: transform 0.3s ease;
+    }
+    .mobile-menu.open { transform: translateX(0); visibility: visible; }
+    .mobile-menu ul { list-style: none; }
+    .mobile-menu > ul > li > a,
+    .mobile-parent {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 0;
+      font-family: 'Noto Serif TC', serif;
+      font-weight: 600;
+      font-size: 1rem;
+      letter-spacing: 0.08em;
+      color: var(--moss);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(90,122,74,0.1);
+      cursor: pointer;
+    }
+    .mobile-parent:hover, .mobile-menu > ul > li > a:hover { color: var(--fern); }
+    .mobile-caret { display: inline-block; transition: transform 0.2s; }
+    .mobile-caret.open { transform: rotate(180deg); }
+    .mobile-sub {
+      list-style: none;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    .mobile-sub.open { max-height: 200px; }
+    .mobile-sub li a {
+      display: block;
+      padding: 11px 0 11px 16px;
+      font-size: 0.85rem;
+      color: var(--stone);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(90,122,74,0.06);
+      letter-spacing: 0.06em;
+    }
+    .mobile-sub li a:hover { color: var(--fern); }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+    }
+
+    /* ----- 頁面內容區域 (角色卡樣式完整保留，不影響既有nav/footer) ----- */
+    .content {
+      flex: 1;
+      padding-top: 92px; /* 72px nav + 20px 間距 */
+      padding-bottom: 40px;
+    }
+
+    /* 角色卡片專用樣式 — 完全整合自原本設計，不與模板衝突 */
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 32px 20px;
+    }
+    .hero-section {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .hero-section h1 {
+      font-family: 'Noto Serif TC', serif;
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: #3f6030;
+    }
+    .hero-section h1 span {
+      font-size: 1.6rem;
+      color: #7f6e58;
+      display: block;
+      margin-top: 8px;
+    }
+    .hero-sub {
+      color: #8b7a64;
+      margin-top: 12px;
+      font-size: 1rem;
+      border-top: 1px solid #d9cfc0;
+      display: inline-block;
+      padding-top: 12px;
+    }
+
+    .duo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-bottom: 48px;
+    }
+
+    /* 好朋友專用標題區塊 (保留原有視覺，調整後更乾淨) */
+    .friends-header-block {
+      text-align: center;
+      margin: 32px 0 24px 0;
+    }
+    .friends-header-block .section-title {
+      font-family: 'Noto Serif TC', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #3d5a38;
+      letter-spacing: 0.02em;
+    }
+    .friends-header-block .hero-subhead {
+      font-size: 0.95rem;
+      color: #7f6e58;
+      max-width: 700px;
+      margin: 12px auto 0;
+      line-height: 1.5;
+    }
+    .illustration-top {
+      text-align: center;
+      margin: 20px 0 40px;
+    }
+    .illustration-top img {
+      max-width: 100%;
+      border-radius: 32px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      background: #dbd0bf;
+    }
+
+    .friends-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+      margin-bottom: 32px;
+    }
+    .friends-row2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      max-width: 66%;
+      margin: 0 auto 48px auto;
+    }
+
+    /* 通用角色卡片 */
+    .character-card {
+      background: #fffdf9;
+      border-radius: 24px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+      border: 1px solid #e2d9ce;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+      height: 100%;
+    }
+    .character-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 26px rgba(0,0,0,0.08);
+    }
+    .card-layout {
+      display: flex;
+      flex-direction: row;
+      height: 100%;
+    }
+    .card-photo {
+      flex: 0 0 140px;
+      background: #eef2e7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 12px;
+      border-right: 2px solid #e8e0d4;
+    }
+    .card-photo img {
+      width: 110px;
+      height: 110px;
+      object-fit: cover;
+      border-radius: 20px;
+      background: #cfdec2;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+    }
+    .card-info {
+      flex: 1;
+      padding: 16px 18px;
+    }
+    .title-block {
+      margin-bottom: 8px;
+    }
+    .name {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #3f6030;
+      font-family: 'Noto Serif TC', serif;
+      letter-spacing: -0.2px;
+    }
+    .sci-name {
+      font-size: 0.7rem;
+      color: #9b8a70;
+      font-style: italic;
+    }
+    .badge-tag {
+      display: inline-block;
+      background: #e7e0d3;
+      padding: 3px 12px;
+      border-radius: 30px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: #5a4a32;
+      margin: 8px 0 10px 0;
+    }
+    .desc-section {
+      margin-bottom: 10px;
+    }
+    .desc-line {
+      font-size: 0.75rem;
+      line-height: 1.45;
+      margin-bottom: 4px;
+      color: #4a463e;
+    }
+    .desc-line strong {
+      color: #4a6b3c;
+    }
+    .trait-bubbles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 10px 0 8px;
+    }
+    .trait-bubble {
+      background: #f2ede4;
+      padding: 2px 12px;
+      border-radius: 30px;
+      font-size: 0.65rem;
+      font-weight: 500;
+      color: #5a4d38;
+    }
+    .quote-block {
+      font-style: italic;
+      border-left: 3px solid #c2aa7a;
+      padding-left: 10px;
+      margin: 10px 0 10px;
+      font-size: 0.75rem;
+      color: #6a5d48;
+    }
+    .role-tag {
+      background: #4a6b3c;
+      color: white;
+      display: inline-block;
+      padding: 4px 14px;
+      border-radius: 30px;
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    .team-spirit {
+      margin-top: 48px;
+      background: #e9e1d2;
+      border-radius: 28px;
+      padding: 28px 24px;
+      text-align: center;
+    }
+
+    @media (max-width: 860px) {
+      .container {
+        padding: 0 20px;
+      }
+      .duo-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+      .friends-grid {
+        grid-template-columns: 1fr;
+      }
+      .friends-row2 {
+        grid-template-columns: 1fr;
+        max-width: 100%;
+        margin: 0 0 32px 0;
+      }
+      .card-photo {
+        flex: 0 0 110px;
+      }
+      .card-photo img {
+        width: 85px;
+        height: 85px;
+      }
+      .name {
+        font-size: 1.2rem;
+      }
+      .hero-section h1 {
+        font-size: 2rem;
+      }
+    }
+
+    /* ----- Footer (完整保留) ----- */
+    footer {
+      border-top: 1px solid rgba(90,122,74,0.15);
+      padding: 40px 4vw;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--paper);
+      margin-top: auto;
+    }
+    .footer-logo {
+      font-family: 'Noto Serif TC', serif;
+      font-weight: 900;
+      font-size: 1.1rem;
+      color: var(--moss);
+      letter-spacing: 0.05em;
+    }
+    .footer-copy {
+      font-size: 0.75rem;
+      color: var(--stone);
+      letter-spacing: 0.1em;
+    }
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+    .footer-links a {
+      font-size: 0.75rem;
+      color: var(--stone);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    .footer-links a:hover {
+      opacity: 1;
+      color: var(--fern);
+    }
+    @media (max-width: 768px) {
+      footer {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+      }
+      .footer-links {
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+    }
+  </style>
 </head>
-<body class="h-screen w-full overflow-hidden font-sans antialiased">
+<body>
+  <!-- 導覽列佔位 -->
+  <div id="nav-placeholder"></div>
 
-    <div class="h-screen w-full flex flex-col md:flex-row relative backdrop-blur-sm">
-        
-        <!-- 左侧阿蕨區域 裝飾更豐富 -->
-        <div class="w-full md:w-5/12 bg-gradient-to-br from-emerald-600 to-green-700 flex flex-col items-center justify-center p-5 relative shadow-2xl z-10">
-            <!-- 裝飾性葉片背景 -->
-            <div class="absolute inset-0 opacity-10 pointer-events-none">
-                <div class="absolute top-10 left-5 text-8xl">🍃</div>
-                <div class="absolute bottom-20 right-8 text-9xl rotate-45">🌿</div>
-                <div class="absolute top-1/3 right-2 text-7xl">🍂</div>
+  <!-- 頁面主要內容：已塞入完整的蕨積角色介紹區塊，其餘完全不變動 -->
+  <main class="content">
+    <div class="container">
+      <!-- 標題區 -->
+      <div class="hero-section">
+        <h1>蕨積宇宙 · 靈魂雙人組<br><span>阿蕨 Fern ╳ 小積 Brom</span></h1>
+        <div class="hero-sub">理性與務實交織，綠色生活的策劃者與實踐者</div>
+      </div>
+
+      <!-- 雙主角：阿蕨 + 小積 (2欄) -->
+      <div class="duo-grid">
+        <!-- 阿蕨 -->
+        <div class="character-card">
+          <div class="card-layout">
+            <div class="card-photo">
+              <img src="fern.png?text=阿蕨+Fern" alt="阿蕨"
+                   onerror="this.onerror=null; this.src='https://placehold.co/400x400/c2d4b2/5a7a4a?text=蕨類·阿蕨';">
             </div>
-            
-            <!-- 蕨類角色圖標 + 動畫 -->
-            <div class="character-float relative z-20">
-                <div class="bg-white/20 backdrop-blur-sm rounded-full p-3 shadow-2xl">
-                    <img src="fern.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1995/1995572.png'; this.onerror=null;" class="w-36 h-36 md:w-44 md:h-44 object-contain drop-shadow-xl">
-                </div>
+            <div class="card-info">
+              <div class="title-block">
+                <div class="name">阿蕨 Fern</div>
+                <div class="sci-name">Nephrolepis / 蕨類</div>
+              </div>
+              <div class="badge-tag">🌿 老派知識份子・系統派解題專家</div>
+              <div class="desc-section">
+                <div class="desc-line"><strong>🌿 外型</strong>：高瘦挺拔，葉片像展開的書頁，永遠站得比別人高一點。</div>
+                <div class="desc-line"><strong>🧠 個性</strong>：冷靜理性、邏輯派，講話不多但每一句都像重點整理。</div>
+                <div class="desc-line"><strong>📚 習性</strong>：耐陰、慢長，習慣在角落默默把事情做到最好。</div>
+              </div>
+              <div class="trait-bubbles">
+                <span class="trait-bubble">綠色顧問本體</span>
+                <span class="trait-bubble">系統派解題專家</span>
+                <span class="trait-bubble">邏輯構築者</span>
+              </div>
+              <div class="quote-block">「問題不急，先釐清脈絡。」</div>
+              <div class="role-tag">🌱 蕨積策略長・首席顧問</div>
             </div>
-            
-            <!-- 對話氣泡 (毛玻璃) -->
-            <div class="mt-6 w-full max-w-sm relative z-20 transform transition-all duration-300">
-                <div class="bg-white/95 backdrop-blur-sm rounded-3xl p-5 shadow-2xl border-l-[10px] border-emerald-700 bubble-glow">
-                    <div class="flex items-start gap-2">
-                        <span class="text-3xl">🌱</span>
-                        <div class="flex-1">
-                            <h3 class="font-black text-xl text-gray-800 tracking-tight">阿蕨 · 碳智庫</h3>
-                            <p id="dialog" class="text-gray-700 font-medium mt-1 leading-relaxed text-base">歡迎！請幫我判斷每個項目的碳排放分類 🌍</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- 對話小尾巴 -->
-                <div class="absolute -bottom-2 left-8 w-4 h-4 bg-white/95 rotate-45 rounded-sm"></div>
-            </div>
-            
-            <!-- 額外碳知識小提示 -->
-            <div class="absolute bottom-4 left-0 right-0 text-center text-white/60 text-xs font-medium md:block hidden">
-                💡 直接排放(Scope1) | 間接排放(Scope2/3)
-            </div>
+          </div>
         </div>
 
-        <!-- 右側遊戲主區域 美觀卡片設計 -->
-        <div class="w-full md:w-7/12 bg-white/40 backdrop-blur-sm flex flex-col items-center justify-center p-6 overflow-y-auto">
-            <div class="w-full max-w-lg mx-auto">
-                <!-- 分數與進度條區域 -->
-                <div class="mb-6 bg-white/70 rounded-2xl p-4 shadow-md border border-white/50">
-                    <div class="flex justify-between items-center mb-2">
-                        <div class="flex items-center gap-2">
-                            <span class="text-2xl">🏆</span>
-                            <span class="font-black text-gray-700 text-lg">碳排積分</span>
-                        </div>
-                        <div class="bg-gray-800 text-white px-4 py-1.5 rounded-full font-black text-xl">
-                            <span id="scoreValue">0</span> / <span id="totalScore">60</span>
-                        </div>
-                    </div>
-                    <div class="flex justify-between text-xs text-gray-600 font-semibold mt-1">
-                        <span>📊 答對進度</span>
-                        <span id="progressFraction">第1 / 6題</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-3 mt-2 overflow-hidden">
-                        <div id="progressBar" class="progress-bar-fill bg-gradient-to-r from-emerald-500 to-green-600 h-3 rounded-full" style="width: 0%"></div>
-                    </div>
-                </div>
-
-                <!-- 主要遊戲卡片 -->
-                <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 border border-emerald-100 transform transition-all duration-300">
-                    <div class="text-center">
-                        <!-- 動態物品圖標 附帶彈跳效果 -->
-                        <div id="item-icon" class="text-[140px] md:text-[160px] mb-3 transition-all duration-300 drop-shadow-2xl inline-block hover:scale-105 cursor-default">🏭</div>
-                        <!-- 物品描述 -->
-                        <div class="mt-2 mb-6">
-                            <p id="item-description" class="text-gray-700 font-bold text-xl md:text-2xl bg-gray-50 inline-block px-6 py-2 rounded-full shadow-inner">工廠煙囪排放</p>
-                        </div>
-                        
-                        <!-- 兩個主要分類按鈕 -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4">
-                            <button id="scope1Btn" class="group relative bg-gradient-to-br from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-black py-5 rounded-2xl text-xl tracking-wide shadow-lg transition-all duration-200 card-hover flex items-center justify-center gap-3 border border-white/30">
-                                <span class="text-3xl">🏭</span>
-                                <span>直接排放 (Scope 1)</span>
-                                <div class="absolute inset-0 rounded-2xl bg-white/0 group-hover:bg-white/10 transition"></div>
-                            </button>
-                            <button id="otherBtn" class="group relative bg-gradient-to-br from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 text-white font-black py-5 rounded-2xl text-xl tracking-wide shadow-lg transition-all duration-200 card-hover flex items-center justify-center gap-3 border border-white/30">
-                                <span class="text-3xl">🌍</span>
-                                <span>間接／其他 (Scope 2/3)</span>
-                                <div class="absolute inset-0 rounded-2xl bg-white/0 group-hover:bg-white/10 transition"></div>
-                            </button>
-                        </div>
-                        
-                        <!-- 額外反饋提示區 -->
-                        <div id="feedbackTip" class="mt-6 text-sm font-semibold text-gray-500 bg-gray-100 p-2 rounded-xl transition-all">
-                            💡 點擊分類，幫助阿蕨釐清碳排源頭
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 底部可愛裝飾 -->
-                <div class="text-center mt-6 text-gray-500 text-xs font-medium flex justify-center gap-4">
-                    <span>🌿 淨零旅程</span>
-                    <span>⚡ 知識即是力量</span>
-                    <span>🍃 第1關 · 碳足跡辨識</span>
-                </div>
+        <!-- 小積 -->
+        <div class="character-card">
+          <div class="card-layout">
+            <div class="card-photo">
+              <img src="brom.png?text=小積+Brom" alt="小積"
+                   onerror="this.onerror=null; this.src='https://placehold.co/400x400/bdd2ab/5a7a4a?text=積水鳳梨·小積';">
             </div>
+            <div class="card-info">
+              <div class="title-block">
+                <div class="name">小積 Brom</div>
+                <div class="sci-name">Guzmania / 積水鳳梨</div>
+              </div>
+              <div class="badge-tag">💧 務實生活派・現場執行擔當</div>
+              <div class="desc-section">
+                <div class="desc-line"><strong>🌱 外型</strong>：矮胖圓潤，葉片層層包覆像在存東西，中心永遠有水。</div>
+                <div class="desc-line"><strong>💬 個性</strong>：親切直接、帶點厭世幽默，什麼都可以聊，什麼都能落地。</div>
+                <div class="desc-line"><strong>🛠 習性</strong>：能存水、能撐環境，在哪都活得下來。</div>
+              </div>
+              <div class="trait-bubbles">
+                <span class="trait-bubble">人間翻譯機</span>
+                <span class="trait-bubble">落地執行王</span>
+                <span class="trait-bubble">厭世但可靠</span>
+              </div>
+              <div class="quote-block">「講人話，我幫你做到。」</div>
+              <div class="role-tag">⚙️ 蕨積營運總監・專案實現者</div>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <!-- ========= 調整後：好朋友標題＋插圖區（僅修改此區塊，其餘完全不變） ========= -->
+      <div class="friends-header-block">
+        <div class="section-title">🌿 阿蕨與小積的好朋友們 🌿</div>
+        <div class="hero-subhead">
+          在「蕨積綠色宇宙」裡可不是孤單的兩人組～他們有一群超有個性的植物好朋友！每個朋友都保留了真實植物特性，是辦公室的植物人，一起推廣綠色生活。
+        </div>
+      </div>
+      <div class="illustration-top">
+        <img src="teamsss.png" alt="蕨積好朋友全員集合" onerror="this.onerror=null; this.src='https://placehold.co/800x500/d4e4c8/5a7a4a?text=蕨積+好朋友+插畫';">
+      </div>
+
+      <!-- 第一排三位好朋友：小龜、虎妹、肉肉 (3欄) 完全保持原樣 -->
+      <div class="friends-grid">
+        <!-- 小龜 -->
+        <div class="character-card">
+          <div class="card-layout">
+            <div class="card-photo"><img src="mons.png?text=小龜" alt="小龜"></div>
+            <div class="card-info">
+              <div class="title-block"><div class="name">小龜</div><div class="sci-name">Monstera</div></div>
+              <div class="badge-tag">🌿 龜背芋・洞洞西裝</div>
+              <div class="desc-line"><strong>外型：</strong>頭上長滿可愛的大洞葉子，像穿了件「洞洞西裝」。</div>
+              <div class="desc-line"><strong>個性：</strong>超級好奇寶寶、冒險王。</div>
+              <div class="trait-bubbles"><span class="trait-bubble">活動策劃部長</span><span class="trait-bubble">探索力MAX</span></div>
+              <div class="quote-block">「新路線？我第一個去踩點！」</div>
+              <div class="role-tag">🏢 團體活動策劃部長</div>
+            </div>
+          </div>
+        </div>
+        <!-- 虎妹 -->
+        <div class="character-card">
+          <div class="card-layout">
+            <div class="card-photo"><img src="sans.png?text=虎妹" alt="虎妹"></div>
+            <div class="card-info">
+              <div class="title-block"><div class="name">虎妹</div><div class="sci-name">Sansevieria</div></div>
+              <div class="badge-tag">⚡ 虎尾蘭・劍葉戰士</div>
+              <div class="desc-line"><strong>外型：</strong>頭頂直挺挺的劍狀葉，戴一副酷酷的墨鏡。</div>
+              <div class="desc-line"><strong>個性：</strong>超耐操、超獨立，24小時都能光合作用。</div>
+              <div class="trait-bubbles"><span class="trait-bubble">夜貓子光合</span><span class="trait-bubble">健身教練</span></div>
+              <div class="quote-block">「半夜運動最安靜，要跟嗎？」</div>
+              <div class="role-tag">💪 夜間特訓・健身擔當</div>
+            </div>
+          </div>
+        </div>
+        <!-- 肉肉 -->
+        <div class="character-card">
+          <div class="card-layout">
+            <div class="card-photo"><img src="succ.png?text=肉肉" alt="肉肉"></div>
+            <div class="card-info">
+              <div class="title-block"><div class="name">肉肉</div><div class="sci-name">Succulent</div></div>
+              <div class="badge-tag">🌵 多肉植物・Q彈教主</div>
+              <div class="desc-line"><strong>外型：</strong>圓圓胖胖的小肉球頭，穿西裝特別Q彈。</div>
+              <div class="desc-line"><strong>個性：</strong>超會存水、超佛系，講話慢半拍。</div>
+              <div class="trait-bubbles"><span class="trait-bubble">儲水大師</span><span class="trait-bubble">療癒系</span></div>
+              <div class="quote-block">「慢慢來，水要存，心情也要。」</div>
+              <div class="role-tag">🌸 療癒系吉祥物</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 第二排兩位好朋友：琴哥、空空 (2欄置中) 完全保持原樣 -->
+      <div class="friends-row2">
+        <!-- 琴哥 -->
+        <div class="character-card">
+          <div class="card-layout">
+            <div class="card-photo"><img src="ficus.png?text=琴哥" alt="琴哥"></div>
+            <div class="card-info">
+              <div class="title-block"><div class="name">琴哥</div><div class="sci-name">Ficus lyrata</div></div>
+              <div class="badge-tag">🎻 琴葉榕・大提琴紳士</div>
+              <div class="desc-line"><strong>外型：</strong>高挑的大提琴狀葉子，穿西裝超有型。</div>
+              <div class="desc-line"><strong>個性：</strong>文青、愛音樂、講話輕聲細語。</div>
+              <div class="trait-bubbles"><span class="trait-bubble">氛圍大師</span><span class="trait-bubble">優雅擔當</span></div>
+              <div class="quote-block">「今天想聽巴哈，還是蕭邦？」</div>
+              <div class="role-tag">🎵 辦公室氛圍擔當</div>
+            </div>
+          </div>
+        </div>
+        <!-- 空空 -->
+        <div class="character-card">
+          <div class="card-layout">
+            <div class="card-photo"><img src="till.png?text=空空" alt="空空"></div>
+            <div class="card-info">
+              <div class="title-block"><div class="name">空空</div><div class="sci-name">Tillandsia</div></div>
+              <div class="badge-tag">☁️ 空氣鳳梨・漂浮旅人</div>
+              <div class="desc-line"><strong>外型：</strong>銀灰色細葉，像一團會飛的雲，直接漂浮上班。</div>
+              <div class="desc-line"><strong>個性：</strong>自由奔放、零負擔，講話超快。</div>
+              <div class="trait-bubbles"><span class="trait-bubble">無土栽培</span><span class="trait-bubble">外派特派員</span></div>
+              <div class="quote-block">「不用土壤，哪裡都是我的座位。」</div>
+              <div class="role-tag">✈️ 跨部門外派特派員</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 辦公室日常 (完全保持原樣) -->
+      <div class="team-spirit">
+        <div style="font-family:'Noto Serif TC'; font-weight:600; font-size:1.2rem; color:#4a6b3c;">🌱 蕨積辦公室日常 🌱</div>
+        <div style="color: #5e5b52; margin-top: 10px;">這些好朋友們平常就在蕨積辦公室一起上班、一起光合作用、一起推廣「植物減碳」的綠色生活理念。<br>從洞洞西裝小龜到漂浮上班的空空，每個植物人都有獨一無二的綠色超能力，讓每一天充滿療癒與永續的靈感。</div>
+      </div>
     </div>
+  </main>
 
-    <script>
-        // ======================= 題庫 (豐富6道題目) =======================
-        const QUESTIONS = [
-            { 
-                icon: "🏭", 
-                description: "工廠煙囪燃燒煤炭排放黑煙", 
-                correctType: "scope1", 
-                successMsg: "完全正確！工廠直接燃燒燃料屬於直接排放 (Scope 1) 👍",
-                errorMsg: "不對喔～煙囪排放來自公司自有設施的直接燃燒，屬於直接排放 (Scope 1) 喔！"
-            },
-            { 
-                icon: "💡", 
-                description: "辦公室照明與空調用電", 
-                correctType: "other", 
-                successMsg: "答對了！外購電力屬於間接排放 (Scope 2)，並非直接排放唷 ⚡",
-                errorMsg: "哎呀！用電是來自電力公司，歸類在間接排放 (Scope 2/3)，試試另一個選項！"
-            },
-            { 
-                icon: "🍔", 
-                description: "生產牛肉漢堡 (農場飼養、加工運輸)", 
-                correctType: "other", 
-                successMsg: "太棒了！漢堡的生命週期排放屬於間接排放 (Scope 3)，涵蓋供應鏈各環節 🍃",
-                errorMsg: "牛隻甲烷、飼料種植、加工運送⋯都是間接排放唷！選擇間接分類才正確～"
-            },
-            { 
-                icon: "🚛", 
-                description: "公司自有貨車運送產品 (燃油)", 
-                correctType: "scope1", 
-                successMsg: "正確！自有貨車燃燒汽油/柴油屬於直接排放 (Scope 1) ✅",
-                errorMsg: "公司擁有或控制的車輛排放是直接排放喔！試試 Scope 1 選項 🚛"
-            },
-            { 
-                icon: "⚡", 
-                description: "向台電購買的電力", 
-                correctType: "other", 
-                successMsg: "專業判斷！外購電力是典型的間接排放 (Scope 2) 🎯",
-                errorMsg: "外購電力並非公司自己燃燒產生，正確歸類為間接排放 (Scope 2/3) 唷～"
-            },
-            { 
-                icon: "✈️", 
-                description: "員工出差搭乘國際航班", 
-                correctType: "other", 
-                successMsg: "完美！商務航空旅行屬於Scope 3 (其他間接排放)，分類正確 🌏",
-                errorMsg: "飛機排放並非公司直接擁有，歸屬間接排放 (Scope 3) 才正確！再試一次～"
-            }
-        ];
-        
-        const TOTAL_QS = QUESTIONS.length;
-        const MAX_SCORE = TOTAL_QS * 10;  // 每題10分 共60分
-        
-        // 遊戲狀態
-        let currentIndex = 0;            // 0-based
-        let currentScore = 0;
-        let waitingForNext = false;       // 避免連點 / 等待切換下一題
-        let answeredCorrect = false;      // 當前題目是否已經答對 (防止重複加分)
-        
-        // DOM 元素
-        const dialogEl = document.getElementById('dialog');
-        const itemIconEl = document.getElementById('item-icon');
-        const itemDescEl = document.getElementById('item-description');
-        const scoreValueSpan = document.getElementById('scoreValue');
-        const totalScoreSpan = document.getElementById('totalScore');
-        const progressFractionSpan = document.getElementById('progressFraction');
-        const progressBarFill = document.getElementById('progressBar');
-        const feedbackTipDiv = document.getElementById('feedbackTip');
-        const scope1Btn = document.getElementById('scope1Btn');
-        const otherBtn = document.getElementById('otherBtn');
-        
-        // 初始化顯示總分上限
-        totalScoreSpan.innerText = MAX_SCORE;
-        
-        // 更新UI (分數，進度條，題目內容)
-        function updateUI() {
-            // 更新分數顯示
-            scoreValueSpan.innerText = currentScore;
-            // 更新題目進度文字
-            progressFractionSpan.innerText = `第${currentIndex+1} / ${TOTAL_QS}題`;
-            // 更新進度條寬度 (根據答對題數 / 總題數，但為視覺友善按題號進度)
-            const progressPercent = ((currentIndex) / TOTAL_QS) * 100;
-            progressBarFill.style.width = `${progressPercent}%`;
-            // 顯示當前題目的 icon 及描述
-            const q = QUESTIONS[currentIndex];
-            itemIconEl.innerText = q.icon;
-            itemDescEl.innerText = q.description;
-            // 重設反饋提示為一般狀態 (非錯誤閃爍)
-            feedbackTipDiv.className = "mt-6 text-sm font-semibold text-gray-500 bg-gray-100 p-2 rounded-xl transition-all";
-            feedbackTipDiv.innerHTML = `🌱 目前項目：${q.description} — 請選擇分類`;
-        }
-        
-        // 動畫: 錯誤shake
-        function shakeCard() {
-            const gameCard = document.querySelector('.bg-white.rounded-3xl');
-            gameCard.classList.add('shake-animation');
-            setTimeout(() => {
-                gameCard.classList.remove('shake-animation');
-            }, 300);
-        }
-        
-        // 正確時按鈕閃爍綠光
-        function correctFlash() {
-            const btnGroup = document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2');
-            if(btnGroup) {
-                btnGroup.classList.add('pulse-green');
-                setTimeout(() => btnGroup.classList.remove('pulse-green'), 500);
-            }
-        }
-        
-        // 顯示對話框 (阿蕨發言)
-        function setDialogMessage(msg, isError = false) {
-            dialogEl.innerText = msg;
-            // 視覺微反饋：對話框改變邊框顏色
-            const dialogBox = document.querySelector('.bg-white\\/95');
-            if (isError) {
-                dialogBox.style.borderLeftColor = '#ef4444';
-                setTimeout(() => {
-                    if (dialogBox) dialogBox.style.borderLeftColor = '#047857';
-                }, 800);
-            } else {
-                dialogBox.style.borderLeftColor = '#047857';
-            }
-        }
-        
-        // 正確處理 (加分，顯示成功，禁用按鈕並準備下一題)
-        function handleCorrect() {
-            if (waitingForNext) return;
-            if (answeredCorrect) return; // 已經加分過
-            
-            // 加分 (每題10分)
-            currentScore += 10;
-            scoreValueSpan.innerText = currentScore;
-            answeredCorrect = true;
-            waitingForNext = true;
-            
-            // 正確動畫與反饋
-            correctFlash();
-            const currentQ = QUESTIONS[currentIndex];
-            setDialogMessage(`✅ ${currentQ.successMsg} +10分！`, false);
-            feedbackTipDiv.innerHTML = `🎉 正確！ ${currentQ.successMsg.substring(0, 60)}`;
-            feedbackTipDiv.classList.add('bg-green-100', 'text-green-800', 'border', 'border-green-300');
-            feedbackTipDiv.classList.remove('bg-gray-100', 'text-gray-500');
-            
-            // 禁用按鈕防止重複點擊
-            scope1Btn.disabled = true;
-            otherBtn.disabled = true;
-            
-            // 判斷是否完成所有題目
-            const isLastQuestion = (currentIndex + 1 === TOTAL_QS);
-            
-            if (isLastQuestion) {
-                // 遊戲完成，顯示過關訊息，跳轉下一關
-                setDialogMessage(`🎉 太強了！全數正確！總分 ${currentScore} 分。前往下一關與小積會合！ 🌟`);
-                feedbackTipDiv.innerHTML = `🏆 完美過關！獲得 ${currentScore}/${MAX_SCORE} 分，前往下一關執行減碳！`;
-                // 延遲跳轉到 level2.html
-                setTimeout(() => {
-                    window.location.href = 'level2.html';
-                }, 1800);
-            } else {
-                // 不是最後一題，延遲加載下一題
-                setDialogMessage(`✨ 漂亮！下一題來囉～ 繼續挑戰！`);
-                setTimeout(() => {
-                    loadNextQuestion();
-                }, 1200);
-            }
-        }
-        
-        // 錯誤處理 (不扣分，提示錯誤，不切換題目)
-        function handleIncorrect(selectedType) {
-            if (waitingForNext) return;
-            if (answeredCorrect) return; // 已答對此題就不能再錯
-            
-            const currentQ = QUESTIONS[currentIndex];
-            const isScope1Error = (selectedType === 'scope1' && currentQ.correctType !== 'scope1');
-            let errorMessage = '';
-            
-            if (isScope1Error) {
-                errorMessage = `❌ ${currentQ.errorMsg}`;
-            } else {
-                errorMessage = `❌ ${currentQ.errorMsg}`;
-            }
-            
-            // 顯示錯誤對話
-            setDialogMessage(errorMessage, true);
-            // 顯示提示區加強教學
-            feedbackTipDiv.innerHTML = `⚠️ 答錯了！ ${currentQ.errorMsg.substring(0, 100)}`;
-            feedbackTipDiv.classList.add('bg-red-100', 'text-red-700', 'border', 'border-red-200');
-            feedbackTipDiv.classList.remove('bg-gray-100', 'text-gray-500');
-            // 震動卡片效果
-            shakeCard();
-            
-            // 按鈕暫時不鎖定，讓玩家重新嘗試 (但可閃一下錯誤)
-            // 為了更好的體驗，不對按鈕禁用，但需要等待重新選擇
-            // 不改變等待標誌，可以繼續點擊
-        }
-        
-        // 載入下一題 (重置狀態)
-        function loadNextQuestion() {
-            // 移到下一題
-            currentIndex++;
-            if (currentIndex >= TOTAL_QS) return; // 安全
-            
-            // 重置當前題目相關狀態
-            answeredCorrect = false;
-            waitingForNext = false;
-            
-            // 啟用按鈕
-            scope1Btn.disabled = false;
-            otherBtn.disabled = false;
-            
-            // 更新UI (題目，icon，描述)
-            updateUI();
-            
-            // 重置對話框為中性詢問語氣
-            const nextQ = QUESTIONS[currentIndex];
-            setDialogMessage(`🌿 那麼這一項呢？「${nextQ.description}」屬於直接還是間接排放？`, false);
-            feedbackTipDiv.innerHTML = `💡 提示：思考排放源是否為公司自有/控制。點擊正確分類獲得10分！`;
-            feedbackTipDiv.classList.remove('bg-green-100', 'bg-red-100', 'text-green-800', 'text-red-700');
-            feedbackTipDiv.classList.add('bg-gray-100', 'text-gray-500');
-            
-            // 進度條更新: updateUI 已經處理進度百分比 (依據當前索引/總題數)
-            // 但因為答對下一題後進度條基於題號，更好看
-            const newProgressPercent = (currentIndex / TOTAL_QS) * 100;
-            progressBarFill.style.width = `${newProgressPercent}%`;
-        }
-        
-        // 遊戲開始/重置 初始化第一題 (剛載入頁面)
-        function initGame() {
-            currentIndex = 0;
-            currentScore = 0;
-            waitingForNext = false;
-            answeredCorrect = false;
-            scoreValueSpan.innerText = "0";
-            updateUI();  // 顯示第一題內容
-            setDialogMessage(`🌱 歡迎！第一題：「${QUESTIONS[0].description}」是直接排放還是間接呢？`, false);
-            feedbackTipDiv.innerHTML = `🧠 記得！工廠煙囪、自有車輛是直接排放；電力、供應鏈是間接排放喔！`;
-            scope1Btn.disabled = false;
-            otherBtn.disabled = false;
-            // 進度條寬度歸零 (因為目前第0題，答對0題)
-            progressBarFill.style.width = "0%";
-            progressFractionSpan.innerText = `第1 / ${TOTAL_QS}題`;
-        }
-        
-        // 按鈕事件綁定 (點擊時判斷類型)
-        function onSelectScope1() {
-            if (waitingForNext) return;
-            if (answeredCorrect) {
-                setDialogMessage("這題已經答對囉！等待前往下一題吧～ 🌟", false);
-                return;
-            }
-            const currentQ = QUESTIONS[currentIndex];
-            if (currentQ.correctType === "scope1") {
-                // 正確
-                handleCorrect();
-            } else {
-                // 錯誤
-                handleIncorrect("scope1");
-            }
-        }
-        
-        function onSelectOther() {
-            if (waitingForNext) return;
-            if (answeredCorrect) {
-                setDialogMessage("已經過關了，下一題馬上來！放輕鬆～", false);
-                return;
-            }
-            const currentQ = QUESTIONS[currentIndex];
-            if (currentQ.correctType === "other") {
-                // 正確
-                handleCorrect();
-            } else {
-                // 錯誤
-                handleIncorrect("other");
-            }
-        }
-        
-        // 註冊事件監聽
-        scope1Btn.addEventListener('click', onSelectScope1);
-        otherBtn.addEventListener('click', onSelectOther);
-        
-        // 附加鍵盤/觸摸優化 (避免快速點擊)
-        // 啟動遊戲
-        initGame();
-        
-        // 為了增加精緻感: 當正確或錯誤時控制按鈕過渡避免高頻
-        // 並且當等待時按鈕disabled樣式會呈現半透明，防止點擊
-        // 修正視覺: 若使用者嘗試點擊disabled按鈕給出提示
-        function addDisabledHint() {
-            const btns = [scope1Btn, otherBtn];
-            btns.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    if (waitingForNext && btn.disabled) {
-                        // 微小提示但無需打斷
-                        if (!answeredCorrect) return;
-                        setDialogMessage("⏳ 稍等片刻，下一題馬上出現～", false);
-                    }
-                });
-            });
-        }
-        addDisabledHint();
-        
-        // 額外優化: 移動端touch防止縮放干擾
-        document.querySelectorAll('button').forEach(btn => {
-            btn.addEventListener('touchstart', (e) => {
-                // 只為增強觸感
-            });
+  <!-- Footer (原始不動) -->
+  <footer>
+    <ul class="footer-links">
+      <li><a href="shop.html">植物選品</a></li>
+      <li><a href="consult.html">綠色顧問</a></li>
+      <li><a href="fbnote.html">蕨望筆記</a></li>
+      <li><a href="about.html">關於蕨積</a></li>
+    </ul>
+    <p class="footer-copy">© 2026 蕨積 FernBrom . All rights reserved.</p>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // 載入共用導覽列
+      fetch('nav.html')
+        .then(response => response.text())
+        .then(data => {
+          document.getElementById('nav-placeholder').innerHTML = data;
+          initNav();
+        })
+        .catch(err => {
+          console.error('無法載入導覽列:', err);
+          document.getElementById('nav-placeholder').innerHTML = 
+            '<nav style="background:var(--moss);color:white;padding:0 4vw;height:72px;display:flex;align-items:center;">' +
+            '<span style="font-family:Noto Serif TC,serif;font-weight:900;">⚠️ 導覽列載入失敗，請確認 nav.html 是否存在</span>' +
+            '</nav>';
         });
-        
-        // 背景動態彩色水波紋效果 (純裝飾)
-        const styleSheet = document.createElement("style");
-        styleSheet.textContent = `
-            .bg-white\\/40 {
-                background: radial-gradient(circle at 10% 30%, rgba(220, 245, 210, 0.5), rgba(255,255,240,0.3));
-            }
-        `;
-        document.head.appendChild(styleSheet);
-        
-        // 若圖片加載失敗，確保蕨類顯示好看emoji替代
-        const fernImg = document.querySelector('img');
-        if (fernImg) {
-            fernImg.addEventListener('error', function() {
-                this.onerror = null;
-                this.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle fill='%234ade80' cx='50' cy='50' r='45'/%3E%3Ctext x='50' y='70' font-size='50' text-anchor='middle' fill='white'%3E🌿%3C/text%3E%3C/svg%3E";
+
+      function initNav() {
+        var btn = document.getElementById('hamburger');
+        var menu = document.getElementById('mobileMenu');
+        if (btn && menu) {
+          btn.addEventListener('click', function () {
+            btn.classList.toggle('open');
+            menu.classList.toggle('open');
+          });
+          menu.querySelectorAll('.mobile-link').forEach(function (a) {
+            a.addEventListener('click', function () {
+              btn.classList.remove('open');
+              menu.classList.remove('open');
             });
+          });
         }
-        
-        // 額外控制如果中途刷新導致分數顯示正確，無bug
-        window.addEventListener('load', () => {
-            // 確保所有狀態整潔
-            if (currentIndex === 0 && currentScore === 0) {
-                progressBarFill.style.width = "0%";
-            }
+        if (menu) {
+          menu.querySelectorAll('.mobile-parent').forEach(function (parent) {
+            parent.addEventListener('click', function () {
+              var id = parent.getAttribute('data-target');
+              var sub = document.getElementById(id);
+              var caretId = 'caret-' + id.replace('sub-', '');
+              var caret = document.getElementById(caretId);
+              var opening = !sub.classList.contains('open');
+              menu.querySelectorAll('.mobile-sub').forEach(function (s) { s.classList.remove('open'); });
+              menu.querySelectorAll('.mobile-caret').forEach(function (c) { c.classList.remove('open'); });
+              if (opening) {
+                sub.classList.add('open');
+                if (caret) caret.classList.add('open');
+              }
+            });
+          });
+        }
+        window.addEventListener('scroll', function () {
+          var nav = document.getElementById('mainNav');
+          if (nav) nav.classList.toggle('scrolled', window.scrollY > 20);
         });
-        
-    </script>
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+    });
+  </script>
 </body>
 </html>
