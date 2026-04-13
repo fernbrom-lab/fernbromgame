@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>綠碳工坊｜植生牆完整建構 × 碳觀念</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', 'Noto Sans TC', monospace;
+        }
+        body {
+            background: #1f4f2b;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .game-panel {
+            max-width: 1100px;
+            width: 100%;
+            background: #fef9e6;
+            border-radius: 56px;
+            box-shadow: 0 25px 40px rgba(0,0,0,0.3);
+            padding: 28px 30px 38px;
+            transition: all 0.2s;
+        }
+        .page {
+            display: none;
+            animation: fade 0.3s ease;
+        }
+        .page.active {
+            display: block;
+        }
+        @keyframes fade {
+            from { opacity: 0; transform: translateY(8px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        h2 {
+            font-size: 1.9rem;
+            border-left: 12px solid #2e7d32;
+            padding-left: 20px;
+            margin-top: 0;
+            color: #1a3b1e;
+        }
+        .option-group {
+            background: #eef5e8;
+            border-radius: 36px;
+            padding: 20px 28px;
+            margin: 20px 0;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 8px;
+        }
+        select, input {
+            padding: 12px 18px;
+            font-size: 1rem;
+            border-radius: 48px;
+            border: 1px solid #b3cf9b;
+            background: white;
+            width: 100%;
+            max-width: 320px;
+        }
+        button {
+            background: #2b5e2f;
+            border: none;
+            color: white;
+            padding: 12px 28px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 60px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: 0.1s linear;
+            box-shadow: 0 3px 0 #1a3a1a;
+        }
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #1a3a1a;
+        }
+        button:disabled {
+            opacity: 0.5;
+            transform: none;
+            cursor: not-allowed;
+        }
+        .flex-btns {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+        .plant-grid {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+            justify-content: center;
+        }
+        .plant-card {
+            background: #fff2db;
+            border-radius: 28px;
+            padding: 12px 16px;
+            width: 150px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid #cddba6;
+            transition: 0.05s linear;
+        }
+        .plant-card.selected {
+            background: #c8e6b5;
+            border-color: #2e7d32;
+            box-shadow: 0 0 0 2px #f9a825;
+        }
+        .plant-color {
+            width: 40px;
+            height: 40px;
+            border-radius: 40px;
+            margin: 8px auto;
+            border: 1px solid #aaa;
+        }
+        .progress-bar {
+            background: #ddd;
+            border-radius: 40px;
+            height: 28px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: #3c8c40;
+            transition: width 0.1s linear;
+        }
+        canvas {
+            background: #4a6741;
+            border-radius: 24px;
+            display: block;
+            margin: 20px auto;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
+        .badge {
+            background: #2b5e2f20;
+            border-radius: 28px;
+            padding: 12px 18px;
+        }
+        hr {
+            margin: 24px 0;
+            border-color: #cfe3c0;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #5b6e4a;
+            margin-top: 28px;
+        }
+        .plant-note {
+            font-size: 0.75rem;
+            color: #5a6e41;
+            margin-top: 6px;
+        }
+        .warning {
+            color: #b34e3a;
+            background: #ffe8e0;
+            border-radius: 20px;
+            padding: 8px 12px;
+            margin-top: 10px;
+        }
+        @media (max-width: 700px) {
+            .game-panel { padding: 18px; }
+            h2 { font-size: 1.5rem; }
+            .plant-card { width: 130px; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-panel" id="gameApp">
+    <!-- 頁面1：環境＋面積 -->
+    <div id="page1" class="page active">
+        <h2>🌿 第一步 · 植生牆環境</h2>
+        <div class="option-group">
+            <label>📍 設置地點</label>
+            <select id="locationSelect">
+                <option value="outdoor">🌞 室外植生牆</option>
+                <option value="indoor">🏠 室內植生牆</option>
+            </select>
+            <label>📐 面積 (m²) : <span id="areaValue">10</span> m²</label>
+            <input type="range" id="areaSlider" min="5" max="80" value="10" step="1">
+            <label>🌱 面積越大，固碳越多，但施工碳排也會增加</label>
+        </div>
+        <div class="flex-btns">
+            <button id="toPlantBtn">下一步：選擇植物 🌸</button>
+        </div>
+        <footer>🌳 七位小夥伴等你召集，一起打造會呼吸的綠牆</footer>
+    </div>
+
+    <!-- 頁面2：六種植物（含真實養護邏輯） -->
+    <div id="page2" class="page">
+        <h2>🌱 第二步 · 六種植物夥伴</h2>
+        <div class="plant-grid" id="plantGrid"></div>
+        <div class="flex-btns">
+            <button id="backToEnvBtn">⬅ 返回</button>
+            <button id="toWorkerBtn" disabled>下一步：挑選人數 👥</button>
+        </div>
+        <footer>💡 每種植物都有適合的環境，選錯會影響長期固碳效果</footer>
+    </div>
+
+    <!-- 頁面3：施工人數 1~7 -->
+    <div id="page3" class="page">
+        <h2>👥 第三步 · 幾位夥伴施工？</h2>
+        <div class="option-group">
+            <label>🧑‍🌾 施工團隊人數 (最多七位小夥伴)</label>
+            <input type="range" id="workerSlider" min="1" max="7" value="3" step="1">
+            <p style="font-size:2rem; text-align:center; margin:10px" id="workerCountShow">3 人</p>
+            <p>⚡ 人數越多 → 點擊滑鼠施工越快，但施工碳排也會微增</p>
+        </div>
+        <div class="flex-btns">
+            <button id="backToPlantBtn">⬅ 返回植物</button>
+            <button id="toGameBtn">🚧 開始施工！</button>
+        </div>
+    </div>
+
+    <!-- 頁面4：施工遊戲（點陣圖 + 點擊施工） -->
+    <div id="page4" class="page">
+        <h2>🖱️ 第四步 · 點擊滑鼠 團隊協力施工</h2>
+        <div class="badge">
+            <span>👷 施工人數：<span id="gameWorkerNum">0</span> 人</span>&nbsp;&nbsp;|&nbsp;
+            <span>🌿 植物：<span id="gamePlantName">—</span></span>&nbsp;&nbsp;|&nbsp;
+            <span>📐 面積：<span id="gameArea">0</span> m²</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="constructionFill"></div>
+        </div>
+        <p style="text-align:center">✨ 點擊下方植生牆 → 每點一次 = 人數倍率進度 ✨</p>
+        <canvas id="greenWallCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; aspect-ratio:600/400"></canvas>
+        <div class="flex-btns">
+            <button id="resetGameBtn" style="background:#7f8c5e;">重新施工</button>
+            <button id="completeBtn" disabled>✅ 完成施工 & 驗收</button>
+        </div>
+    </div>
+
+    <!-- 頁面5：驗收＋合約評估 -->
+    <div id="page5" class="page">
+        <h2>📑 第五步 · 合約驗收評估</h2>
+        <div id="contractReport" class="option-group"></div>
+        <div class="flex-btns">
+            <button id="backToConstructionBtn">🔨 返回施工</button>
+            <button id="toFutureBtn">🌱 前往未來模樣 & 碳排結算</button>
+        </div>
+    </div>
+
+    <!-- 頁面6：未來模樣 + 碳排折抵（交錯答案） -->
+    <div id="page6" class="page">
+        <h2>🔮 第六步 · 未來模樣 & 碳足跡結算</h2>
+        <div id="futureCarbonArea" class="option-group"></div>
+        <div class="flex-btns">
+            <button id="restartBtn">🌍 重新開始</button>
+        </div>
+        <footer>施工碳排 vs 年固碳量 — 幾年後達成碳中和？</footer>
+    </div>
+</div>
+
+<script>
+    // ---------- 六種植物完整資料（含真實邏輯）----------
+    const PLANTS = [
+        { 
+            name: "🍃 綠葉鵝掌藤", 
+            color: "#5b8c5a", 
+            trait: "超級好養，怎麼選都不會出事",
+            suitable: { outdoor: true, indoor: true },
+            descSuitable: "適應力極強，任何環境都生長良好",
+            descMismatch: "",
+            carbonFactor: 1.25,
+            futureGood: "🌿 鵝掌藤茂盛翠綠，完全不用擔心，成為固碳主力。",
+            futureBad: ""
+        },
+        { 
+            name: "💧 蔓榕", 
+            color: "#6f9e6f", 
+            trait: "水不能斷，室內太陽少會長不好",
+            suitable: { outdoor: true, indoor: false },
+            descSuitable: "室外通風濕潤，蔓榕攀附生長，葉片油亮。",
+            descMismatch: "⚠️ 室內光線不足，蔓榕葉片稀疏、生長遲緩，固碳能力下降。",
+            carbonFactor: 1.3,
+            futureGood: "💧 蔓榕枝葉繁茂，如綠色瀑布，需要持續補水。",
+            futureBad: "⚠️ 蔓榕因日照不足，葉片黃落，生長狀況不佳。"
+        },
+        { 
+            name: "🏠 粗勒草", 
+            color: "#4c8b5e", 
+            trait: "室內種植王者，不能放室外",
+            suitable: { outdoor: false, indoor: true },
+            descSuitable: "室內環境穩定，粗勒草葉紋美麗，淨化空氣。",
+            descMismatch: "❌ 粗勒草不耐強光與低溫，室外種植容易衰弱枯黃。",
+            carbonFactor: 1.15,
+            futureGood: "🏠 粗勒草在室內展現亮麗葉色，生長穩定。",
+            futureBad: "❌ 粗勒草因室外環境衝擊，葉片焦枯，存活率低。"
+        },
+        { 
+            name: "🌿 腎蕨", 
+            color: "#7dab73", 
+            trait: "要時間適應，適應後跟雜草一樣",
+            suitable: { outdoor: true, indoor: true },
+            descSuitable: "適應期過後，腎蕨瘋狂蔓延，生命力超強。",
+            descMismatch: "",
+            carbonFactor: 1.2,
+            futureGood: "🌿 腎蕨適應後如綠毯般覆蓋牆面，極度旺盛。",
+            futureBad: ""
+        },
+        { 
+            name: "🦌 鹿角蕨", 
+            color: "#92b881", 
+            trait: "比較貴，需要持續關心觀察",
+            suitable: { outdoor: true, indoor: true },
+            descSuitable: "定期關心下，鹿角蕨展現優雅姿態。",
+            descMismatch: "⚠️ 鹿角蕨若缺乏照顧，孢子葉枯萎，觀賞價值降低。",
+            carbonFactor: 1.35,
+            futureGood: "🦌 鹿角蕨蓬勃生長，成為牆面焦點，需要持續關心。",
+            futureBad: "⚠️ 鹿角蕨因疏於觀察，生長停滯，需加強養護。"
+        },
+        { 
+            name: "💦 積水鳳梨", 
+            color: "#d98c5f", 
+            trait: "給水方式不一樣，需持續關心",
+            suitable: { outdoor: true, indoor: true },
+            descSuitable: "葉心積水正確給水，鳳梨色彩鮮豔。",
+            descMismatch: "⚠️ 積水鳳梨若給水方式錯誤，葉心腐爛，生長受阻。",
+            carbonFactor: 1.1,
+            futureGood: "💦 積水鳳梨葉心蓄水，豔麗苞片增添熱帶風情。",
+            futureBad: "⚠️ 積水鳳梨因澆水不當，狀態不佳，需調整給水方式。"
+        }
+    ];
+
+    // 全域遊戲狀態
+    let gameState = {
+        location: "outdoor",
+        areaSqm: 10,
+        plantId: null,
+        plantName: "",
+        plantColor: "#5b8c5a",
+        plantCarbonFactor: 1.25,
+        plantObj: null,
+        workerNum: 3,
+        totalPixels: 30 * 20,
+        finishedPixels: 0,
+        contractScore: 0,
+        contractMessage: ""
+    };
+
+    let canvasElem = null, ctx = null;
+
+    // 切換頁面
+    function showPage(pageNumber) {
+        for(let i=1; i<=6; i++) {
+            const page = document.getElementById(`page${i}`);
+            if(page) page.classList.remove("active");
+        }
+        const activePage = document.getElementById(`page${pageNumber}`);
+        if(activePage) activePage.classList.add("active");
+        if(pageNumber === 4) {
+            initCanvasAndDraw();
+            document.getElementById("gameWorkerNum").innerText = gameState.workerNum;
+            document.getElementById("gamePlantName").innerText = gameState.plantName;
+            document.getElementById("gameArea").innerText = gameState.areaSqm;
+        }
+        if(pageNumber === 5) evaluateContract();
+        if(pageNumber === 6) renderFutureAndCarbon();
+    }
+
+    // 繪製點陣圖
+    function drawPixelWall() {
+        if(!canvasElem || !ctx) return;
+        const w = canvasElem.width, h = canvasElem.height;
+        const cols = 30, rows = 20;
+        const cellW = w / cols, cellH = h / rows;
+        const finishedCount = gameState.finishedPixels;
+        const baseColor = gameState.plantColor;
+        
+        for(let row=0; row<rows; row++) {
+            for(let col=0; col<cols; col++) {
+                const idx = row * cols + col;
+                let isFinished = idx < finishedCount;
+                let color = isFinished ? baseColor : "#8b6946";
+                ctx.fillStyle = color;
+                ctx.fillRect(col*cellW, row*cellH, cellW, cellH);
+                ctx.strokeStyle = "#6a4e2e60";
+                ctx.strokeRect(col*cellW, row*cellH, cellW, cellH);
+            }
+        }
+        if(gameState.finishedPixels >= gameState.totalPixels) {
+            ctx.font = "bold 24px monospace";
+            ctx.fillStyle = "#ffffaa";
+            ctx.fillText("✓ 完工", 20, 50);
+        }
+    }
+
+    function updateConstructionProgressUI() {
+        const percent = (gameState.finishedPixels / gameState.totalPixels) * 100;
+        const fillDiv = document.getElementById("constructionFill");
+        if(fillDiv) fillDiv.style.width = `${percent}%`;
+        drawPixelWall();
+        const completeBtn = document.getElementById("completeBtn");
+        if(completeBtn) completeBtn.disabled = (gameState.finishedPixels < gameState.totalPixels);
+    }
+
+    function addConstruction(clickPower = 1) {
+        if(gameState.finishedPixels >= gameState.totalPixels) return;
+        let increment = clickPower * gameState.workerNum;
+        let newFinished = Math.min(gameState.totalPixels, gameState.finishedPixels + increment);
+        gameState.finishedPixels = newFinished;
+        updateConstructionProgressUI();
+    }
+
+    function initCanvasAndDraw() {
+        canvasElem = document.getElementById("greenWallCanvas");
+        if(!canvasElem) return;
+        canvasElem.width = 600;
+        canvasElem.height = 400;
+        ctx = canvasElem.getContext("2d");
+        gameState.totalPixels = 30 * 20;
+        if(gameState.finishedPixels > gameState.totalPixels) gameState.finishedPixels = 0;
+        updateConstructionProgressUI();
+        const newCanvas = canvasElem.cloneNode(true);
+        canvasElem.parentNode.replaceChild(newCanvas, canvasElem);
+        canvasElem = newCanvas;
+        ctx = canvasElem.getContext("2d");
+        updateConstructionProgressUI();
+        canvasElem.addEventListener("click", () => addConstruction(1));
+    }
+
+    // 合約評估（加入植物環境匹配度）
+    function evaluateContract() {
+        let score = 50;
+        let plant = PLANTS[gameState.plantId];
+        let isMatch = plant.suitable[gameState.location];
+        
+        if(isMatch) score += 20;
+        else score -= 25;
+        
+        if(gameState.areaSqm >= 10 && gameState.areaSqm <= 60) score += 10;
+        if(gameState.finishedPixels >= gameState.totalPixels) score += 25;
+        if(gameState.workerNum >= 5) score += 5;
+        
+        score = Math.min(100, Math.max(0, score));
+        let gradeText = score >= 80 ? "🏅 黃金合約" : (score >= 60 ? "🌿 合格綠牆" : "📋 需改善");
+        
+        let matchWarning = "";
+        if(!isMatch) {
+            if(gameState.plantName === "蔓榕") matchWarning = "<div class='warning'>⚠️ 合約提醒：蔓榕種在室內，日照不足將影響長期生長與固碳。</div>";
+            else if(gameState.plantName === "粗勒草") matchWarning = "<div class='warning'>❌ 合約提醒：粗勒草不適合室外，強光低溫會導致衰弱。</div>";
+            else matchWarning = "<div class='warning'>⚠️ 合約提醒：此植物環境匹配不佳，長期固碳效果會下降。</div>";
+        }
+        
+        gameState.contractScore = score;
+        gameState.contractMessage = `${gradeText} (總分:${score})`;
+        
+        document.getElementById("contractReport").innerHTML = `
+            <h3>📋 驗收報告</h3>
+            <p>🌍 位置: ${gameState.location === 'outdoor' ? '室外' : '室內'} ｜ 面積 ${gameState.areaSqm} m²</p>
+            <p>🌱 植物: ${gameState.plantName} — ${plant.trait}</p>
+            <p>👥 施工人數: ${gameState.workerNum} 人 | 完工率 100%</p>
+            <p>⭐ 合約評分: ${gameState.contractScore} 分</p>
+            <p>💬 ${gameState.contractMessage}</p>
+            ${matchWarning}
+            <hr>
+            <p>✅ 驗收完成，下一步將進行長期碳效益評估</p>
+        `;
+    }
+
+    // 未來模樣 + 碳排結算（交錯答案，反映植物環境匹配）
+    function renderFutureAndCarbon() {
+        const area = gameState.areaSqm;
+        const isOutdoor = (gameState.location === "outdoor");
+        const plant = PLANTS[gameState.plantId];
+        const isMatch = plant.suitable[gameState.location];
+        
+        // 根據匹配度調整固碳係數
+        let matchFactor = isMatch ? 1.0 : 0.6;  // 不匹配固碳能力剩60%
+        let effectiveCarbonFactor = plant.carbonFactor * matchFactor;
+        
+        // 施工碳排
+        let constructEm = area * 4.5 + gameState.workerNum * 7.2 + (isOutdoor ? 18 : 12);
+        let baseSequest = isOutdoor ? 3.2 : 1.6;
+        let yearlySequest = area * baseSequest * effectiveCarbonFactor;
+        let paybackYears = yearlySequest > 0 ? (constructEm / yearlySequest) : 999;
+        paybackYears = Math.ceil(paybackYears * 10) / 10;
+        
+        // 未來模樣描述（交錯答案）
+        let futureDesc = "";
+        if(!isMatch) {
+            futureDesc = plant.descMismatch;
+        } else {
+            futureDesc = plant.futureGood;
+        }
+        
+        // 腎蕨特別備註（時間短看不出效果）
+        if(plant.name === "🌿 腎蕨" && isMatch) {
+            futureDesc += "  🌱 腎蕨需要一段適應期，初期較慢，但適應後會非常旺盛。";
+        }
+        
+        // 鹿角蕨、積水鳳梨持續關心提醒
+        if(plant.name === "🦌 鹿角蕨" && isMatch) {
+            futureDesc += "  🔍 鹿角蕨需要持續觀察葉背孢子與通風，定期關心才能維持最佳狀態。";
+        }
+        if(plant.name === "💦 積水鳳梨" && isMatch) {
+            futureDesc += "  💧 積水鳳梨需保持葉心積水但不可過久，給水方式正確才能展現艷麗色彩。";
+        }
+        
+        let warningBadge = "";
+        if(!isMatch) {
+            warningBadge = "<div class='warning'>⚠️ 長期評估：植物與環境不匹配，固碳能力下降40%，碳抵銷年數延長。</div>";
+        }
+        
+        document.getElementById("futureCarbonArea").innerHTML = `
+            <h3>🌎 長期評估報告（1年後）</h3>
+            <p>🔨 施工階段總碳排: <strong>${constructEm.toFixed(1)} kgCO₂e</strong></p>
+            <p>🌿 實際年固碳量: <strong>${yearlySequest.toFixed(1)} kgCO₂e</strong> ${!isMatch ? '(因環境不匹配而降低)' : ''}</p>
+            <p>⏳ 碳中和所需年數: <strong>${paybackYears} 年</strong></p>
+            <div style="background:#d0e6b5; border-radius:24px; padding:12px; margin-top:12px">
+            🔮 <strong>未來模樣預測</strong><br>${futureDesc}
+            </div>
+            ${warningBadge}
+            <div style="margin-top:16px; font-size:0.9rem;">
+            💡 碳觀念小教室：施工碳排來自材料與運輸，植物固碳需要正確環境才能發揮最大效益。<br>
+            ✅ 正確的植物搭配，能讓植生牆在 ${paybackYears} 年內達成碳中和。
+            </div>
+        `;
+    }
+
+    // 渲染植物選擇
+    function renderPlantSelection() {
+        const container = document.getElementById("plantGrid");
+        if(!container) return;
+        container.innerHTML = "";
+        PLANTS.forEach((plant, idx) => {
+            const div = document.createElement("div");
+            div.className = `plant-card ${gameState.plantId === idx ? 'selected' : ''}`;
+            div.innerHTML = `
+                <div class="plant-color" style="background:${plant.color}"></div>
+                <strong>${plant.name}</strong>
+                <div class="plant-note">${plant.trait}</div>
+                <div class="plant-note">固碳係數 x${plant.carbonFactor}</div>
+            `;
+            div.onclick = () => {
+                gameState.plantId = idx;
+                gameState.plantName = plant.name;
+                gameState.plantColor = plant.color;
+                gameState.plantCarbonFactor = plant.carbonFactor;
+                gameState.plantObj = plant;
+                renderPlantSelection();
+                document.getElementById("toWorkerBtn").disabled = false;
+            };
+            container.appendChild(div);
+        });
+    }
+
+    // 事件綁定
+    document.getElementById("toPlantBtn")?.addEventListener("click", () => {
+        gameState.location = document.getElementById("locationSelect").value;
+        gameState.areaSqm = parseInt(document.getElementById("areaSlider").value);
+        showPage(2);
+    });
+    document.getElementById("backToEnvBtn")?.addEventListener("click", () => showPage(1));
+    document.getElementById("backToPlantBtn")?.addEventListener("click", () => showPage(2));
+    document.getElementById("toWorkerBtn")?.addEventListener("click", () => {
+        if(gameState.plantId === null) return alert("請先選擇一種植物！");
+        showPage(3);
+        document.getElementById("workerSlider")?.dispatchEvent(new Event("input"));
+    });
+    document.getElementById("toGameBtn")?.addEventListener("click", () => {
+        gameState.workerNum = parseInt(document.getElementById("workerSlider").value);
+        gameState.finishedPixels = 0;
+        showPage(4);
+    });
+    document.getElementById("completeBtn")?.addEventListener("click", () => {
+        if(gameState.finishedPixels >= gameState.totalPixels) showPage(5);
+        else alert("🚧 植生牆尚未完工！繼續點擊施工～");
+    });
+    document.getElementById("backToConstructionBtn")?.addEventListener("click", () => showPage(4));
+    document.getElementById("toFutureBtn")?.addEventListener("click", () => showPage(6));
+    document.getElementById("restartBtn")?.addEventListener("click", () => location.reload());
+    document.getElementById("resetGameBtn")?.addEventListener("click", () => {
+        gameState.finishedPixels = 0;
+        updateConstructionProgressUI();
+    });
+    
+    // 滑桿顯示
+    const areaSlider = document.getElementById("areaSlider");
+    const areaSpan = document.getElementById("areaValue");
+    if(areaSlider) areaSlider.addEventListener("input", () => areaSpan.innerText = areaSlider.value);
+    const workerSlider = document.getElementById("workerSlider");
+    const workerShow = document.getElementById("workerCountShow");
+    if(workerSlider) workerSlider.addEventListener("input", () => workerShow.innerText = workerSlider.value + " 人");
+    
+    document.getElementById("toWorkerBtn").disabled = true;
+    renderPlantSelection();
+</script>
+</body>
+</html>
