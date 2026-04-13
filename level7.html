@@ -2,94 +2,83 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>蕨積綠色宇宙 - 第七關：雲端傳知</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
         body {
             background: linear-gradient(145deg, #e0f2fe 0%, #bae6fd 100%);
+            min-height: 100vh;
         }
-        /* 角色漂浮 */
+        @media (max-width: 768px) {
+            body {
+                overflow-y: auto;
+            }
+            .mobile-stack {
+                flex-direction: column !important;
+            }
+        }
         .character-float {
             animation: float 3.5s ease-in-out infinite;
         }
         @keyframes float {
-            0% { transform: translateY(0px); }
+            0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-12px); }
-            100% { transform: translateY(0px); }
-        }
-        /* 包裹懸浮動畫 */
-        .package-float {
-            animation: softFloat 2s ease-in-out infinite;
-        }
-        @keyframes softFloat {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
-            100% { transform: translateY(0px); }
         }
         .bubble-glow {
             box-shadow: 0 20px 35px -12px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.3) inset;
         }
-        /* 飛行包裹特效 */
+        .package-float {
+            animation: softFloat 2s ease-in-out infinite;
+        }
+        @keyframes softFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .progress-fill {
+            transition: width 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
         .flying-package {
             position: fixed;
             pointer-events: none;
             z-index: 200;
-            font-size: 3rem;
+            font-size: 2.5rem;
             filter: drop-shadow(0 8px 12px rgba(0,0,0,0.2));
             animation: flyToCloud 0.9s cubic-bezier(0.2, 0.9, 0.4, 1.2) forwards;
         }
         @keyframes flyToCloud {
-            0% {
-                opacity: 1;
-                transform: translate(0, 0) scale(1) rotate(0deg);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(var(--dx, 80px), var(--dy, -180px)) scale(0.3) rotate(15deg);
-            }
+            0% { opacity: 1; transform: translate(0, 0) scale(1) rotate(0deg); }
+            100% { opacity: 0; transform: translate(var(--dx, 80px), var(--dy, -180px)) scale(0.3) rotate(15deg); }
         }
-        /* 知識小標籤 */
         .knowledge-tag {
             position: fixed;
             pointer-events: none;
-            font-size: 1rem;
+            font-size: 0.75rem;
             font-weight: bold;
             background: #0f172aee;
             backdrop-filter: blur(8px);
             color: #a7f3d0;
-            padding: 6px 12px;
+            padding: 4px 10px;
             border-radius: 40px;
             white-space: nowrap;
             z-index: 210;
             animation: fadeUp 1s ease-out forwards;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             border-left: 3px solid #22c55e;
         }
         @keyframes fadeUp {
-            0% {
-                opacity: 0;
-                transform: translateY(0px) scale(0.8);
-            }
-            20% {
-                opacity: 1;
-                transform: translateY(-20px) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-70px) scale(0.9);
-            }
+            0% { opacity: 0; transform: translateY(0px) scale(0.8); }
+            20% { opacity: 1; transform: translateY(-20px) scale(1); }
+            100% { opacity: 0; transform: translateY(-70px) scale(0.9); }
         }
-        /* 雲朵粒子 */
         .cloud-particle {
             position: fixed;
             pointer-events: none;
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             animation: cloudFloat 1.2s ease-out forwards;
             z-index: 180;
         }
@@ -97,403 +86,406 @@
             0% { opacity: 0.8; transform: translateY(0) scale(0.5); }
             100% { opacity: 0; transform: translateY(-140px) scale(1.2); }
         }
-        .progress-fill {
-            transition: width 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-        }
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none !important;
-        }
         .complete-glow {
             animation: completeFlash 0.8s ease-out 2;
         }
         @keyframes completeFlash {
-            0% { box-shadow: 0 0 0 0 #22c55e, 0 0 0 0 rgba(34,197,94,0.5); background-color: #f0fdf4; }
-            50% { box-shadow: 0 0 0 20px #22c55e, 0 0 0 8px rgba(34,197,94,0.3); background-color: #dcfce7; }
-            100% { box-shadow: 0 0 0 0 #22c55e, 0 0 0 0 rgba(34,197,94,0); background-color: transparent; }
+            0% { box-shadow: 0 0 0 0 #22c55e; background-color: #f0fdf4; }
+            50% { box-shadow: 0 0 0 20px #22c55e; background-color: #dcfce7; }
+            100% { box-shadow: 0 0 0 0 #22c55e; background-color: transparent; }
+        }
+        .knowledge-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .knowledge-scroll::-webkit-scrollbar-track {
+            background: #0c4a6e;
+            border-radius: 10px;
+        }
+        .knowledge-scroll::-webkit-scrollbar-thumb {
+            background: #38bdf8;
+            border-radius: 10px;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: default;
         }
     </style>
 </head>
-<body class="overflow-hidden antialiased">
+<body>
 
-    <div class="h-screen w-full flex flex-col md:flex-row relative">
-        
-        <!-- 左侧空空 Till 區域 (天空藍清爽風格) -->
-        <div class="w-full md:w-5/12 bg-gradient-to-br from-sky-500 to-cyan-600 flex flex-col items-center justify-center p-5 relative shadow-2xl z-10">
-            <!-- 雲朵裝飾背景 -->
-            <div class="absolute inset-0 opacity-15 pointer-events-none overflow-hidden">
-                <div class="absolute top-5 left-2 text-7xl">☁️</div>
-                <div class="absolute bottom-16 right-4 text-8xl rotate-6">☁️</div>
-                <div class="absolute top-1/3 left-10 text-6xl">💨</div>
+<div class="w-full min-h-screen flex flex-col md:flex-row mobile-stack">
+    
+    <!-- 左側：綠色傳播知識庫（電腦版顯示） -->
+    <div class="hidden md:block md:w-4/12 bg-sky-900/85 backdrop-blur-sm border-r border-white/20 p-4 overflow-y-auto shadow-2xl knowledge-scroll" style="min-height: 100vh;">
+        <div class="sticky top-3">
+            <div class="flex items-center gap-2 mb-4 pb-2 border-b border-sky-500/50">
+                <span class="text-2xl">📚</span>
+                <h3 class="font-black text-white text-base">綠色傳播知識庫</h3>
+                <span class="text-[10px] bg-sky-500/40 px-2 py-0.5 rounded-full text-sky-100">先讀再玩</span>
             </div>
             
-            <!-- 空空角色圖像 + 浮動 -->
-            <div class="character-float relative z-20">
-                <div class="bg-white/20 backdrop-blur-sm rounded-full p-3 shadow-2xl">
-                    <img src="till.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1995/1995572.png'; this.onerror=null;" class="w-36 h-36 md:w-44 md:h-44 object-contain drop-shadow-xl">
+            <div class="space-y-3 text-white/90 text-xs">
+                <div class="bg-sky-800/40 rounded-lg p-2">
+                    <h4 class="font-bold text-sky-300 text-sm">📢 為什麼要傳播綠色知識？</h4>
+                    <p class="text-gray-200 text-xs">一個人的減碳力量有限，但當知識傳播出去，就能影響更多人一起行動，產生乘數效應！</p>
                 </div>
-            </div>
-            
-            <!-- 對話氣泡 (雲端感) -->
-            <div class="mt-6 w-full max-w-sm relative z-20 transition-all duration-300">
-                <div class="bg-white/95 backdrop-blur-sm rounded-3xl p-5 shadow-2xl border-l-[10px] border-sky-700 bubble-glow">
-                    <div class="flex items-start gap-2">
-                        <span class="text-3xl">☁️</span>
-                        <div class="flex-1">
-                            <h3 class="font-black text-xl text-gray-800 tracking-tight">空空 Till · 雲端傳書</h3>
-                            <p id="dialog" class="text-gray-700 font-medium mt-1 leading-relaxed text-base">準備好了嗎？點擊飛舞的包裹，將綠色知識傳向雲端！📦✨</p>
-                        </div>
+                <div class="bg-sky-800/40 rounded-lg p-2">
+                    <h4 class="font-bold text-sky-300 text-sm">🌍 社群媒體與環保</h4>
+                    <p class="text-gray-200 text-xs">分享環保資訊、標記朋友參與、發起減碳挑戰，都能讓綠色行動擴散更快。</p>
+                </div>
+                <div class="bg-sky-800/40 rounded-lg p-2">
+                    <h4 class="font-bold text-sky-300 text-sm">💚 校園環保推廣</h4>
+                    <ul class="text-gray-200 text-xs list-disc list-inside mt-1 space-y-0.5">
+                        <li>成立環保社團</li>
+                        <li>舉辦舊衣/舊書交換</li>
+                        <li>班級節電競賽</li>
+                        <li>環保標語創作</li>
+                    </ul>
+                </div>
+                <div class="bg-sky-800/40 rounded-lg p-2">
+                    <h4 class="font-bold text-sky-300 text-sm">📦 知識包裹的意義</h4>
+                    <p class="text-gray-200 text-xs">每個包裹都乘載著一則綠色知識，傳遞出去就像在別人心中種下一顆環保種子。</p>
+                </div>
+                <div class="bg-sky-800/40 rounded-lg p-2">
+                    <h4 class="font-bold text-sky-300 text-sm">🎯 本關挑戰</h4>
+                    <p class="text-gray-200 text-xs">點擊包裹<span class="text-yellow-200">3次</span>，將綠色知識傳向雲端。每傳一次可獲得<span class="text-yellow-200">3.3kg減碳量</span>，滿分9.9kg！</p>
+                </div>
+                <div class="bg-sky-800/40 rounded-lg p-2">
+                    <h4 class="font-bold text-sky-300 text-sm">🧠 小測驗</h4>
+                    <p class="text-gray-200 text-xs">💭 哪種方式最能有效推廣環保理念？</p>
+                    <div class="mt-1 space-y-1 text-xs">
+                        <label class="flex items-center gap-2 cursor-pointer text-gray-200"><input type="radio" name="quiz" value="a"> A. 自己默默做</label>
+                        <label class="flex items-center gap-2 cursor-pointer text-gray-200"><input type="radio" name="quiz" value="b"> B. 分享並邀請他人參與</label>
+                        <label class="flex items-center gap-2 cursor-pointer text-gray-200"><input type="radio" name="quiz" value="c"> C. 批評不環保的人</label>
                     </div>
+                    <p id="quizFeedback" class="text-xs mt-2 text-sky-300"></p>
                 </div>
-                <div class="absolute -bottom-2 left-8 w-4 h-4 bg-white/95 rotate-45 rounded-sm"></div>
             </div>
             
-            <!-- 提示小標語 -->
-            <div class="absolute bottom-4 left-0 right-0 text-center text-white/80 text-xs font-medium md:block hidden">
-                💡 每傳遞一個包裹，綠色知識就多一分擴散 | 共需傳遞 3 次
+            <div class="mt-4 p-2 bg-sky-800/40 rounded-lg border border-sky-500/30">
+                <p class="text-sky-200 text-[10px] flex items-center gap-1">
+                    <span>💡</span> 傳遞知識就是傳遞改變的力量！
+                </p>
             </div>
         </div>
-
-        <!-- 右側傳遞互動區 -->
-        <div class="w-full md:w-7/12 bg-gradient-to-br from-sky-50 to-cyan-50 flex flex-col items-center justify-center p-6 relative">
-            
-            <!-- 傳遞進度面板 -->
-            <div class="w-full max-w-md mb-5 bg-white/70 backdrop-blur-sm rounded-2xl p-4 shadow-md border border-sky-200">
-                <div class="flex justify-between items-center flex-wrap gap-2">
-                    <div class="flex items-center gap-2">
-                        <span class="text-2xl">📡</span>
-                        <span class="font-black text-gray-700">雲端知識傳遞</span>
-                    </div>
-                    <div class="bg-sky-800 text-white px-4 py-1.5 rounded-full font-black text-xl">
-                        <span id="deliverCount">0</span> / <span id="totalDeliver">3</span>
-                    </div>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-3 mt-2 overflow-hidden">
-                    <div id="deliverProgress" class="progress-fill bg-gradient-to-r from-sky-500 to-cyan-500 h-3 rounded-full" style="width: 0%"></div>
-                </div>
-                <div class="flex justify-between mt-2 text-xs text-gray-600">
-                    <span>🌍 累積減碳：<span id="carbonSaved">0</span> kg CO₂e</span>
-                    <span>📚 知識包裹 ×3</span>
-                </div>
+    </div>
+    
+    <!-- 中間：空空角色區 -->
+    <div class="w-full md:w-4/12 bg-gradient-to-br from-sky-500 to-cyan-600 flex flex-col items-center justify-center p-5 shadow-2xl" style="min-height: 350px;">
+        <div class="character-float">
+            <div class="bg-white/20 backdrop-blur-sm rounded-full p-3 shadow-2xl">
+                <img src="till.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1995/1995572.png';" class="w-28 h-28 md:w-36 md:h-36 object-contain drop-shadow-xl">
             </div>
-            
-            <!-- 主要包裹互動區 -->
-            <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-8 md:p-10 border border-sky-200 relative transition-all">
-                <div class="text-center relative">
-                    <!-- 漂浮雲朵背景裝飾 -->
-                    <div class="absolute -top-12 -right-8 text-7xl opacity-20 pointer-events-none">☁️</div>
-                    <div class="absolute -bottom-10 -left-6 text-8xl opacity-20 pointer-events-none">☁️</div>
-                    
-                    <!-- 主要包裹按鈕 -->
-                    <button id="packageBtn" class="package-float focus:outline-none transition-all duration-200 active:scale-95">
-                        <div class="text-[150px] md:text-[180px] drop-shadow-2xl relative">
-                            📦
-                            <span class="absolute -top-2 -right-2 text-3xl animate-ping opacity-70">✨</span>
-                        </div>
-                    </button>
-                    
-                    <!-- 動態知識短語區域 -->
-                    <div id="knowledgeTip" class="mt-6 text-sm font-semibold text-sky-800 bg-sky-100/80 p-3 rounded-xl border border-sky-300 transition-all max-w-xs mx-auto">
-                        🌱 點擊包裹，將綠色知識傳向雲端！
+        </div>
+        <div class="mt-4 w-full max-w-xs">
+            <div class="bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-2xl border-l-[8px] border-sky-700 bubble-glow">
+                <div class="flex items-start gap-2">
+                    <span class="text-2xl">☁️</span>
+                    <div class="flex-1">
+                        <h3 class="font-black text-gray-800">空空 Till · 雲端傳書</h3>
+                        <p id="dialog" class="text-gray-700 font-medium mt-1 text-sm">準備好了嗎？點擊飛舞的包裹，將綠色知識傳向雲端！📦✨</p>
                     </div>
                 </div>
-            </div>
-            
-            <!-- 底部趣味裝飾 -->
-            <div class="absolute bottom-4 left-0 right-0 text-center text-sky-500 text-xs font-medium">
-                💨 每個包裹都乘載著減碳智慧 | 三發全數送出即完成任務
             </div>
         </div>
     </div>
 
-    <script>
-        // ---------- 遊戲核心 ----------
-        const TARGET_DELIVER = 3;          // 需要傳遞3次
+    <!-- 右側：傳遞互動區 -->
+    <div class="w-full md:w-4/12 bg-gradient-to-br from-sky-50 to-cyan-50 flex flex-col items-center justify-center p-5" style="min-height: 450px;">
+        <div class="w-full max-w-md mx-auto">
+            <!-- 傳遞進度面板 -->
+            <div class="mb-4 bg-white/70 rounded-xl p-3 shadow-md border border-sky-200">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-1">
+                        <span class="text-xl">📡</span>
+                        <span class="font-black text-gray-700 text-sm">雲端知識傳遞</span>
+                    </div>
+                    <div class="bg-sky-800 text-white px-3 py-0.5 rounded-full font-black">
+                        <span id="deliverCount">0</span> / <span id="totalDeliver">3</span>
+                    </div>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2 mt-1 overflow-hidden">
+                    <div id="deliverProgress" class="progress-fill bg-gradient-to-r from-sky-500 to-cyan-500 h-2 rounded-full" style="width: 0%"></div>
+                </div>
+                <div class="flex justify-between mt-1 text-[10px] text-gray-600">
+                    <span>🌍 累積減碳：<span id="carbonSaved">0</span> kg</span>
+                    <span>📚 知識包裹 ×3</span>
+                </div>
+            </div>
+            
+            <!-- 包裹按鈕 -->
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-sky-200 text-center">
+                <div class="relative">
+                    <div class="absolute -top-8 -right-6 text-6xl opacity-20 pointer-events-none">☁️</div>
+                    <div class="absolute -bottom-6 -left-4 text-7xl opacity-20 pointer-events-none">☁️</div>
+                    
+                    <button id="packageBtn" class="package-float focus:outline-none transition-all duration-200 active:scale-95">
+                        <div class="text-8xl md:text-9xl drop-shadow-2xl relative">
+                            📦
+                            <span class="absolute -top-1 -right-1 text-2xl animate-ping opacity-70">✨</span>
+                        </div>
+                    </button>
+                    
+                    <div id="knowledgeTip" class="mt-4 text-xs font-semibold text-sky-800 bg-sky-100/80 p-2 rounded-lg border border-sky-300">
+                        🌱 點擊包裹，將綠色知識傳向雲端！
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function(){
+        const TARGET_DELIVER = 3;
+        const CARBON_PER_DELIVER = 3.3;
         let currentDelivered = 0;
-        let totalCarbonSaved = 0;
         let isCompleted = false;
-        let isAnimating = false;            // 防止動畫期間重複點擊
+        let isAnimating = false;
+        let hasSaved = false;
         
-        // 綠色知識庫 (每次傳遞隨機顯示一條知識)
+        // 知識庫
         const KNOWLEDGE_BANK = [
             "🌿 每回收1噸紙，拯救17棵樹！",
-            "💡 將燈泡換成LED，年減碳約100kg",
-            "🚲 短途騎單車取代機車，每年減碳150kg",
+            "💡 LED燈泡年減碳約100kg",
+            "🚲 騎單車取代機車，年減碳150kg",
             "♻️ 自備購物袋，減少塑膠足跡",
-            "⚡ 隨手關燈，節省能源又減碳",
-            "💧 節水馬桶每年省下10噸水",
-            "🌱 種一棵樹，年吸收22kg CO₂",
-            "🍃 多吃蔬菜，低碳飲食救地球",
+            "⚡ 隨手關燈，節能又減碳",
+            "💧 節水馬桶年省10噸水",
+            "🌱 一棵樹年吸收22kg CO₂",
+            "🍃 多吃蔬菜，低碳飲食",
             "🔋 回收電池避免重金屬污染",
             "☀️ 太陽能熱水器年減碳300kg"
         ];
         
-        // DOM 元素
+        // DOM
         const dialogEl = document.getElementById('dialog');
         const deliverCountSpan = document.getElementById('deliverCount');
         const totalDeliverSpan = document.getElementById('totalDeliver');
-        const deliverProgressBar = document.getElementById('deliverProgress');
+        const deliverProgress = document.getElementById('deliverProgress');
         const carbonSavedSpan = document.getElementById('carbonSaved');
-        const knowledgeTipDiv = document.getElementById('knowledgeTip');
+        const knowledgeTip = document.getElementById('knowledgeTip');
         const packageBtn = document.getElementById('packageBtn');
         
         totalDeliverSpan.innerText = TARGET_DELIVER;
         
-        // 更新 UI (計數、進度、碳排)
-        function updateStatsUI() {
+        // 儲存減碳量（僅第一次通關）
+        function saveCarbonToLocal() {
+            if (hasSaved) return;
+            const totalCarbon = currentDelivered * CARBON_PER_DELIVER;
+            let currentTotal = localStorage.getItem('fern_total_carbon');
+            currentTotal = currentTotal ? parseFloat(currentTotal) : 0;
+            const newTotal = currentTotal + totalCarbon;
+            localStorage.setItem('fern_total_carbon', newTotal);
+            localStorage.setItem('fern_level7_completed', 'true');
+            hasSaved = true;
+            console.log(`🌱 第七關儲存減碳量：${totalCarbon}kg，累積總和：${newTotal}kg`);
+        }
+        
+        function updateUI() {
             deliverCountSpan.innerText = currentDelivered;
             const percent = (currentDelivered / TARGET_DELIVER) * 100;
-            deliverProgressBar.style.width = `${percent}%`;
-            // 每個包裹減碳 3.3 kg (總共約10kg)
-            totalCarbonSaved = currentDelivered * 3.3;
-            carbonSavedSpan.innerText = totalCarbonSaved.toFixed(1);
+            deliverProgress.style.width = `${percent}%`;
+            const totalCarbon = currentDelivered * CARBON_PER_DELIVER;
+            carbonSavedSpan.innerText = totalCarbon.toFixed(1);
             
-            // 根據進度改變對話內容
             if (!isCompleted) {
                 if (currentDelivered === TARGET_DELIVER) {
                     dialogEl.innerText = "🎉 任務達成！綠色知識已傳遍雲端！綠色宇宙正式開啟 🌟✨";
-                    knowledgeTipDiv.innerHTML = "🏆 完美！三個包裹全數送達，減碳成就解鎖！準備迎接最終章 🏆";
-                } 
-                else if (currentDelivered === TARGET_DELIVER - 1) {
+                    knowledgeTip.innerHTML = "🏆 完美！三個包裹全數送達，減碳成就解鎖！🏆";
+                } else if (currentDelivered === TARGET_DELIVER - 1) {
                     dialogEl.innerText = "☁️ 最後一個包裹！點擊發送，完成綠色知識連線！";
-                    knowledgeTipDiv.innerHTML = "✨ 再傳遞一次，就能開啟綠色宇宙 ✨";
-                }
-                else if (currentDelivered > 0) {
-                    dialogEl.innerText = `📡 已送出 ${currentDelivered} 個知識包裹！繼續點擊，讓環保理念飛向雲端～`;
-                    knowledgeTipDiv.innerHTML = `💚 已經傳遞 ${currentDelivered} 次！每個包裹都是減碳的種子 🌱`;
-                } 
-                else {
-                    dialogEl.innerText = "準備好了嗎？點擊飛舞的包裹，將綠色知識傳向雲端！📦✨";
-                    knowledgeTipDiv.innerHTML = "🌱 點擊包裹，將綠色知識傳向雲端！";
+                    knowledgeTip.innerHTML = "✨ 再傳遞一次，就能開啟綠色宇宙 ✨";
+                } else if (currentDelivered > 0) {
+                    dialogEl.innerText = `📡 已送出 ${currentDelivered} 個知識包裹！繼續傳遞～`;
+                    knowledgeTip.innerHTML = `💚 已傳遞 ${currentDelivered} 次！每個包裹都是減碳種子 🌱`;
+                } else {
+                    dialogEl.innerText = "準備好了嗎？點擊包裹，將綠色知識傳向雲端！📦✨";
+                    knowledgeTip.innerHTML = "🌱 點擊包裹，將綠色知識傳向雲端！";
                 }
             }
         }
         
-        // 產生飛行包裹特效 (從點擊位置飛向天空)
-        function createFlyingEffect(x, y, knowledgeText) {
-            // 主包裹圖示飛出
-            const flyingDiv = document.createElement('div');
-            flyingDiv.innerText = '📦✨';
-            flyingDiv.className = 'flying-package';
-            flyingDiv.style.left = `${x - 40}px`;
-            flyingDiv.style.top = `${y - 40}px`;
-            // 隨機偏移方向 (稍微往右上或左上)
-            const deltaX = (Math.random() * 100 + 40) * (Math.random() > 0.5 ? 1 : -1);
-            const deltaY = -150 - Math.random() * 70;
-            flyingDiv.style.setProperty('--dx', `${deltaX}px`);
-            flyingDiv.style.setProperty('--dy', `${deltaY}px`);
-            document.body.appendChild(flyingDiv);
+        function createFlyingEffect(x, y, knowledge) {
+            // 飛行包裹
+            const flying = document.createElement('div');
+            flying.innerText = '📦✨';
+            flying.className = 'flying-package';
+            flying.style.left = (x - 35) + 'px';
+            flying.style.top = (y - 35) + 'px';
+            const dx = (Math.random() * 100 + 40) * (Math.random() > 0.5 ? 1 : -1);
+            const dy = -130 - Math.random() * 70;
+            flying.style.setProperty('--dx', dx + 'px');
+            flying.style.setProperty('--dy', dy + 'px');
+            document.body.appendChild(flying);
             
-            // 添加雲朵粒子
+            // 雲朵粒子
             for (let i = 0; i < 3; i++) {
                 setTimeout(() => {
                     const cloud = document.createElement('div');
                     cloud.innerText = '☁️';
                     cloud.className = 'cloud-particle';
-                    cloud.style.left = `${x - 20 + (Math.random() - 0.5) * 40}px`;
-                    cloud.style.top = `${y - 20 + (Math.random() - 0.5) * 30}px`;
+                    cloud.style.left = (x - 15 + (Math.random() - 0.5) * 40) + 'px';
+                    cloud.style.top = (y - 15 + (Math.random() - 0.5) * 30) + 'px';
                     document.body.appendChild(cloud);
                     setTimeout(() => cloud.remove(), 1000);
                 }, i * 60);
             }
             
-            // 知識標籤浮現
+            // 知識標籤
             const tag = document.createElement('div');
-            tag.innerText = knowledgeText;
+            tag.innerText = knowledge;
             tag.className = 'knowledge-tag';
-            tag.style.left = `${x - 60}px`;
-            tag.style.top = `${y - 30}px`;
+            tag.style.left = (x - 50) + 'px';
+            tag.style.top = (y - 25) + 'px';
             document.body.appendChild(tag);
-            setTimeout(() => tag.remove(), 1300);
-            setTimeout(() => flyingDiv.remove(), 950);
+            setTimeout(() => tag.remove(), 1200);
+            setTimeout(() => flying.remove(), 900);
         }
         
-        // 隨機獲取知識訊息
         function getRandomKnowledge() {
             return KNOWLEDGE_BANK[Math.floor(Math.random() * KNOWLEDGE_BANK.length)];
         }
         
-        // 傳遞包裹主要邏輯
-        async function deliverPackage(event) {
+        function deliverPackage(event) {
             if (isCompleted) return;
-            if (isAnimating) return;   // 動畫中不處理新點擊
+            if (isAnimating) return;
             if (currentDelivered >= TARGET_DELIVER) return;
             
-            // 獲取點擊位置
-            let clientX, clientY;
-            if (event && event.touches) {
-                clientX = event.touches[0].clientX;
-                clientY = event.touches[0].clientY;
-            } else if (event) {
-                clientX = event.clientX;
-                clientY = event.clientY;
+            let x, y;
+            if (event.touches) {
+                x = event.touches[0].clientX;
+                y = event.touches[0].clientY;
             } else {
+                x = event.clientX;
+                y = event.clientY;
+            }
+            if (!x || !y) {
                 const rect = packageBtn.getBoundingClientRect();
-                clientX = rect.left + rect.width / 2;
-                clientY = rect.top + rect.height / 2;
+                x = rect.left + rect.width/2;
+                y = rect.top + rect.height/2;
             }
             
-            // 鎖定動畫狀態
             isAnimating = true;
-            
-            // 獲取隨機知識
             const knowledge = getRandomKnowledge();
             
-            // 顯示短暫視覺回饋：按鈕縮放
             packageBtn.style.transform = 'scale(0.92)';
-            setTimeout(() => {
-                if (!isCompleted) packageBtn.style.transform = 'scale(1)';
-            }, 120);
+            setTimeout(() => { if (!isCompleted) packageBtn.style.transform = 'scale(1)'; }, 120);
             
-            // 產生特效（飛行包裹 + 知識標籤）
-            if (clientX && clientY) {
-                createFlyingEffect(clientX, clientY, knowledge);
-            } else {
-                // fallback 中心點
-                const rect = packageBtn.getBoundingClientRect();
-                createFlyingEffect(rect.left + rect.width/2, rect.top + rect.height/2, knowledge);
-            }
+            createFlyingEffect(x, y, knowledge);
             
-            // 增加傳遞次數
             currentDelivered++;
-            updateStatsUI();
+            updateUI();
             
-            // 更新提示區顯示剛剛傳遞的知識
-            knowledgeTipDiv.innerHTML = `📡 傳送成功！「${knowledge}」 飛向雲端～ +3.3kg 減碳`;
-            knowledgeTipDiv.classList.add("bg-green-100", "border-green-400");
+            knowledgeTip.innerHTML = `📡 傳送成功！「${knowledge}」 +${CARBON_PER_DELIVER}kg 減碳`;
+            knowledgeTip.classList.add("bg-green-100", "border-green-400");
             setTimeout(() => {
                 if (!isCompleted && currentDelivered < TARGET_DELIVER) {
-                    knowledgeTipDiv.innerHTML = "🌱 繼續點擊包裹，傳遞更多綠色知識！";
-                    knowledgeTipDiv.classList.remove("bg-green-100", "border-green-400");
-                } else if (!isCompleted && currentDelivered === TARGET_DELIVER) {
-                    // 最後完成時保留特殊訊息
-                    knowledgeTipDiv.innerHTML = "🎉 包裹全數送達！即將開啟綠色宇宙 🎉";
+                    knowledgeTip.innerHTML = "🌱 繼續點擊包裹，傳遞更多綠色知識！";
+                    knowledgeTip.classList.remove("bg-green-100", "border-green-400");
                 }
             }, 1800);
             
-            // 輕微震動
             if (navigator.vibrate) navigator.vibrate(40);
             
-            // 檢查是否完成目標
             if (currentDelivered >= TARGET_DELIVER) {
                 completeGame();
             } else {
-                // 解鎖動畫 (稍後允許再次點擊)
-                setTimeout(() => {
-                    isAnimating = false;
-                }, 500);
+                setTimeout(() => { isAnimating = false; }, 500);
             }
         }
         
-        // 遊戲通關: 華麗收尾 + 跳轉 final.html
         function completeGame() {
             if (isCompleted) return;
             isCompleted = true;
             
-            // 禁用按鈕與動畫
+            saveCarbonToLocal();
+            
             packageBtn.disabled = true;
-            packageBtn.style.cursor = 'default';
-            isAnimating = true;  // 不再響應
+            isAnimating = true;
             
-            // 最終對話更新
             dialogEl.innerText = "🎉 任務達成！綠色知識正式連結雲端！綠色宇宙即將開啟 🚀✨";
-            knowledgeTipDiv.innerHTML = "🏆 恭喜！三個包裹乘載滿滿減碳智慧，成功開拓綠色宇宙！ 🏆";
-            knowledgeTipDiv.classList.add("bg-gradient-to-r", "from-emerald-200", "to-cyan-200", "font-black");
+            knowledgeTip.innerHTML = "🏆 恭喜！三個包裹乘載滿滿減碳智慧，成功開拓綠色宇宙！ 🏆";
+            knowledgeTip.classList.add("bg-gradient-to-r", "from-emerald-200", "to-cyan-200", "font-black");
             
-            // 全區閃光特效
             const rightCard = document.querySelector('.bg-white\\/80');
             if (rightCard) rightCard.classList.add('complete-glow');
             
-            // 創造多個包裹齊飛慶祝
             const btnRect = packageBtn.getBoundingClientRect();
-            const centerX = btnRect.left + btnRect.width / 2;
-            const centerY = btnRect.top + btnRect.height / 2;
-            for (let i = 0; i < 8; i++) {
+            const cx = btnRect.left + btnRect.width/2;
+            const cy = btnRect.top + btnRect.height/2;
+            for (let i = 0; i < 6; i++) {
                 setTimeout(() => {
-                    const fakeX = centerX + (Math.random() - 0.5) * 80;
-                    const fakeY = centerY + (Math.random() - 0.5) * 60;
-                    const knowledge = getRandomKnowledge();
-                    createFlyingEffect(fakeX, fakeY, knowledge);
+                    const fx = cx + (Math.random() - 0.5) * 80;
+                    const fy = cy + (Math.random() - 0.5) * 60;
+                    createFlyingEffect(fx, fy, getRandomKnowledge());
                 }, i * 100);
             }
             
-            // 最終包裹隱藏動畫 (淡出)
             packageBtn.style.transition = 'opacity 0.5s';
             packageBtn.style.opacity = '0';
-            
-            // 震動
             if (navigator.vibrate) navigator.vibrate(200);
             
-            // 跳轉至 final.html
-            setTimeout(() => {
-                window.location.href = 'final.html';
-            }, 2000);
+            setTimeout(() => window.location.href = 'final.html', 2000);
         }
         
-        // 綁定事件 (滑鼠與觸控)
-        function bindEvents() {
-            const clickHandler = (e) => {
-                e.preventDefault();
-                if (!isCompleted && !isAnimating && currentDelivered < TARGET_DELIVER) {
-                    deliverPackage(e);
-                } else if (isCompleted) {
-                    // 已完成，不做回應
-                } else if (isAnimating) {
-                    // 提示稍後
-                    knowledgeTipDiv.innerHTML = "⏳ 包裹正在飛行中，稍後再點擊～";
-                    setTimeout(() => {
-                        if (!isCompleted && currentDelivered < TARGET_DELIVER)
-                            knowledgeTipDiv.innerHTML = "🌱 點擊包裹，將綠色知識傳向雲端！";
-                    }, 800);
+        // 測驗互動
+        const quizRadios = document.querySelectorAll('input[name="quiz"]');
+        const quizFeedback = document.getElementById('quizFeedback');
+        quizRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'b') {
+                    quizFeedback.innerHTML = '✅ 正確！分享並邀請他人參與最能擴大影響力！';
+                    quizFeedback.className = 'text-xs mt-2 text-emerald-400';
+                } else {
+                    quizFeedback.innerHTML = '❌ 再想想！哪個選項最能讓更多人一起行動？';
+                    quizFeedback.className = 'text-xs mt-2 text-rose-400';
                 }
-            };
-            packageBtn.addEventListener('click', clickHandler);
-            packageBtn.addEventListener('touchstart', clickHandler, { passive: false });
-        }
+            });
+        });
         
-        // 圖片備援機制
-        const tillImg = document.querySelector('img');
-        if (tillImg) {
-            tillImg.addEventListener('error', function() {
-                this.onerror = null;
-                this.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle fill='%2338bdf8' cx='50' cy='50' r='45'/%3E%3Ctext x='50' y='70' font-size='48' text-anchor='middle' fill='white'%3E☁️%3C/text%3E%3C/svg%3E";
+        // 隱藏重置（雙擊角色區7次）
+        let resetCount = 0, resetTimer = null;
+        const roleArea = document.querySelector('.bg-gradient-to-br.from-sky-500');
+        if (roleArea) {
+            roleArea.addEventListener('dblclick', () => {
+                resetCount++;
+                if (resetTimer) clearTimeout(resetTimer);
+                resetTimer = setTimeout(() => { resetCount = 0; }, 1000);
+                if (resetCount >= 7) {
+                    if (confirm('⚠️ 確定重置所有遊戲數據？')) {
+                        const keys = ['fern_total_carbon', 'fern_level1_completed', 'fern_level2_completed', 'fern_level3_completed', 'fern_level4_completed', 'fern_level5_completed', 'fern_level6_completed', 'fern_level7_completed'];
+                        keys.forEach(k => localStorage.removeItem(k));
+                        alert('✅ 數據已重置！');
+                        window.location.reload();
+                    }
+                    resetCount = 0;
+                }
             });
         }
         
-        // 初始化
-        function initGame() {
+        function init() {
             currentDelivered = 0;
-            totalCarbonSaved = 0;
             isCompleted = false;
             isAnimating = false;
+            hasSaved = false;
             packageBtn.disabled = false;
             packageBtn.style.opacity = '1';
             packageBtn.style.transform = 'scale(1)';
-            updateStatsUI();
-            knowledgeTipDiv.innerHTML = "🌱 點擊包裹，將綠色知識傳向雲端！";
-            knowledgeTipDiv.classList.remove("bg-gradient-to-r", "from-emerald-200", "to-cyan-200", "font-black");
-            knowledgeTipDiv.classList.add("bg-sky-100/80");
+            updateUI();
+            knowledgeTip.innerHTML = "🌱 點擊包裹，將綠色知識傳向雲端！";
+            knowledgeTip.classList.remove("bg-gradient-to-r", "from-emerald-200", "to-cyan-200", "font-black");
+            knowledgeTip.classList.add("bg-sky-100/80");
         }
         
-        initGame();
-        bindEvents();
+        const img = document.querySelector('img');
+        if (img) img.onerror = () => { img.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle fill='%2338bdf8' cx='50' cy='50' r='45'/%3E%3Ctext x='50' y='70' font-size='48' text-anchor='middle' fill='white'%3E☁️%3C/text%3E%3C/svg%3E"; };
         
-        // 額外增加背景雲飄動效果 (純裝飾)
-        let cloudInterval;
-        function addBackgroundClouds() {
-            const rightBg = document.querySelector('.md\\:w-7\\/12');
-            if (!rightBg) return;
-            // 靜態裝飾已經足夠，不加過多動態
-        }
-        addBackgroundClouds();
+        init();
         
-        // 清理定時器以防萬一（無需）
-        window.addEventListener('beforeunload', () => {
-            // 清理可能殘留的飛行動畫DOM（瀏覽器自動處理）
-        });
-        
-        // 增加友善提示：如果用戶快速點擊，不影響計數，動畫鎖保護
-    </script>
+        packageBtn.addEventListener('click', (e) => { e.preventDefault(); deliverPackage(e); });
+        packageBtn.addEventListener('touchstart', (e) => { e.preventDefault(); deliverPackage(e); }, { passive: false });
+    })();
+</script>
 </body>
 </html>
