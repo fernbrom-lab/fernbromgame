@@ -103,6 +103,19 @@
             opacity: 0.5;
             cursor: default;
         }
+        /* 確保手機版遊戲區有明確高度 */
+        @media (max-width: 768px) {
+            #game-area {
+                min-height: 380px;
+                height: auto;
+                flex: 1;
+            }
+            .game-container {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
@@ -161,7 +174,7 @@
     </div>
     
     <!-- 中間：虎妹角色區 -->
-    <div class="w-full md:w-4/12 bg-gradient-to-br from-slate-800 to-slate-900 flex flex-col items-center justify-center p-5 shadow-2xl" style="min-height: 350px;">
+    <div class="w-full md:w-4/12 bg-gradient-to-br from-slate-800 to-slate-900 flex flex-col items-center justify-center p-5 shadow-2xl" style="min-height: 320px;">
         <div class="character-float">
             <div class="bg-white/10 backdrop-blur-sm rounded-full p-3 shadow-2xl border border-white/20">
                 <img src="sans.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/616/616489.png';" class="w-28 h-28 md:w-36 md:h-36 object-contain drop-shadow-xl">
@@ -181,7 +194,7 @@
     </div>
 
     <!-- 右側：遊戲區 -->
-    <div class="w-full md:w-4/12 bg-slate-950 flex flex-col" style="min-height: 450px;">
+    <div class="w-full md:w-4/12 bg-slate-950 flex flex-col game-container" style="min-height: 420px; flex: 1;">
         <!-- 進度面板 -->
         <div class="pt-3 px-3">
             <div class="bg-black/60 backdrop-blur-md rounded-xl p-2 border border-white/20 shadow-xl">
@@ -205,7 +218,7 @@
         </div>
 
         <!-- 遊戲區 -->
-        <div id="game-area" class="relative flex-1 overflow-hidden" style="min-height: 320px;">
+        <div id="game-area" class="relative flex-1 overflow-hidden" style="min-height: 320px; width: 100%;">
             <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle fill=%22rgba(255,255,255,0.03)%22 cx=%2250%22 cy=%2250%22 r=%221%22/%3E%3C/svg%3E')] bg-repeat pointer-events-none"></div>
             <div class="absolute bottom-3 left-0 right-0 text-center text-white/30 text-[10px] pointer-events-none">
                 💧 點擊飄動的 🌑 分子，淨化它們！
@@ -222,6 +235,7 @@
         let hasSaved = false;
         let activeMolecules = [];
         let spawnInterval = null;
+        let retryCount = 0;
         
         // DOM
         const dialogEl = document.getElementById('dialog');
@@ -325,10 +339,28 @@
             }, delay);
         }
         
+        // 取得遊戲區實際寬度（確保取得正確值）
+        function getGameAreaWidth() {
+            if (!gameArea) return window.innerWidth - 40;
+            const width = gameArea.clientWidth;
+            if (width > 50) return width;
+            return window.innerWidth - 40;
+        }
+        
         function createMolecule() {
             if (isGameCompleted || !gameArea) return;
-            const width = gameArea.clientWidth;
-            if (width < 100) return;
+            
+            // 動態取得寬度，確保手機直向時也能正確計算
+            const width = getGameAreaWidth();
+            if (width < 100) {
+                // 寬度還沒準備好，延遲重試
+                if (retryCount < 5) {
+                    retryCount++;
+                    setTimeout(() => createMolecule(), 200);
+                }
+                return;
+            }
+            retryCount = 0;
             
             const mol = document.createElement('div');
             const icons = ['🌑', '🌑', '🌑', '💨', '🌫️'];
@@ -351,9 +383,12 @@
             activeMolecules.push(mol);
             
             const targetDist = width + 100;
-            requestAnimationFrame(() => {
-                if (mol && mol.parentNode) mol.style.transform = `translateX(${targetDist}px)`;
-            });
+            // 使用 setTimeout 確保 DOM 已渲染
+            setTimeout(() => {
+                if (mol && mol.parentNode && !mol.getAttribute('data-captured')) {
+                    mol.style.transform = `translateX(${targetDist}px)`;
+                }
+            }, 10);
             
             const timeout = setTimeout(() => {
                 if (mol && mol.parentNode && !mol.getAttribute('data-captured')) {
@@ -390,7 +425,7 @@
         function startSpawner() {
             if (spawnInterval) clearInterval(spawnInterval);
             spawnInterval = setInterval(() => {
-                if (!isGameCompleted && activeMolecules.length < 15 && gameArea?.clientWidth > 50) {
+                if (!isGameCompleted && activeMolecules.length < 15) {
                     createMolecule();
                 }
             }, 1000);
@@ -446,9 +481,10 @@
         
         init();
         
+        // 螢旋轉或視窗大小改變時，重新調整現有分子的目標位置
         window.addEventListener('resize', () => {
-            const w = gameArea?.clientWidth;
-            if (w) {
+            const w = getGameAreaWidth();
+            if (w > 50) {
                 activeMolecules.forEach(mol => {
                     if (mol && mol.parentNode && !mol.getAttribute('data-captured')) {
                         mol.style.transition = 'transform 0.3s linear';
