@@ -185,6 +185,7 @@
 </div>
 
 <script>
+    // 六種植物資料
     const PLANTS = [
         { id: 0, name: "🍃 綠葉鵝掌藤", trait: "超級好養，怎麼選都不會出事", emoji: "🌿" },
         { id: 1, name: "💧 蔓榕", trait: "水不能斷，室內太陽少會長不好", emoji: "🌱" },
@@ -194,17 +195,20 @@
         { id: 5, name: "💦 積水鳳梨", trait: "給水方式不一樣，需持續關心", emoji: "🌸" }
     ];
 
+    // 全域變數（避免使用 location 這個保留字）
     let totalPlants = 0;
-    let location = "";
+    let siteLocation = "";  // 改用 siteLocation
     let area = 0;
     let quantities = [0, 0, 0, 0, 0, 0];
 
     function loadFromStorage() {
         totalPlants = parseInt(localStorage.getItem('greenwall_total_plants'));
-        location = localStorage.getItem('greenwall_location');
+        siteLocation = localStorage.getItem('greenwall_location');  // 改用 siteLocation
         area = parseInt(localStorage.getItem('greenwall_area'));
         
-        if (!totalPlants || !location || !area) {
+        console.log('讀取資料:', { totalPlants, siteLocation, area });
+        
+        if (!totalPlants || !siteLocation || !area) {
             return false;
         }
         return true;
@@ -226,13 +230,16 @@
         const allocated = quantities.reduce((a, b) => a + b, 0);
         const remaining = totalPlants - allocated;
         
-        document.getElementById('summaryArea').innerHTML = `
-            📐 面積：${area} m² &nbsp;|&nbsp;
-            📍 ${location === 'outdoor' ? '室外' : '室內'} &nbsp;|&nbsp;
-            🧱 總株數：<span>${totalPlants}</span> 株<br>
-            ✅ 已分配：<span id="allocatedCount">${allocated}</span> 株 &nbsp;|&nbsp;
-            ⏳ 剩餘：<span id="remainingCount">${remaining}</span> 株
-        `;
+        const summaryDiv = document.getElementById('summaryArea');
+        if (summaryDiv) {
+            summaryDiv.innerHTML = `
+                📐 面積：${area} m² &nbsp;|&nbsp;
+                📍 ${siteLocation === 'outdoor' ? '室外' : '室內'} &nbsp;|&nbsp;
+                🧱 總株數：<span>${totalPlants}</span> 株<br>
+                ✅ 已分配：<span id="allocatedCount">${allocated}</span> 株 &nbsp;|&nbsp;
+                ⏳ 剩餘：<span id="remainingCount">${remaining}</span> 株
+            `;
+        }
         
         // 更新每個植物的百分比條
         for (let i = 0; i < PLANTS.length; i++) {
@@ -246,12 +253,12 @@
         const nextBtn = document.getElementById('nextBtn');
         const warningDiv = document.getElementById('warningMsg');
         if (allocated === totalPlants && totalPlants > 0) {
-            nextBtn.disabled = false;
-            warningDiv.style.display = 'none';
+            if (nextBtn) nextBtn.disabled = false;
+            if (warningDiv) warningDiv.style.display = 'none';
         } else {
-            nextBtn.disabled = true;
-            if (totalPlants > 0) warningDiv.style.display = 'block';
-            else warningDiv.style.display = 'none';
+            if (nextBtn) nextBtn.disabled = true;
+            if (warningDiv && totalPlants > 0) warningDiv.style.display = 'block';
+            else if (warningDiv) warningDiv.style.display = 'none';
         }
     }
 
@@ -363,10 +370,15 @@
             }
         }
         
-        document.getElementById('balanceBtn').onclick = autoBalance;
-        document.getElementById('clearBtn').onclick = clearAll;
-        document.getElementById('backBtn').onclick = goBack;
-        document.getElementById('nextBtn').onclick = saveAndNext;
+        const balanceBtn = document.getElementById('balanceBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const backBtn = document.getElementById('backBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        
+        if (balanceBtn) balanceBtn.onclick = autoBalance;
+        if (clearBtn) clearBtn.onclick = clearAll;
+        if (backBtn) backBtn.onclick = goBack;
+        if (nextBtn) nextBtn.onclick = saveAndNext;
         
         updateSummaryAndUI();
     }
@@ -376,16 +388,21 @@
         container.innerHTML = `
             <div class="error-box">
                 <p>⚠️ ${message}</p>
+                <p style="font-size:0.8rem; margin-top:8px;">請先從第一步設定面積與株數。</p>
                 <button id="goToStep1Btn" style="margin-top:16px;">返回第一步</button>
             </div>
         `;
-        document.getElementById('goToStep1Btn')?.addEventListener('click', () => {
-            window.location.href = 'step1_select.html';
-        });
+        const goBtn = document.getElementById('goToStep1Btn');
+        if (goBtn) {
+            goBtn.addEventListener('click', () => {
+                window.location.href = 'step1_select.html';
+            });
+        }
     }
 
     // 執行
-    if (!loadFromStorage()) {
+    const hasData = loadFromStorage();
+    if (!hasData) {
         renderErrorPage('找不到第一步的資料，請先設定面積與株數。');
     } else {
         renderMainPage();
