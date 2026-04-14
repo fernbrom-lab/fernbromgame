@@ -267,7 +267,6 @@
 </div>
 
 <script>
-    // 工地語錄庫
     const WORKER_TALKS = [
         "😤 老鄧資遣我是你的損失！", "😤 老鄧資遣我是你的損失！",
         "🤔 我做得快是傻子，多虧去職訓不然我還不會做這個呢！", "🤔 我做得快是傻子，多虧去職訓不然我還不會做這個呢！",
@@ -279,11 +278,14 @@
         "🌙 加班費記得多算一點", "🎵 邊唱歌邊工作最開心"
     ];
 
-    // 從 localStorage 讀取的植物資料
     let PLANTS = [];
     let area = 0, totalPlants = 0, siteLocation = "", quantities = [], workers = [], workerCount = 0;
     let gridColors = [], finishedPixels = 0, canvas = null, ctx = null, cols = 0, rows = 0;
     let workerTalks = [];
+    
+    // 儲存由下往上的索引映射
+    let bottomUpIndices = [];     // bottomUpIndices[i] = 原始索引
+    let originalToBottomUp = [];  // 原始索引 -> bottomUp 位置
 
     function loadData() {
         area = parseInt(localStorage.getItem('greenwall_area')) || 10;
@@ -402,11 +404,36 @@
         return colorPool;
     }
 
-    let colorPool = [];
+    // 建立由下往上的索引順序
+    function buildBottomUpIndices() {
+        const indices = [];
+        // 從最後一行開始，由下往上、由左往右
+        for (let row = rows - 1; row >= 0; row--) {
+            for (let col = 0; col < cols; col++) {
+                const idx = row * cols + col;
+                if (idx < totalPlants) {
+                    indices.push(idx);
+                }
+            }
+        }
+        return indices;
+    }
 
     function initGridColors() {
-        colorPool = buildColorPool();
-        gridColors = [...colorPool];
+        const colorPool = buildColorPool();
+        // 按照由下往上的順序分配顏色
+        bottomUpIndices = buildBottomUpIndices();
+        gridColors = new Array(totalPlants);
+        for (let i = 0; i < bottomUpIndices.length && i < colorPool.length; i++) {
+            gridColors[bottomUpIndices[i]] = colorPool[i];
+        }
+    }
+
+    // 判斷某個格子是否已施工（根據由下往上的填充進度）
+    function isCellFinished(originalIndex) {
+        // 找出這個原始索引在 bottomUpIndices 中的位置
+        const position = bottomUpIndices.indexOf(originalIndex);
+        return position < finishedPixels;
     }
 
     function drawPixelWall() {
@@ -423,7 +450,7 @@
                     continue;
                 }
                 
-                if (idx < finishedPixels) {
+                if (isCellFinished(idx)) {
                     ctx.fillStyle = gridColors[idx];
                 } else {
                     ctx.fillStyle = "#ffffff";
@@ -446,33 +473,6 @@
         document.getElementById('progressFill').style.width = `${percent}%`;
         drawPixelWall();
         document.getElementById('completeBtn').disabled = (finishedPixels < totalPlants);
-    }
-
-    // 核心修正：由下往上種植（不需要特別處理順序，因為 finishedPixels 是連續的）
-    // 但為了讓視覺上是由下往上，我們需要重新排列索引順序
-    // 讓較下面的格子索引較小，這樣填滿時就會先填下面
-    
-    function reorderIndicesBottomUp() {
-        // 重新排列 gridColors 的順序，讓底部的格子排在前面
-        const newOrder = [];
-        for (let row = rows - 1; row >= 0; row--) {
-            for (let col = 0; col < cols; col++) {
-                const idx = row * cols + col;
-                if (idx < totalPlants) {
-                    newOrder.push(idx);
-                }
-            }
-        }
-        
-        // 重新排列 gridColors
-        const newGridColors = [];
-        for (let i = 0; i < newOrder.length; i++) {
-            newGridColors.push(gridColors[newOrder[i]]);
-        }
-        gridColors = newGridColors;
-        
-        // 重新繪製
-        drawPixelWall();
     }
 
     function handleCanvasClick(e) {
@@ -506,7 +506,6 @@
         if (confirm('確定要重新施工嗎？目前進度將會歸零。')) {
             finishedPixels = 0;
             initGridColors();
-            reorderIndicesBottomUp();  // 重新排列為由下往上順序
             updateProgress();
             for (let i = 0; i < workerCount; i++) workerTalks[i] = getRandomTalk();
             renderWorkers();
@@ -536,7 +535,6 @@
         console.log(`點陣圖設定: ${totalPlants} 株 → ${cols} x ${rows} = ${cols * rows} 格`);
         
         initGridColors();
-        reorderIndicesBottomUp();  // 關鍵：重新排列為由下往上的順序
         if (finishedPixels > totalPlants) finishedPixels = totalPlants;
         updateProgress();
         
