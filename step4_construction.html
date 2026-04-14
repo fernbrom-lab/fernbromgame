@@ -551,18 +551,18 @@
             if (wasEmpty) {
                 flyTalk(`🌱 種下 ${selectedPlant.name}！ ${talk}`, clientX, clientY);
             } else {
-                flyTalk(`🎨 換成 ${selectedPlant.name}！ ${talk}`, clientX, clientY);
+                flyTalk(`🎨 換成 ${selectedPlant.name}！ $很累耶`, clientX, clientY);
             }
         }
     }
 
     function resetAll() {
-        if (confirm('清除所有顏色，重新設計？')) {
+        if (confirm('清除所有，重新種？')) {
             initGridColors();
             updateProgressAndButton();
             // 重置完成後噴語錄
             const rect = document.getElementById('resetBtn').getBoundingClientRect();
-            flyTalk("🔄 已清除所有顏色，重新開始設計！", rect.left + rect.width/2, rect.top + rect.height/2);
+            flyTalk("🔄 已清除所有，重新開始種植！", rect.left + rect.width/2, rect.top + rect.height/2);
         }
     }
 
@@ -590,20 +590,20 @@
             updateProgressAndButton();
             
             const rect = document.getElementById('autoFillBtn').getBoundingClientRect();
-            flyTalk("🎲 亂數填滿完成！來看看成品吧～", rect.left + rect.width/2, rect.top + rect.height/2);
+            flyTalk("🎲 隨機種植完成！來看看成品吧～", rect.left + rect.width/2, rect.top + rect.height/2);
         }
     }
 
     function completeAndNext() {
         if (finishedCount < totalPlants) {
-            alert(`尚未完成！已塗色 ${finishedCount} / ${totalPlants} 格，請繼續設計。`);
+            alert(`還沒種完！已種 ${finishedCount} / ${totalPlants} 顆，請繼續設計。`);
             return;
         }
         localStorage.setItem('greenwall_construction_done', 'true');
         localStorage.setItem('greenwall_grid_colors', JSON.stringify(gridColors));
         
         const rect = document.getElementById('completeBtn').getBoundingClientRect();
-        flyTalk("🎉 設計完成！前往驗收與碳排評估！", rect.left + rect.width/2, rect.top + rect.height/2);
+        flyTalk("🎉 完成瞜！前往驗收與碳排評估！", rect.left + rect.width/2, rect.top + rect.height/2);
         
         setTimeout(() => {
             window.location.href = 'step5_carbon.html';
