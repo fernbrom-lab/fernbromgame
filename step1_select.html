@@ -32,6 +32,19 @@
             padding-left: 20px;
             margin-top: 0;
         }
+        .intro-text {
+            background: #eef2e0;
+            border-radius: 24px;
+            padding: 14px 20px;
+            margin: 16px 0 20px 0;
+            font-size: 0.9rem;
+            color: #2d4a1e;
+            border-left: 4px solid #5a8f4c;
+            font-weight: 500;
+        }
+        .intro-text strong {
+            color: #2b5e2f;
+        }
         .form-group {
             margin: 24px 0;
         }
@@ -47,6 +60,9 @@
             border-radius: 60px;
             border: 1px solid #b3cf9b;
             background: white;
+        }
+        select:invalid {
+            color: #8a9a6e;
         }
         .info-box {
             background: #e0f0da;
@@ -97,7 +113,6 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
-        /* 專業說明區塊 */
         .pro-tips {
             background: #f1f2e6;
             border-left: 6px solid #3d5a38;
@@ -107,19 +122,6 @@
             font-size: 0.85rem;
             line-height: 1.5;
             color: #2d3a1f;
-        }
-        .pro-tips p {
-            margin: 8px 0;
-        }
-        .pro-tips strong {
-            color: #1e4a1a;
-        }
-        .pro-tips .highlight {
-            background: #e0e5c3;
-            border-radius: 20px;
-            padding: 2px 10px;
-            display: inline-block;
-            font-weight: bold;
         }
         .site-warning {
             background: #f9e2c7;
@@ -135,10 +137,19 @@
 <body>
 <div class="card">
     <h1>🌿 第一步 · 植生牆規模</h1>
+
+    <!-- 引導說明區塊 -->
+    <div class="intro-text">
+        🌱 <strong>事前評估，決定植生牆的未來</strong><br>
+        植生牆不是裝飾品，而是一面會呼吸、能固碳、調節微氣候的「活系統」。<br>
+        您現在做的每一個選擇，都會影響未來的養護難度、生長狀況與碳效益。<br>
+        📌 事先的說明與理解，會決定未來植生牆的走向。
+    </div>
     
     <div class="form-group">
         <label>📍 設置地點</label>
-        <select id="location">
+        <select id="location" required>
+            <option value="" disabled selected>—— 請選擇設置位置 ——</option>
             <option value="outdoor">🌞 室外植生牆</option>
             <option value="indoor">🏠 室內植生牆</option>
         </select>
@@ -146,7 +157,7 @@
 
     <!-- 動態專業說明區 (根據室內/室外改變內容) -->
     <div id="proTips" class="pro-tips">
-        <!-- 預設室內說明會用 js 更新 -->
+        <p>💡 請先選擇設置地點，會顯示專業評估建議。</p>
     </div>
 
     <div class="form-group">
@@ -163,7 +174,7 @@
         ⚠️ 為維持遊戲點陣圖效能，暫時限制總株數 ≤ 800 株（面積 ≤ 20 m²）
     </div>
 
-    <button id="nextBtn">下一步 ▶ 選擇植物</button>
+    <button id="nextBtn" disabled>下一步 ▶ 選擇植物</button>
 
     <div class="note">
         💡 本遊戲為概念展示與教學用途。<br>
@@ -202,36 +213,20 @@
     const locationSelect = document.getElementById('location');
     const proTipsDiv = document.getElementById('proTips');
 
-    // 更新說明區塊與面積/工時提醒
-    function updateProTips() {
+    function updateProTipsAndButton() {
         const selected = locationSelect.value;
         if (selected === 'indoor') {
             proTipsDiv.innerHTML = indoorText;
-        } else {
+            nextBtn.disabled = false;
+        } else if (selected === 'outdoor') {
             proTipsDiv.innerHTML = outdoorText;
-        }
-        // 額外動態加上面積與工時關聯提醒（不覆蓋原有結構，用 append 方式加一行）
-        const currentArea = parseInt(areaSlider.value);
-        let工时Msg = '';
-        if (currentArea <= 10) {
-           工时Msg = `⏱️ 面積 ${currentArea} m²，估計施作工期約 1~2 個工作天（含基盤、介質、植栽）。`;
-        } else if (currentArea <= 20) {
-           工时Msg = `⏱️ 面積 ${currentArea} m²，估計施作工期約 3~5 個工作天，需調配人力與物料。`;
+            nextBtn.disabled = false;
         } else {
-           工时Msg = `⏱️ 面積 ${currentArea} m²，屬較大規模，建議分段施作，工期約 1~2 週並需專案管理。`;
+            proTipsDiv.innerHTML = `<p>💡 請先選擇設置地點，會顯示專業評估建議。</p>`;
+            nextBtn.disabled = true;
         }
-        // 避免重複添加工時提醒，先移除舊的 .work-tip
-        const oldTip = proTipsDiv.querySelector('.work-tip');
-        if (oldTip) oldTip.remove();
-        const workTip = document.createElement('div');
-        workTip.className = 'work-tip';
-        workTip.style.marginTop = '12px';
-        workTip.style.padding = '8px 12px';
-        workTip.style.background = '#e3e6cf';
-        workTip.style.borderRadius = '20px';
-        workTip.style.fontSize = '0.8rem';
-        workTip.innerHTML = `📐 ${工时Msg} 施作面積直接影響工時與成本，請審慎評估。`;
-        proTipsDiv.appendChild(workTip);
+        // 重新計算面積相關警告
+        updatePlants();
     }
 
     function updatePlants() {
@@ -243,24 +238,23 @@
 
         if (total > 800) {
             warningDiv.style.display = 'block';
-            nextBtn.disabled = true;
+            // 如果地點還沒選，按鈕本來就是 disabled，不用額外處理
+            if (locationSelect.value) nextBtn.disabled = true;
         } else {
             warningDiv.style.display = 'none';
-            nextBtn.disabled = false;
+            // 只有當地點已選且未超過上限時才啟用
+            if (locationSelect.value) nextBtn.disabled = false;
         }
-        // 更新專業區塊內的工時提醒
-        updateProTips();
     }
 
     // 監聽地點切換以及面積滑動
     locationSelect.addEventListener('change', () => {
-        updateProTips();
-        updatePlants();  // 確保工時重新計算
+        updateProTipsAndButton();
     });
     areaSlider.addEventListener('input', updatePlants);
     
     // 初始化
-    updateProTips();
+    updateProTipsAndButton();
     updatePlants();
 
     nextBtn.addEventListener('click', () => {
