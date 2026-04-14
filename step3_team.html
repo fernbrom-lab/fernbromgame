@@ -27,6 +27,7 @@
             border-radius: 48px;
             padding: 28px;
             box-shadow: 0 20px 35px rgba(0,0,0,0.3);
+            position: relative;
         }
         h1 {
             color: #1a3b1e;
@@ -89,14 +90,22 @@
             padding: 10px 8px;
             text-align: center;
             cursor: pointer;
-            transition: 0.05s linear;
+            transition: all 0.08s linear;
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
             border: 1px solid #cddba6;
             -webkit-tap-highlight-color: transparent;
         }
         .member-card:active {
-            transform: scale(0.96);
+            transform: scale(0.94);
             background: #e8f0e0;
+        }
+        .member-card.click-effect {
+            animation: cardPop 0.2s ease-out;
+        }
+        @keyframes cardPop {
+            0% { transform: scale(1); background: white; }
+            50% { transform: scale(0.92); background: #d4e8c4; }
+            100% { transform: scale(1); background: white; }
         }
         .member-avatar {
             width: 60px;
@@ -127,6 +136,15 @@
         .truck-icon {
             font-size: 3rem;
             margin: 10px 0;
+            transition: transform 0.1s ease;
+        }
+        .truck-icon.shake {
+            animation: truckShake 0.3s ease;
+        }
+        @keyframes truckShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-3px); }
+            75% { transform: translateX(3px); }
         }
         .truck-team {
             background: #cddba6;
@@ -146,10 +164,11 @@
             text-align: center;
             width: 70px;
             cursor: pointer;
+            transition: all 0.08s linear;
             -webkit-tap-highlight-color: transparent;
         }
         .truck-member:active {
-            transform: scale(0.96);
+            transform: scale(0.94);
         }
         .truck-member .member-avatar {
             width: 55px;
@@ -199,9 +218,10 @@
             width: 100%;
             margin-top: 20px;
             -webkit-tap-highlight-color: transparent;
+            transition: transform 0.05s linear;
         }
         button:active {
-            transform: scale(0.98);
+            transform: scale(0.97);
         }
         button:disabled {
             opacity: 0.5;
@@ -223,6 +243,36 @@
             color: #8a9a6e;
             margin-top: 24px;
         }
+        /* 噴飛語錄動畫 */
+        .fly-quote {
+            position: fixed;
+            background: #ffe8c0;
+            color: #5a1e00;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            white-space: nowrap;
+            z-index: 1000;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            border: 1px solid #cc8833;
+            animation: flyQuote 1s ease-out forwards;
+        }
+        @keyframes flyQuote {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+            30% {
+                opacity: 1;
+                transform: translate(15px, -35px) scale(1.08);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(40px, -90px) scale(0.7);
+            }
+        }
         @media (max-width: 700px) {
             .card { padding: 18px; }
             h1 { font-size: 1.3rem; }
@@ -239,7 +289,6 @@
 
     <div class="summary" id="summaryArea">載入中...</div>
 
-    <!-- 工安與人力建議區 -->
     <div class="safety-warning" id="safetyArea">
         ⚠️ 載入中...
     </div>
@@ -253,7 +302,7 @@
 
         <div class="truck-area">
             <div class="section-title">🚛 施工貨車（點擊移除）</div>
-            <div class="truck-icon">🚛</div>
+            <div class="truck-icon" id="truckIcon">🚛</div>
             <div class="truck-team" id="truckTeam"></div>
             <div>👷 施工人數：<span class="counter" id="workerCount">0</span> / 7</div>
         </div>
@@ -269,6 +318,25 @@
 </div>
 
 <script>
+    // 工人語錄庫（老鄧系列）
+    const WORKER_QUOTES = [
+        "😤 老鄧資遣我是你的損失！",
+        "🤔 我做得快是傻子，多虧去職訓不然我還不會做這個呢！",
+        "💔 我喜歡做工不代表要接受你的不公平，大叔你摸著良心問問自己！",
+        "🌞 天氣熱要多喝水～",
+        "⚠️ 作業中須注意工安！",
+        "🌱 植物是生命也要尊重～",
+        "💪 今天也要努力施工！",
+        "🍵 休息一下喝個茶吧",
+        "🔧 工具要隨手收好",
+        "🤝 團隊合作最重要！",
+        "🌿 這面牆以後會很美",
+        "💧 記得幫植物澆水",
+        "🪴 每一株都是心血",
+        "🏗️ 安全第一，品質至上",
+        "😎 我種的植物最漂亮"
+    ];
+
     // 夥伴資料（7位）
     const TEAM_MEMBERS = [
         { id: 0, name: "阿蕨", emoji: "🌿", imgFile: "brom.png" },
@@ -297,6 +365,28 @@
     let quantities = [];
     let selectedWorkers = [];
 
+    function getRandomQuote() {
+        return WORKER_QUOTES[Math.floor(Math.random() * WORKER_QUOTES.length)];
+    }
+
+    // 噴飛語錄
+    function flyQuote(text, x, y) {
+        const div = document.createElement('div');
+        div.className = 'fly-quote';
+        div.textContent = '💬 ' + text;
+        div.style.left = (x - 50) + 'px';
+        div.style.top = (y - 30) + 'px';
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 1000);
+    }
+
+    // 觸發卡車震動
+    function shakeTruck() {
+        const truck = document.getElementById('truckIcon');
+        truck.classList.add('shake');
+        setTimeout(() => truck.classList.remove('shake'), 300);
+    }
+
     function loadPreviousData() {
         area = parseInt(localStorage.getItem('greenwall_area')) || 10;
         totalPlants = parseInt(localStorage.getItem('greenwall_total_plants')) || 400;
@@ -316,7 +406,6 @@
             🌱 植物種類：${quantities.filter(q => q > 0).length} 種
         `;
         
-        // 更新工安建議區
         const minRequired = getMinWorkersByArea(area);
         document.getElementById('safetyArea').innerHTML = `
             ⚠️ <strong>工安協同作業規範</strong><br>
@@ -333,20 +422,35 @@
                      style="width:${sizeNum}px; height:${sizeNum}px; object-fit:cover; border-radius:60px;">`;
     }
 
-    function addWorker(worker) {
+    // 加入夥伴（含動畫與語錄）
+    function addWorker(worker, clickX, clickY) {
         if (selectedWorkers.some(w => w.id === worker.id)) {
+            flyQuote(`⚠️ ${worker.name} 已經在車上了！`, clickX, clickY);
             return false;
         }
         if (selectedWorkers.length >= 7) {
+            flyQuote(`🚛 貨車已滿！最多 7 人`, clickX, clickY);
             alert('貨車最多只能載 7 人！');
             return false;
         }
         selectedWorkers.push(worker);
+        
+        // 噴飛語錄
+        const quote = getRandomQuote();
+        flyQuote(`✨ ${worker.name} 加入團隊！ ${quote}`, clickX, clickY);
+        shakeTruck();
         return true;
     }
 
-    function removeWorker(workerId) {
+    // 移除夥伴（含動畫與語錄）
+    function removeWorker(workerId, clickX, clickY) {
+        const removed = selectedWorkers.find(w => w.id === workerId);
+        if (removed) {
+            const quote = getRandomQuote();
+            flyQuote(`😢 ${removed.name} 離開了... ${quote}`, clickX, clickY);
+        }
         selectedWorkers = selectedWorkers.filter(w => w.id !== workerId);
+        shakeTruck();
     }
 
     function checkSafetyAndUpdateButton() {
@@ -377,7 +481,6 @@
             return false;
         }
         
-        // 人力充足
         if (currentCount === minRequired) {
             errorDiv.style.display = 'block';
             errorDiv.style.background = '#d4edda';
@@ -420,7 +523,14 @@
             
             card.addEventListener('click', (e) => {
                 e.stopPropagation();
-                if (addWorker(member)) {
+                const rect = card.getBoundingClientRect();
+                const clickX = rect.left + rect.width / 2;
+                const clickY = rect.top + rect.height / 2;
+                
+                card.classList.add('click-effect');
+                setTimeout(() => card.classList.remove('click-effect'), 200);
+                
+                if (addWorker(member, clickX, clickY)) {
                     saveAndRender();
                 }
             });
@@ -454,7 +564,10 @@
                 
                 div.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    removeWorker(worker.id);
+                    const rect = div.getBoundingClientRect();
+                    const clickX = rect.left + rect.width / 2;
+                    const clickY = rect.top + rect.height / 2;
+                    removeWorker(worker.id, clickX, clickY);
                     saveAndRender();
                 });
             });
