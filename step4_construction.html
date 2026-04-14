@@ -401,7 +401,8 @@
             for (let col = 0; col < cols; col++) {
                 const idx = row * cols + col;
                 if (idx >= totalPlants) {
-                    ctx.fillStyle = "#e8e8e0";
+                    // 超出範圍的格子畫灰色（不參與點擊）
+                    ctx.fillStyle = "#d0d0c0";
                     ctx.fillRect(col * cellSize.w, row * cellSize.h, cellSize.w, cellSize.h);
                     continue;
                 }
@@ -427,6 +428,7 @@
         document.getElementById('completeBtn').disabled = (finishedCount < totalPlants);
     }
 
+    // 修正：根據點擊座標正確計算格子索引
     function handleCanvasClick(e) {
         if (!canvas) return;
         
@@ -443,18 +445,32 @@
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
-        const canvasX = (clientX - rect.left) * scaleX;
-        const canvasY = (clientY - rect.top) * scaleY;
+        
+        let canvasX = (clientX - rect.left) * scaleX;
+        let canvasY = (clientY - rect.top) * scaleY;
+        
+        // 邊界檢查
+        if (canvasX < 0) canvasX = 0;
+        if (canvasY < 0) canvasY = 0;
+        if (canvasX > canvas.width) canvasX = canvas.width;
+        if (canvasY > canvas.height) canvasY = canvas.height;
         
         const col = Math.floor(canvasX / cellSize.w);
         const row = Math.floor(canvasY / cellSize.h);
+        
+        // 確保 col 和 row 在有效範圍內
+        if (col < 0 || col >= cols) return;
+        if (row < 0 || row >= rows) return;
+        
         const idx = row * cols + col;
         
+        // 檢查索引是否在有效範圍內（不能超出 totalPlants）
         if (idx >= 0 && idx < totalPlants && selectedPlantId !== null) {
             const selectedPlant = PLANTS[selectedPlantId];
             gridColors[idx] = selectedPlant.color;
             updateProgressAndButton();
             
+            // 隨機噴飛語錄
             if (workers.length > 0 && Math.random() > 0.7) {
                 const randomIdx = Math.floor(Math.random() * workers.length);
                 const talk = workerTalks[randomIdx];
@@ -497,12 +513,20 @@
                     colorPool.push(PLANTS[i].color);
                 }
             }
+            // 隨機打亂
             for (let i = colorPool.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [colorPool[i], colorPool[j]] = [colorPool[j], colorPool[i]];
             }
+            // 填滿所有格子
             for (let i = 0; i < totalPlants && i < colorPool.length; i++) {
                 gridColors[i] = colorPool[i];
+            }
+            // 如果顏色不夠，用第一種植物補滿
+            if (colorPool.length < totalPlants && PLANTS.length > 0) {
+                for (let i = colorPool.length; i < totalPlants; i++) {
+                    gridColors[i] = PLANTS[0].color;
+                }
             }
             updateProgressAndButton();
         }
@@ -524,14 +548,16 @@
         canvas.height = 400;
         ctx = canvas.getContext('2d');
         
+        // 計算網格：使網格總數 >= totalPlants，但確保所有格子都能被點擊
         cols = Math.ceil(Math.sqrt(totalPlants));
         rows = Math.ceil(totalPlants / cols);
         
-        console.log(`點陣圖: ${totalPlants} 株 → ${cols} x ${rows}`);
+        console.log(`點陣圖: ${totalPlants} 株 → ${cols} 列 x ${rows} 行 = ${cols * rows} 格`);
         
         initGridColors();
         updateProgressAndButton();
         
+        // 移除舊監聽，避免重複綁定
         canvas.removeEventListener('click', handleCanvasClick);
         canvas.removeEventListener('touchstart', handleCanvasClick);
         canvas.addEventListener('click', handleCanvasClick);
