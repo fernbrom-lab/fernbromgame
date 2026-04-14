@@ -53,6 +53,33 @@
             font-size: 0.85rem;
             color: #a35100;
         }
+        .safety-tips {
+            background: #fef4e8;
+            border-radius: 20px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            border: 1px solid #f0dca8;
+        }
+        .safety-tips-title {
+            font-weight: bold;
+            color: #c0392b;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .safety-tips-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 8px;
+            font-size: 0.75rem;
+            color: #5a4a2a;
+        }
+        .safety-tips-list li {
+            margin-left: 20px;
+            line-height: 1.4;
+        }
         .two-columns {
             display: flex;
             gap: 20px;
@@ -243,7 +270,6 @@
             color: #8a9a6e;
             margin-top: 24px;
         }
-        /* 噴飛語錄動畫 */
         .fly-quote {
             position: fixed;
             background: #ffe8c0;
@@ -289,8 +315,28 @@
 
     <div class="summary" id="summaryArea">載入中...</div>
 
+    <!-- 工安與人力建議區 -->
     <div class="safety-warning" id="safetyArea">
         ⚠️ 載入中...
+    </div>
+
+    <!-- 新增施工安全注意事項區塊 -->
+    <div class="safety-tips">
+        <div class="safety-tips-title">
+            ⚠️ 施工安全注意事項 ⚠️
+        </div>
+        <ul class="safety-tips-list">
+            <li>🔹 高處作業必須佩戴安全帶，並確實勾掛於牢固點位</li>
+            <li>🔹 施工架及工作平台需經檢查確認穩固，方可使用</li>
+            <li>🔹 電動工具使用前須檢查電線有無破損，避免漏電風險</li>
+            <li>🔹 植生牆灌水後每平方公尺重量可達60-100kg，須確認結構荷重</li>
+            <li>🔹 作業時須佩戴安全帽、防滑手套及防護眼鏡</li>
+            <li>🔹 夜間或光線不足處，需增設臨時照明設備</li>
+            <li>🔹 高空物料吊掛時，下方嚴禁人員通過或停留</li>
+            <li>🔹 每日上工前實施工具箱會議(TBM)，確認作業風險</li>
+            <li>🔹 施工區域須設置警示帶及安全圍籬，防止無關人員進入</li>
+            <li>🔹 如遇強風(6級以上)、雷雨等惡劣天氣，應立即停止戶外作業</li>
+        </ul>
     </div>
 
     <div class="two-columns">
@@ -314,7 +360,7 @@
         <button id="backBtn" class="btn-secondary">⬅ 返回植物分配</button>
         <button id="nextBtn" disabled>🚧 出發施工！</button>
     </div>
-    <footer>🌱 依據面積與工安規範，需符合最低人力建議才可施工。</footer>
+    <footer>🌱 依據面積與工安規範，需符合最低人力建議才可施工。安全第一，品質至上！</footer>
 </div>
 
 <script>
@@ -435,7 +481,6 @@
         }
         selectedWorkers.push(worker);
         
-        // 噴飛語錄
         const quote = getRandomQuote();
         flyQuote(`✨ ${worker.name} 加入團隊！ ${quote}`, clickX, clickY);
         shakeTruck();
