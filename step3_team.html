@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>植生牆遊戲 · 第三步：召集施工夥伴</title>
+    <title>植生牆遊戲 · 第三步：召集施工夥伴（工安協同）</title>
     <style>
         * {
             box-sizing: border-box;
@@ -42,6 +42,15 @@
             margin-bottom: 24px;
             text-align: center;
             font-size: 0.9rem;
+        }
+        .safety-warning {
+            background: #fff0e0;
+            border-left: 6px solid #e67e22;
+            border-radius: 20px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            color: #a35100;
         }
         .two-columns {
             display: flex;
@@ -160,13 +169,23 @@
             font-weight: bold;
             color: #1a5a1a;
         }
-        .warning {
+        .warning-msg {
             background: #ffe0b5;
             border-radius: 28px;
             padding: 10px;
             margin-top: 16px;
             text-align: center;
             font-size: 0.8rem;
+        }
+        .error-msg {
+            background: #f8d7da;
+            color: #721c24;
+            border-radius: 28px;
+            padding: 12px;
+            margin-top: 16px;
+            text-align: center;
+            font-size: 0.85rem;
+            border-left: 4px solid #dc3545;
         }
         button {
             background: #2b5e2f;
@@ -216,19 +235,22 @@
 </head>
 <body>
 <div class="card">
-    <h1>👥 第三步 · 召集施工夥伴</h1>
+    <h1>👥 第三步 · 召集施工夥伴（工安協同作業）</h1>
 
     <div class="summary" id="summaryArea">載入中...</div>
 
+    <!-- 工安與人力建議區 -->
+    <div class="safety-warning" id="safetyArea">
+        ⚠️ 載入中...
+    </div>
+
     <div class="two-columns">
-        <!-- 左邊：七個小夥伴 -->
         <div class="team-area">
             <div class="section-title">🌾 等待召集的夥伴（點擊加入）</div>
             <div class="members-grid" id="membersGrid"></div>
-            <div class="warning">💡 點擊夥伴 = 加入貨車｜點擊貨車上的夥伴 = 移除</div>
+            <div class="warning-msg">💡 點擊夥伴 = 加入貨車｜點擊貨車上的夥伴 = 移除</div>
         </div>
 
-        <!-- 右邊：貨車（施工團隊） -->
         <div class="truck-area">
             <div class="section-title">🚛 施工貨車（點擊移除）</div>
             <div class="truck-icon">🚛</div>
@@ -237,11 +259,13 @@
         </div>
     </div>
 
+    <div id="errorMsg" class="error-msg" style="display:none;"></div>
+
     <div class="flex-btns">
         <button id="backBtn" class="btn-secondary">⬅ 返回植物分配</button>
         <button id="nextBtn" disabled>🚧 出發施工！</button>
     </div>
-    <footer>🌱 人數越多，施工速度越快！最多 7 人。點擊即可加入/移除</footer>
+    <footer>🌱 依據面積與工安規範，需符合最低人力建議才可施工。</footer>
 </div>
 
 <script>
@@ -256,13 +280,21 @@
         { id: 6, name: "空空", emoji: "🎈", imgFile: "till.png" }
     ];
 
-    // 從 localStorage 讀取前兩步資料
+    // 面積對應最低人力需求
+    function getMinWorkersByArea(area) {
+        if (area >= 1 && area <= 2) return 2;
+        if (area >= 3 && area <= 5) return 3;
+        if (area >= 6 && area <= 8) return 4;
+        if (area >= 9 && area <= 13) return 5;
+        if (area >= 14 && area <= 16) return 6;
+        if (area >= 17 && area <= 20) return 7;
+        return 2;
+    }
+
     let area = 0;
     let totalPlants = 0;
     let siteLocation = "";
     let quantities = [];
-
-    // 施工團隊（被選中的夥伴）
     let selectedWorkers = [];
 
     function loadPreviousData() {
@@ -283,9 +315,17 @@
             🧱 總株數：${totalPlants} 株 &nbsp;|&nbsp;
             🌱 植物種類：${quantities.filter(q => q > 0).length} 種
         `;
+        
+        // 更新工安建議區
+        const minRequired = getMinWorkersByArea(area);
+        document.getElementById('safetyArea').innerHTML = `
+            ⚠️ <strong>工安協同作業規範</strong><br>
+            📐 施作面積 ${area} m² → 最低建議人力：<strong style="color:#c0392b;">${minRequired} 人</strong><br>
+            🔧 依據職安法規，植生牆工程需協同作業，避免單獨施工發生意外。<br>
+            💰 人力配置亦會影響碳排放總量與施工成本，請審慎評估。
+        `;
     }
 
-    // 渲染頭像（支援圖片）
     function renderAvatar(imgFile, emoji, size = "60px") {
         const sizeNum = parseInt(size);
         return `<img src="${imgFile}" 
@@ -293,10 +333,8 @@
                      style="width:${sizeNum}px; height:${sizeNum}px; object-fit:cover; border-radius:60px;">`;
     }
 
-    // 加入夥伴
     function addWorker(worker) {
         if (selectedWorkers.some(w => w.id === worker.id)) {
-            // alert(`${worker.name} 已經在貨車上了！`);
             return false;
         }
         if (selectedWorkers.length >= 7) {
@@ -307,9 +345,54 @@
         return true;
     }
 
-    // 移除夥伴
     function removeWorker(workerId) {
         selectedWorkers = selectedWorkers.filter(w => w.id !== workerId);
+    }
+
+    function checkSafetyAndUpdateButton() {
+        const minRequired = getMinWorkersByArea(area);
+        const currentCount = selectedWorkers.length;
+        const errorDiv = document.getElementById('errorMsg');
+        const nextBtn = document.getElementById('nextBtn');
+        
+        if (currentCount === 0) {
+            errorDiv.style.display = 'block';
+            errorDiv.innerHTML = '⚠️ 尚未選擇任何夥伴！請點擊左側夥伴加入施工團隊。';
+            nextBtn.disabled = true;
+            return false;
+        }
+        
+        if (currentCount === 1) {
+            errorDiv.style.display = 'block';
+            errorDiv.innerHTML = '⚠️ 單人作業風險極高！違反工安協同作業規範。請至少再增加 1 位夥伴協同施工。';
+            nextBtn.disabled = true;
+            return false;
+        }
+        
+        if (currentCount < minRequired) {
+            const shortage = minRequired - currentCount;
+            errorDiv.style.display = 'block';
+            errorDiv.innerHTML = `⚠️ 人力不足！面積 ${area} m² 至少需要 ${minRequired} 人協同作業。<br>目前 ${currentCount} 人，請再增加 ${shortage} 位夥伴。`;
+            nextBtn.disabled = true;
+            return false;
+        }
+        
+        // 人力充足
+        if (currentCount === minRequired) {
+            errorDiv.style.display = 'block';
+            errorDiv.style.background = '#d4edda';
+            errorDiv.style.color = '#155724';
+            errorDiv.style.borderLeftColor = '#28a745';
+            errorDiv.innerHTML = `✅ 人力符合最低規範！${currentCount} 人可安全施工。（碳排放與成本將依人數計算）`;
+        } else {
+            errorDiv.style.display = 'block';
+            errorDiv.style.background = '#d4edda';
+            errorDiv.style.color = '#155724';
+            errorDiv.style.borderLeftColor = '#28a745';
+            errorDiv.innerHTML = `✅ 人力充足！${currentCount} 人 > 最低需求 ${minRequired} 人，施工效率更高。（碳排放與成本將相應增加）`;
+        }
+        nextBtn.disabled = false;
+        return true;
     }
 
     function renderMembers() {
@@ -378,11 +461,7 @@
         }
         
         document.getElementById('workerCount').innerText = selectedWorkers.length;
-        
-        const nextBtn = document.getElementById('nextBtn');
-        if (nextBtn) {
-            nextBtn.disabled = selectedWorkers.length === 0;
-        }
+        checkSafetyAndUpdateButton();
     }
 
     function saveAndRender() {
@@ -407,8 +486,19 @@
     }
 
     function goToConstruction() {
-        if (selectedWorkers.length === 0) {
+        const minRequired = getMinWorkersByArea(area);
+        const currentCount = selectedWorkers.length;
+        
+        if (currentCount === 0) {
             alert('請至少選擇一位夥伴一起施工！');
+            return;
+        }
+        if (currentCount === 1) {
+            alert('⚠️ 單人作業風險極高！請至少再增加 1 位夥伴協同施工。');
+            return;
+        }
+        if (currentCount < minRequired) {
+            alert(`⚠️ 人力不足！面積 ${area} m² 至少需要 ${minRequired} 人協同作業。\n目前 ${currentCount} 人，請再增加 ${minRequired - currentCount} 位夥伴。`);
             return;
         }
         
@@ -418,7 +508,6 @@
         window.location.href = 'step4_construction.html';
     }
 
-    // 初始化
     loadPreviousData();
     loadSavedWorkers();
     renderMembers();
