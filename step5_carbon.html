@@ -19,7 +19,7 @@
             padding: 20px;
         }
         .card {
-            max-width: 900px;
+            max-width: 1000px;
             width: 100%;
             background: #fef7e0;
             border-radius: 48px;
@@ -134,8 +134,58 @@
             color: #8a9a6e;
             margin-top: 24px;
         }
-        .progress-icon {
-            font-size: 1.2rem;
+        /* 完成圖區塊 */
+        .completed-wall {
+            background: #e0d5b9;
+            border-radius: 28px;
+            padding: 20px;
+            margin: 16px 0;
+            text-align: center;
+        }
+        .completed-wall-title {
+            font-weight: bold;
+            margin-bottom: 16px;
+            font-size: 1rem;
+            color: #2b5e2f;
+        }
+        .pixel-grid {
+            display: grid;
+            grid-template-columns: repeat(20, 1fr);
+            gap: 2px;
+            background: #c0b894;
+            padding: 8px;
+            border-radius: 16px;
+            max-width: 100%;
+            overflow-x: auto;
+        }
+        .pixel-cell {
+            aspect-ratio: 1 / 1;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 4px;
+        }
+        .team-photo {
+            text-align: center;
+            margin-top: 20px;
+            padding: 16px;
+            background: #fff5e0;
+            border-radius: 28px;
+        }
+        .team-photo img {
+            max-width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .team-photo p {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: #5a6e4a;
+        }
+        @media (max-width: 700px) {
+            .pixel-grid {
+                grid-template-columns: repeat(10, 1fr);
+            }
         }
     </style>
 </head>
@@ -162,6 +212,13 @@
             <span id="workerCountDisplay">-</span>
         </div>
         <div class="plant-list-small" id="plantList"></div>
+    </div>
+
+    <!-- 完成圖區塊：顯示植生牆完成樣貌 -->
+    <div class="completed-wall">
+        <div class="completed-wall-title">🎉 植生牆完成圖 🎉</div>
+        <div id="pixelGrid" class="pixel-grid"></div>
+        <div style="font-size:0.7rem; color:#6b5a3a; margin-top:12px;">🌱 每一格代表一株植物，感謝您的努力！</div>
     </div>
 
     <div class="section">
@@ -198,6 +255,12 @@
         </div>
     </div>
 
+    <!-- 團隊合照 -->
+    <div class="team-photo">
+        <img src="team.png" alt="蕨積施工團隊" onerror="this.style.display='none'; this.parentElement.innerHTML='<p>📸 蕨積施工團隊合照<br>（圖片 team.png 找不到）</p>';">
+        <p>🌱 蕨積施工團隊・感謝每一位夥伴的努力 🌱</p>
+    </div>
+
     <div class="flex-btns">
         <button id="restartBtn" class="btn-secondary">🌍 重新開始</button>
         <button id="printBtn">📄 輸出報告</button>
@@ -206,14 +269,21 @@
 </div>
 
 <script>
-    // 植物資料
+    // 植物資料（對應圖片：fern.png, brom.png, succ.png, till.png）
+    const PLANT_IMAGES = {
+        "腎蕨": "fern.png",
+        "積水鳳梨": "brom.png",
+        "多肉植物": "succ.png",
+        "空氣鳳梨": "till.png"
+    };
+    
     const PLANTS = [
-        { id: 0, name: "綠葉鵝掌藤", color: "#5b8c5a", carbonFactor: 1.25, suitable: { outdoor: true, indoor: true } },
-        { id: 1, name: "蔓榕", color: "#6f9e6f", carbonFactor: 1.3, suitable: { outdoor: true, indoor: false } },
-        { id: 2, name: "粗勒草", color: "#4c8b5e", carbonFactor: 1.15, suitable: { outdoor: false, indoor: true } },
-        { id: 3, name: "腎蕨", color: "#7dab73", carbonFactor: 1.2, suitable: { outdoor: true, indoor: true } },
-        { id: 4, name: "鹿角蕨", color: "#92b881", carbonFactor: 1.35, suitable: { outdoor: true, indoor: true } },
-        { id: 5, name: "積水鳳梨", color: "#d98c5f", carbonFactor: 1.1, suitable: { outdoor: true, indoor: true } }
+        { id: 0, name: "綠葉鵝掌藤", color: "#5b8c5a", carbonFactor: 1.25, suitable: { outdoor: true, indoor: true }, img: "fern.png" },
+        { id: 1, name: "蔓榕", color: "#6f9e6f", carbonFactor: 1.3, suitable: { outdoor: true, indoor: false }, img: "brom.png" },
+        { id: 2, name: "粗勒草", color: "#4c8b5e", carbonFactor: 1.15, suitable: { outdoor: false, indoor: true }, img: "succ.png" },
+        { id: 3, name: "腎蕨", color: "#7dab73", carbonFactor: 1.2, suitable: { outdoor: true, indoor: true }, img: "fern.png" },
+        { id: 4, name: "鹿角蕨", color: "#92b881", carbonFactor: 1.35, suitable: { outdoor: true, indoor: true }, img: "till.png" },
+        { id: 5, name: "積水鳳梨", color: "#d98c5f", carbonFactor: 1.1, suitable: { outdoor: true, indoor: true }, img: "brom.png" }
     ];
 
     // 從 localStorage 讀取資料
@@ -224,6 +294,7 @@
     let workers = [];
     let workerCount = 0;
     let finishedPixels = 0;
+    let gridColors = [];
 
     function loadData() {
         area = parseInt(localStorage.getItem('greenwall_area')) || 10;
@@ -237,6 +308,13 @@
         const storedWorkers = localStorage.getItem('greenwall_workers');
         workers = storedWorkers ? JSON.parse(storedWorkers) : [];
         workerCount = workers.length;
+        
+        const storedColors = localStorage.getItem('greenwall_grid_colors');
+        if (storedColors) {
+            try {
+                gridColors = JSON.parse(storedColors);
+            } catch(e) { gridColors = []; }
+        }
     }
 
     function renderBasicInfo() {
@@ -255,6 +333,61 @@
                 tag.innerHTML = `${PLANTS[i].name} × ${qty} 株`;
                 plantContainer.appendChild(tag);
             }
+        }
+    }
+
+    // 渲染完成圖（使用植物圖片）
+    function renderCompletedWall() {
+        const container = document.getElementById('pixelGrid');
+        if (!container) return;
+        
+        // 決定網格大小（最多 20x20，若總株數更多則調整）
+        let displayCols = Math.min(20, Math.ceil(Math.sqrt(totalPlants)));
+        let displayRows = Math.ceil(totalPlants / displayCols);
+        if (displayRows > 20) {
+            displayCols = 20;
+            displayRows = Math.ceil(totalPlants / displayCols);
+        }
+        
+        container.style.gridTemplateColumns = `repeat(${displayCols}, 1fr)`;
+        container.innerHTML = '';
+        
+        // 建立顏色到圖片的映射
+        function getImageForColor(color) {
+            // 根據顏色判斷植物類型
+            if (color === "#5b8c5a") return "fern.png";
+            if (color === "#6f9e6f") return "brom.png";
+            if (color === "#4c8b5e") return "succ.png";
+            if (color === "#7dab73") return "fern.png";
+            if (color === "#92b881") return "till.png";
+            if (color === "#d98c5f") return "brom.png";
+            return "fern.png";
+        }
+        
+        for (let i = 0; i < totalPlants && i < displayCols * displayRows; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'pixel-cell';
+            
+            if (gridColors && gridColors[i]) {
+                const imgFile = getImageForColor(gridColors[i]);
+                cell.style.backgroundImage = `url('${imgFile}')`;
+                cell.style.backgroundSize = 'cover';
+                cell.style.backgroundPosition = 'center';
+            } else {
+                // 未完成的格子顯示灰色
+                cell.style.backgroundColor = '#c0b894';
+                cell.style.backgroundImage = 'none';
+            }
+            container.appendChild(cell);
+        }
+        
+        // 如果格子不足，補滿
+        const totalCells = displayCols * displayRows;
+        for (let i = totalPlants; i < totalCells; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'pixel-cell';
+            cell.style.backgroundColor = '#d0c8a8';
+            container.appendChild(cell);
         }
     }
 
@@ -283,12 +416,13 @@
         }
         
         // 2. 施工完成度
-        if (finishedPixels >= totalPlants) {
+        const coloredCount = gridColors.filter(c => c !== null && c !== undefined).length;
+        if (coloredCount >= totalPlants) {
             score += 15;
             details.push('✅ 施工完成度 100%');
         } else {
             score -= 20;
-            details.push('❌ 施工未完全完成');
+            details.push(`❌ 施工未完全完成 (${coloredCount}/${totalPlants})`);
         }
         
         // 3. 面積合理性
@@ -332,10 +466,8 @@
     function calculateCarbon() {
         const isOutdoor = siteLocation === 'outdoor';
         
-        // 施工碳排公式
         let constructEm = area * 4.5 + workerCount * 7.2 + (isOutdoor ? 18 : 12);
         
-        // 計算平均植物固碳係數（加權平均）
         let totalCarbonFactor = 0;
         let totalQuantity = 0;
         for (let i = 0; i < PLANTS.length; i++) {
@@ -347,7 +479,6 @@
         }
         const avgCarbonFactor = totalQuantity > 0 ? totalCarbonFactor / totalQuantity : 1.0;
         
-        // 環境匹配懲罰：不匹配的植物會降低固碳效率
         let matchPenalty = 1.0;
         let mismatchPlants = [];
         for (let i = 0; i < PLANTS.length; i++) {
@@ -358,11 +489,9 @@
         }
         matchPenalty = Math.max(0.6, matchPenalty);
         
-        // 年固碳量
         let baseSequest = isOutdoor ? 3.2 : 1.6;
         let yearlySequest = area * baseSequest * avgCarbonFactor * matchPenalty;
         
-        // 碳中和年數
         let paybackYears = yearlySequest > 0 ? (constructEm / yearlySequest) : 999;
         paybackYears = Math.ceil(paybackYears * 10) / 10;
         
@@ -391,7 +520,6 @@
         const isOutdoor = siteLocation === 'outdoor';
         let futureText = '';
         
-        // 檢查是否有不匹配的植物
         let mismatchNames = [];
         for (let i = 0; i < PLANTS.length; i++) {
             if (quantities[i] > 0 && !PLANTS[i].suitable[siteLocation]) {
@@ -458,6 +586,7 @@
     // 初始化
     loadData();
     renderBasicInfo();
+    renderCompletedWall();
     calculateContractScore();
     calculateCarbon();
     renderFuturePrediction();
