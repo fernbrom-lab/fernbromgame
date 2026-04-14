@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>植生牆遊戲 · 第四步：點陣圖施工</title>
+    <title>植生牆遊戲 · 第四步：點陣圖施工（由下往上填滿）</title>
     <style>
         * {
             box-sizing: border-box;
@@ -44,7 +44,6 @@
             flex-wrap: wrap;
             gap: 10px;
             font-size: 0.9rem;
-            color: #1a3b1e;
         }
         .plants-summary {
             background: #fff5e0;
@@ -57,7 +56,6 @@
             font-weight: bold;
             margin-bottom: 12px;
             font-size: 0.9rem;
-            color: #2b5e2f;
         }
         .plant-list {
             display: flex;
@@ -73,18 +71,11 @@
             padding: 6px 12px;
             border-radius: 40px;
             border: 1px solid #cddba6;
-            color: #1a3b1e;
         }
         .plant-color-box {
             width: 24px;
             height: 24px;
             border-radius: 24px;
-        }
-        .plant-item img {
-            width: 32px;
-            height: 32px;
-            object-fit: cover;
-            border-radius: 32px;
         }
         .progress-bar {
             background: #ddd;
@@ -100,7 +91,7 @@
             transition: width 0.1s linear;
         }
         .canvas-container {
-            background: #4a6741;
+            background: #e8e8e0;
             border-radius: 24px;
             padding: 8px;
             margin: 20px 0;
@@ -108,7 +99,7 @@
             position: relative;
         }
         canvas {
-            background: #8b6946;
+            background: #ffffff;
             border-radius: 16px;
             display: block;
             margin: 0 auto;
@@ -182,7 +173,6 @@
             cursor: pointer;
             font-weight: 500;
         }
-        /* 噴飛對話框 */
         .fly-talk {
             position: fixed;
             background: #ffe8c0;
@@ -200,18 +190,9 @@
             animation: flyAway 1.2s ease-out forwards;
         }
         @keyframes flyAway {
-            0% {
-                opacity: 1;
-                transform: translate(0, 0) scale(1);
-            }
-            30% {
-                opacity: 1;
-                transform: translate(20px, -40px) scale(1.1);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(50px, -100px) scale(0.8);
-            }
+            0% { opacity: 1; transform: translate(0, 0) scale(1); }
+            30% { opacity: 1; transform: translate(20px, -40px) scale(1.1); }
+            100% { opacity: 0; transform: translate(50px, -100px) scale(0.8); }
         }
         .flex-btns {
             display: flex;
@@ -252,14 +233,11 @@
             padding: 4px 12px;
             font-size: 0.8rem;
         }
-        .warning-text {
-            color: #8b3a00;
-        }
     </style>
 </head>
 <body>
 <div class="card">
-    <h1>🖱️ 第四步 · 點陣圖施工</h1>
+    <h1>🖱️ 第四步 · 點陣圖施工（由下往上填滿）</h1>
 
     <div class="info-bar" id="infoBar">載入中...</div>
 
@@ -274,7 +252,7 @@
 
     <div class="canvas-container">
         <canvas id="greenCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; aspect-ratio:600/400"></canvas>
-        <div class="click-hint">✨ 點擊牆面 = 施工種植！工人語錄會噴飛 ✨</div>
+        <div class="click-hint">✨ 點擊牆面 = 由下往上種植！工人語錄會噴飛 ✨</div>
     </div>
 
     <div class="worker-section">
@@ -285,30 +263,24 @@
         <button id="resetBtn" class="btn-secondary">🔄 重新施工</button>
         <button id="completeBtn" disabled>✅ 完成施工 & 驗收</button>
     </div>
-    <footer>🌱 點擊牆面：增加顏色進度 + 隨機工人語錄噴飛！</footer>
+    <footer>🌱 點擊牆面：植物由下往上慢慢長滿，顏色依植物比例亂數產生！</footer>
 </div>
 
 <script>
+    // 工地語錄庫
     const WORKER_TALKS = [
         "😤 老鄧資遣我是你的損失！", "😤 老鄧資遣我是你的損失！",
-        "🤔 我做得快是傻子", "😤多虧去職訓不然我還不會做這個呢！", "🤔 我做得快是傻子", "😤多虧去職訓不然我還不會做這個呢！",
-        "💔 我喜歡做工不代表要接受你的不公平", "😤大叔你摸著良心問問自己！", "💔 我喜歡做工不代表要接受你的不公平", "😤大叔你摸著良心問問自己！",
-        "🌞 天氣熱要多喝水～", "⚠️ 作業中須注意工安！", "🌱 植物是生命也要尊重～","⚠️ 我不是來做細漢仔！", 
-        "💪 今天也要努力施工！", "🍵 休息一下喝個茶吧", "🔧 工具要隨手收好", "🔧 大叔你摸著良心問問自己！",
-        "🤝 團隊合作最重要！", "🌿 這面牆以後會很美", "💧 記得幫植物澆水", "😤 老鄧資遣我是你的損失！",
+        "🤔 我做得快是傻子，多虧去職訓不然我還不會做這個呢！", "🤔 我做得快是傻子，多虧去職訓不然我還不會做這個呢！",
+        "💔 我喜歡做工不代表要接受你的不公平，大叔你摸著良心問問自己！", "💔 我喜歡做工不代表要接受你的不公平，大叔你摸著良心問問自己！",
+        "🌞 天氣熱要多喝水～", "⚠️ 作業中須注意工安！", "🌱 植物是生命也要尊重～",
+        "💪 今天也要努力施工！", "🍵 休息一下喝個茶吧", "🔧 工具要隨手收好",
+        "🤝 團隊合作最重要！", "🌿 這面牆以後會很美", "💧 記得幫植物澆水",
         "🪴 每一株都是心血", "🏗️ 安全第一，品質至上", "😎 我種的植物最漂亮",
         "🌙 加班費記得多算一點", "🎵 邊唱歌邊工作最開心"
     ];
 
-    const PLANTS = [
-        { id: 0, name: "綠葉鵝掌藤", color: "#5b8c5a", imgFile: "schefflera.png", emoji: "🌿" },
-        { id: 1, name: "蔓榕", color: "#6f9e6f", imgFile: "ficus.png", emoji: "🌱" },
-        { id: 2, name: "粗勒草", color: "#4c8b5e", imgFile: "aglaonema.png", emoji: "🍀" },
-        { id: 3, name: "腎蕨", color: "#7dab73", imgFile: "asplenium.png", emoji: "🍃" },
-        { id: 4, name: "鹿角蕨", color: "#92b881", imgFile: "platycerium.png", emoji: "🌾" },
-        { id: 5, name: "積水鳳梨", color: "#d98c5f", imgFile: "bromeliad.png", emoji: "🌸" }
-    ];
-
+    // 從 localStorage 讀取的植物資料
+    let PLANTS = [];
     let area = 0, totalPlants = 0, siteLocation = "", quantities = [], workers = [], workerCount = 0;
     let gridColors = [], finishedPixels = 0, canvas = null, ctx = null, cols = 0, rows = 0;
     let workerTalks = [];
@@ -317,9 +289,29 @@
         area = parseInt(localStorage.getItem('greenwall_area')) || 10;
         totalPlants = parseInt(localStorage.getItem('greenwall_total_plants')) || 400;
         siteLocation = localStorage.getItem('greenwall_location') || 'outdoor';
-        quantities = JSON.parse(localStorage.getItem('greenwall_quantities') || '[0,0,0,0,0,0]');
+        quantities = JSON.parse(localStorage.getItem('greenwall_quantities') || '[0,0,0,0]');
         workers = JSON.parse(localStorage.getItem('greenwall_workers') || '[]');
         workerCount = workers.length;
+        
+        // 讀取植物資料（從第二步儲存的資料）
+        const storedPlants = localStorage.getItem('greenwall_plants_data');
+        if (storedPlants) {
+            const plantData = JSON.parse(storedPlants);
+            PLANTS = plantData.map((p, idx) => ({
+                id: idx,
+                name: p.name,
+                color: p.color || (idx === 0 ? "#5b8c5a" : idx === 1 ? "#3a5a2a" : idx === 2 ? "#9bc48e" : "#e8a0b4"),
+                quantity: p.quantity || quantities[idx]
+            }));
+        } else {
+            // 預設四種植物
+            PLANTS = [
+                { id: 0, name: "綠葉鵝掌藤", color: "#5b8c5a", quantity: quantities[0] || 0 },
+                { id: 1, name: "蔓榕", color: "#3a5a2a", quantity: quantities[1] || 0 },
+                { id: 2, name: "腎蕨", color: "#9bc48e", quantity: quantities[2] || 0 },
+                { id: 3, name: "粗勒草", color: "#e8a0b4", quantity: quantities[3] || 0 }
+            ];
+        }
         
         if (workerTalks.length !== workerCount) {
             workerTalks = [];
@@ -359,9 +351,9 @@
         const container = document.getElementById('plantList');
         container.innerHTML = '';
         for (let i = 0; i < PLANTS.length; i++) {
-            const qty = quantities[i];
-            if (qty === 0) continue;
             const p = PLANTS[i];
+            const qty = p.quantity;
+            if (qty === 0) continue;
             const div = document.createElement('div');
             div.className = 'plant-item';
             div.innerHTML = `<div class="plant-color-box" style="background:${p.color}"></div>
@@ -397,49 +389,58 @@
         });
     }
 
-    function getPlantColorForIndex(index) {
-        let cumulative = 0;
-        for (let i = 0; i < quantities.length; i++) {
-            cumulative += quantities[i];
-            if (index < cumulative) return PLANTS[i].color;
+    // 根據植物比例建立顏色池（亂數產生植生牆面）
+    function buildColorPool() {
+        const colorPool = [];
+        for (let i = 0; i < PLANTS.length; i++) {
+            const qty = PLANTS[i].quantity;
+            for (let j = 0; j < qty; j++) {
+                colorPool.push(PLANTS[i].color);
+            }
         }
-        return "#88aa66";
+        // 隨機打亂顏色池（讓植生牆更自然）
+        for (let i = colorPool.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [colorPool[i], colorPool[j]] = [colorPool[j], colorPool[i]];
+        }
+        return colorPool;
     }
 
+    let colorPool = [];
+
     function initGridColors() {
-        gridColors = [];
-        for (let i = 0; i < totalPlants; i++) gridColors.push(getPlantColorForIndex(i));
+        colorPool = buildColorPool();
+        gridColors = [...colorPool];
     }
 
     function drawPixelWall() {
         if (!canvas || !ctx) return;
         const w = canvas.width, h = canvas.height;
         const cellW = w / cols, cellH = h / rows;
+        
         for (let row = 0; row < rows; row++) {
             for (let col = 0; col < cols; col++) {
                 const idx = row * cols + col;
                 if (idx >= totalPlants) {
-                    ctx.fillStyle = "#555555";
+                    ctx.fillStyle = "#e8e8e0";
                     ctx.fillRect(col * cellW, row * cellH, cellW, cellH);
                     continue;
                 }
+                
                 if (idx < finishedPixels) {
-                    const color = gridColors[idx];
-                    const r = parseInt(color.slice(1,3), 16);
-                    const g = parseInt(color.slice(3,5), 16);
-                    const b = parseInt(color.slice(5,7), 16);
-                    ctx.fillStyle = `rgb(${r + (Math.sin(idx) * 8)}, ${g + (Math.cos(idx) * 8)}, ${b})`;
+                    ctx.fillStyle = gridColors[idx];
                 } else {
-                    ctx.fillStyle = "#8b6946";
+                    ctx.fillStyle = "#ffffff";
                 }
                 ctx.fillRect(col * cellW, row * cellH, cellW, cellH);
-                ctx.strokeStyle = "#6a4e2e40";
+                ctx.strokeStyle = "#cccccc";
                 ctx.strokeRect(col * cellW, row * cellH, cellW, cellH);
             }
         }
+        
         if (finishedPixels >= totalPlants) {
             ctx.font = "bold 24px monospace";
-            ctx.fillStyle = "#ffffaa";
+            ctx.fillStyle = "#2b5e2f";
             ctx.fillText("✓ 完工", 20, 50);
         }
     }
@@ -451,8 +452,23 @@
         document.getElementById('completeBtn').disabled = (finishedPixels < totalPlants);
     }
 
+    // 由下往上取得下一個要種植的索引
+    function getNextUnfinishedIndex() {
+        // 由下往上：從最後一行開始找
+        for (let row = rows - 1; row >= 0; row--) {
+            for (let col = 0; col < cols; col++) {
+                const idx = row * cols + col;
+                if (idx < totalPlants && idx >= finishedPixels) {
+                    return idx;
+                }
+            }
+        }
+        return finishedPixels;
+    }
+
     function handleCanvasClick(e) {
         if (finishedPixels >= totalPlants) return;
+        
         let clientX, clientY;
         if (e.touches) {
             clientX = e.touches[0].clientX;
@@ -463,11 +479,9 @@
             clientY = e.clientY;
         }
         
+        // 每次點擊完成的人數倍率個方格（由下往上）
         let increment = Math.max(1, workerCount);
         let newFinished = Math.min(totalPlants, finishedPixels + increment);
-        for (let i = finishedPixels; i < newFinished; i++) {
-            if (!gridColors[i]) gridColors[i] = getPlantColorForIndex(i);
-        }
         finishedPixels = newFinished;
         updateProgress();
         
@@ -506,18 +520,46 @@
         canvas.width = 600;
         canvas.height = 400;
         ctx = canvas.getContext('2d');
+        
+        // 計算網格：盡量接近正方形
         cols = Math.ceil(Math.sqrt(totalPlants));
         rows = Math.ceil(totalPlants / cols);
+        
+        console.log(`點陣圖設定: ${totalPlants} 株 → ${cols} x ${rows} = ${cols * rows} 格`);
+        
         initGridColors();
         if (finishedPixels > totalPlants) finishedPixels = totalPlants;
         updateProgress();
+        
         canvas.addEventListener('click', handleCanvasClick);
         canvas.addEventListener('touchstart', handleCanvasClick);
     }
 
+    function loadSavedProgress() {
+        const savedFinished = localStorage.getItem('greenwall_finished_pixels');
+        if (savedFinished) {
+            finishedPixels = parseInt(savedFinished);
+        } else {
+            finishedPixels = 0;
+        }
+        
+        const savedColors = localStorage.getItem('greenwall_grid_colors');
+        if (savedColors) {
+            try {
+                gridColors = JSON.parse(savedColors);
+            } catch(e) {}
+        }
+    }
+
     loadData();
-    if (workerCount === 0) alert('⚠️ 沒有施工夥伴！請返回第三步召集團隊。');
+    loadSavedProgress();
+    
+    if (workerCount === 0) {
+        alert('⚠️ 沒有施工夥伴！請返回第三步召集團隊。');
+    }
+    
     initCanvas();
+    
     document.getElementById('resetBtn').onclick = resetConstruction;
     document.getElementById('completeBtn').onclick = completeAndNext;
 </script>
