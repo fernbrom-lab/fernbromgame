@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>植生牆遊戲 · 第一步：面積與株數</title>
+    <title>🌱 綠手指教室 · 植生牆小遊戲</title>
     <style>
         * {
             box-sizing: border-box;
-            font-family: system-ui, 'Segoe UI', sans-serif;
+            font-family: system-ui, 'Segoe UI', 'Comic Neue', 'Noto Sans TC', sans-serif;
         }
         body {
-            background: #1a472a;
+            background: #6eb56e;
+            background-image: radial-gradient(circle at 10% 20%, rgba(255,255,200,0.2) 2%, transparent 2.5%);
+            background-size: 28px 28px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -19,31 +21,23 @@
             padding: 20px;
         }
         .card {
-            max-width: 720px;
+            max-width: 650px;
             width: 100%;
-            background: #fef7e0;
-            border-radius: 48px;
+            background: #fffef7;
+            border-radius: 64px;
             padding: 32px;
-            box-shadow: 0 20px 35px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+            border: 3px solid #ffdd99;
         }
         h1 {
-            color: #1a3b1e;
-            border-left: 8px solid #2e7d32;
-            padding-left: 20px;
+            color: #3a7a2a;
+            font-size: 1.8rem;
+            text-align: center;
             margin-top: 0;
-        }
-        .intro-text {
-            background: #eef2e0;
-            border-radius: 24px;
-            padding: 14px 20px;
-            margin: 16px 0 20px 0;
-            font-size: 0.9rem;
-            color: #2d4a1e;
-            border-left: 4px solid #5a8f4c;
-            font-weight: 500;
-        }
-        .intro-text strong {
-            color: #2b5e2f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         .form-group {
             margin: 24px 0;
@@ -52,182 +46,122 @@
             font-weight: bold;
             display: block;
             margin-bottom: 8px;
+            color: #4a6a3a;
         }
         select, input {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             font-size: 1rem;
             border-radius: 60px;
-            border: 1px solid #b3cf9b;
+            border: 2px solid #cce3b0;
             background: white;
-        }
-        select:invalid {
-            color: #8a9a6e;
+            font-weight: bold;
         }
         .info-box {
-            background: #e0f0da;
-            border-radius: 28px;
+            background: #e8f5e0;
+            border-radius: 40px;
             padding: 20px;
             margin: 20px 0;
             text-align: center;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-weight: bold;
-            color: #1a5a1a;
+            color: #3a7a2a;
+            border: 2px dashed #aad48a;
         }
         .info-box span {
-            font-size: 1.4rem;
+            font-size: 1.8rem;
             color: #2b6e2f;
         }
         .warning {
-            background: #ffe0b5;
-            color: #a35100;
-            border-radius: 28px;
+            background: #fff0c0;
+            color: #c07a2a;
+            border-radius: 40px;
             padding: 12px;
             font-size: 0.9rem;
             text-align: center;
         }
         .note {
             font-size: 0.75rem;
-            color: #5a6e4a;
+            color: #8aaa6e;
             text-align: center;
             margin-top: 24px;
-            border-top: 1px solid #cddba6;
             padding-top: 16px;
+            border-top: 2px dotted #cce3b0;
         }
         button {
-            background: #2b5e2f;
+            background: #ffaa44;
             color: white;
             border: none;
-            padding: 14px 24px;
-            font-size: 1.2rem;
+            padding: 16px 24px;
+            font-size: 1.3rem;
             font-weight: bold;
             border-radius: 60px;
             width: 100%;
             cursor: pointer;
             margin-top: 16px;
+            box-shadow: 0 5px 0 #cc8833;
+            transition: 0.05s linear;
         }
         button:active {
-            transform: scale(0.98);
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #cc8833;
         }
         button:disabled {
             opacity: 0.5;
+            transform: none;
             cursor: not-allowed;
         }
-        .pro-tips {
-            background: #f1f2e6;
-            border-left: 6px solid #3d5a38;
-            border-radius: 24px;
-            padding: 16px 20px;
-            margin: 20px 0 12px;
-            font-size: 0.85rem;
-            line-height: 1.5;
-            color: #2d3a1f;
-        }
-        .site-warning {
-            background: #f9e2c7;
-            border-left: 6px solid #c06d2e;
-            margin-top: 16px;
-            padding: 14px 18px;
-            border-radius: 24px;
-            font-size: 0.85rem;
-            font-weight: 500;
+        .emoji-big {
+            font-size: 2rem;
+            display: inline-block;
         }
     </style>
 </head>
 <body>
 <div class="card">
-    <h1>🌿 第一步 · 植生牆規模</h1>
-
-    <!-- 引導說明區塊 -->
-    <div class="intro-text">
-        🌱 <strong>事前評估，決定植生牆的未來</strong><br>
-        植生牆不是裝飾品，而是一面會呼吸、能固碳、調節微氣候的「活系統」。<br>
-        您現在做的每一個選擇，都會影響未來的養護難度、生長狀況與碳效益。<br>
-        📌 事先的說明與理解，會決定未來植生牆的走向。
-    </div>
+    <h1>
+        <span class="emoji-big">🌱</span> 
+        綠手指教室 · 植生牆小遊戲
+        <span class="emoji-big">🎮</span>
+    </h1>
     
     <div class="form-group">
-        <label>📍 設置地點</label>
-        <select id="location" required>
-            <option value="" disabled selected>—— 請選擇設置位置 ——</option>
-            <option value="outdoor">🌞 室外植生牆</option>
-            <option value="indoor">🏠 室內植生牆</option>
+        <label>📍 植生牆要蓋在哪裡？</label>
+        <select id="location">
+            <option value="outdoor">🌞 戶外陽光區</option>
+            <option value="indoor">🏠 室內舒適區</option>
         </select>
     </div>
 
-    <!-- 動態專業說明區 (根據室內/室外改變內容) -->
-    <div id="proTips" class="pro-tips">
-        <p>💡 請先選擇設置地點，會顯示專業評估建議。</p>
-    </div>
-
     <div class="form-group">
-        <label>📐 面積 (m²) : <span id="areaValue">10</span> m²</label>
+        <label>📐 牆面有多大？ <span id="areaValue">10</span> 平方公尺</label>
         <input type="range" id="areaSlider" min="1" max="20" value="10" step="1">
     </div>
 
     <div class="info-box">
-        <span id="areaDisplay">10</span> m² × 40 株/m² = <span id="totalPlants">400</span> 株<br>
-        🎮 遊戲中每株顯示為 1 個彩色方塊
+        🌱 <span id="areaDisplay">10</span> 平方公尺 × 40 株 = <span id="totalPlants">400</span> 株小植物<br>
+        🎨 每一株都會變成牆上的一個彩色方塊！
     </div>
 
     <div class="warning" id="warningMsg" style="display:none;">
-        ⚠️ 為維持遊戲點陣圖效能，暫時限制總株數 ≤ 800 株（面積 ≤ 20 m²）
+        🚧 哇！植物太多了，點陣圖會爆炸～請選小一點的面積（最多20平方公尺）
     </div>
 
-    <button id="nextBtn" disabled>下一步 ▶ 選擇植物</button>
+    <button id="nextBtn">🌿 下一步：選植物 ➡</button>
 
     <div class="note">
-        💡 本遊戲為概念展示與教學用途。<br>
-        實務工程中，植生牆密度約 40~100 株/m²，總規模常達數千至上萬株。<br>
-        🌱 植生牆不是裝飾品 —— 它是一面會呼吸、能固碳、調節微氣候的「活系統」。
+        💡 小知識：一面植生牆就像會呼吸的牆壁！<br>
+        植物們可以幫地球降溫、吸收二氧化碳，還會讓心情變好好～
     </div>
 </div>
 
 <script>
-    // 室內專業說明
-    const indoorText = `
-        <p><strong>🏠 室內植生牆 · 關鍵考量</strong></p>
-        <p>🌬️ <strong>通風與氣流：</strong>室內空氣流通通常較弱，需搭配微風扇或空調循環，避免局部高濕誘發病蟲害。</p>
-        <p>☀️ <strong>光照計畫：</strong>多數室內植栽需 500~1500 lux 的散射光，建議輔助 LED 植物燈，光週期 12~14 小時。</p>
-        <p>🌱 <strong>植栽適應性：</strong>優先選擇耐陰、耐低濕的物種（如粗勒草、虎尾蘭、黃金葛），蕨類需額外留意濕度。</p>
-        <p>💧 <strong>給水與排水：</strong>室內蒸散較慢，澆水頻率降低，但需防止積水孳生蚊蠅，建議搭配自動滴灌系統。</p>
-        <p>🧱 <strong>結構荷重：</strong>確認牆面承載力，植生牆含水後每平方公尺可能增加 60~100 kg，需結構技師評估。</p>
-    `;
-
-    // 室外專業說明
-    const outdoorText = `
-        <p><strong>🌞 室外植生牆 · 關鍵考量</strong></p>
-        <p>🧭 <strong>方位與日照：</strong>南向/西向牆面夏季輻射熱高，需選耐旱、耐曬植物（如鵝掌藤、蔓榕）；北向或大樓遮陰處則適合蕨類與耐陰物種。</p>
-        <p>🌬️ <strong>季風與強風：</strong>東北季風或颱風易造成植株脫水或物理損傷，需設置防風網或選用低矮、具韌性的品種，並加強固定結構。</p>
-        <p>☔ <strong>雨水管理：</strong>戶外植生牆可利用雨水回收，但介質排水性必須良好，避免根系腐爛。</p>
-        <p>🌡️ <strong>溫度波動：</strong>夏季高溫與冬季低溫會影響生長，建議搭配耐候性強的原生或馴化植物，並考慮微氣候調控。</p>
-        <p>⚙️ <strong>維護成本：</strong>室外植生牆受風吹日曬，養護頻率較高，包含修剪、病蟲害監控與滴灌系統檢查。</p>
-    `;
-
     const areaSlider = document.getElementById('areaSlider');
     const areaValue = document.getElementById('areaValue');
     const areaDisplay = document.getElementById('areaDisplay');
     const totalPlantsSpan = document.getElementById('totalPlants');
     const warningDiv = document.getElementById('warningMsg');
     const nextBtn = document.getElementById('nextBtn');
-    const locationSelect = document.getElementById('location');
-    const proTipsDiv = document.getElementById('proTips');
-
-    function updateProTipsAndButton() {
-        const selected = locationSelect.value;
-        if (selected === 'indoor') {
-            proTipsDiv.innerHTML = indoorText;
-            nextBtn.disabled = false;
-        } else if (selected === 'outdoor') {
-            proTipsDiv.innerHTML = outdoorText;
-            nextBtn.disabled = false;
-        } else {
-            proTipsDiv.innerHTML = `<p>💡 請先選擇設置地點，會顯示專業評估建議。</p>`;
-            nextBtn.disabled = true;
-        }
-        // 重新計算面積相關警告
-        updatePlants();
-    }
 
     function updatePlants() {
         const area = parseInt(areaSlider.value);
@@ -238,39 +172,24 @@
 
         if (total > 800) {
             warningDiv.style.display = 'block';
-            // 如果地點還沒選，按鈕本來就是 disabled，不用額外處理
-            if (locationSelect.value) nextBtn.disabled = true;
+            nextBtn.disabled = true;
         } else {
             warningDiv.style.display = 'none';
-            // 只有當地點已選且未超過上限時才啟用
-            if (locationSelect.value) nextBtn.disabled = false;
+            nextBtn.disabled = false;
         }
     }
 
-    // 監聽地點切換以及面積滑動
-    locationSelect.addEventListener('change', () => {
-        updateProTipsAndButton();
-    });
     areaSlider.addEventListener('input', updatePlants);
-    
-    // 初始化
-    updateProTipsAndButton();
     updatePlants();
 
     nextBtn.addEventListener('click', () => {
         const area = parseInt(areaSlider.value);
-        const location = locationSelect.value;
+        const location = document.getElementById('location').value;
         const totalPlants = area * 40;
 
         localStorage.setItem('greenwall_area', area);
         localStorage.setItem('greenwall_location', location);
         localStorage.setItem('greenwall_total_plants', totalPlants);
-
-        console.log('已儲存:', {
-            area: localStorage.getItem('greenwall_area'),
-            location: localStorage.getItem('greenwall_location'),
-            total: localStorage.getItem('greenwall_total_plants')
-        });
 
         window.location.href = 'step2_plants.html';
     });
