@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>植生牆遊戲 · 第二步：選擇植物與數量（2x2排版）</title>
+    <title>🌱 第二步 · 選植物夥伴</title>
     <style>
         * {
             box-sizing: border-box;
-            font-family: system-ui, 'Segoe UI', sans-serif;
+            font-family: system-ui, 'Segoe UI', 'Comic Neue', 'Noto Sans TC', sans-serif;
         }
         body {
-            background: #1a472a;
+            background: #6eb56e;
+            background-image: radial-gradient(circle at 10% 20%, rgba(255,255,200,0.2) 2%, transparent 2.5%);
+            background-size: 28px 28px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -19,162 +21,85 @@
             padding: 20px;
         }
         .card {
-            max-width: 1200px;
+            max-width: 1100px;
             width: 100%;
-            background: #fef7e0;
-            border-radius: 48px;
+            background: #fffef7;
+            border-radius: 64px;
             padding: 28px;
-            box-shadow: 0 20px 35px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+            border: 3px solid #ffdd99;
         }
         h1 {
-            color: #1a3b1e;
-            border-left: 8px solid #2e7d32;
-            padding-left: 20px;
-            margin-top: 0;
+            color: #3a7a2a;
             font-size: 1.6rem;
-        }
-        /* 知識教育區塊 */
-        .knowledge-section {
-            background: #e8f0e0;
-            border-radius: 28px;
-            padding: 20px;
-            margin: 20px 0 24px 0;
-            border: 1px solid #c8d8b0;
-        }
-        .knowledge-title {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: #2b5e2f;
-            margin-bottom: 12px;
+            text-align: center;
+            margin-top: 0;
             display: flex;
             align-items: center;
-            gap: 8px;
-        }
-        .knowledge-content {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: space-between;
-        }
-        .knowledge-card {
-            flex: 1;
-            min-width: 180px;
-            background: #fffdf7;
-            border-radius: 20px;
-            padding: 12px 16px;
-            border-left: 4px solid #5a8f4c;
-        }
-        .knowledge-card h4 {
-            color: #3d5a38;
-            margin-bottom: 6px;
-            font-size: 0.9rem;
-        }
-        .knowledge-card p {
-            font-size: 0.75rem;
-            color: #5a6e4a;
-            line-height: 1.4;
-        }
-        .knowledge-fact {
-            background: #d9e6c0;
-            border-radius: 20px;
-            padding: 10px 16px;
-            margin-top: 12px;
-            font-size: 0.75rem;
-            color: #2d4a1e;
-            text-align: center;
+            justify-content: center;
+            gap: 10px;
         }
         .summary {
-            background: #e0f0da;
-            border-radius: 28px;
+            background: #e8f5e0;
+            border-radius: 40px;
             padding: 16px;
             margin-bottom: 24px;
             text-align: center;
             font-weight: bold;
+            font-size: 1rem;
+            border: 2px dashed #aad48a;
         }
         .summary span {
-            font-size: 1.6rem;
-            color: #1a5a1a;
-        }
-        .error-box {
-            background: #ffe0b5;
-            border-radius: 28px;
-            padding: 20px;
-            text-align: center;
-            color: #a35100;
-            margin: 20px 0;
+            font-size: 1.5rem;
+            color: #2b6e2f;
         }
         .plant-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 24px;
+            gap: 20px;
             margin: 20px 0;
-            padding: 4px;
         }
         .plant-card {
-            background: white;
-            border-radius: 28px;
-            padding: 20px;
+            background: #ffffff;
+            border-radius: 32px;
+            padding: 18px;
             text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            border: 1px solid #cddba6;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+            border: 2px solid #ddeec0;
             transition: all 0.2s;
-            display: flex;
-            flex-direction: column;
         }
         .plant-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.12);
+        }
+        .plant-emoji {
+            font-size: 3rem;
+            margin: 8px 0;
         }
         .plant-name {
             font-weight: bold;
             font-size: 1.2rem;
-            margin: 8px 0 4px;
-            color: #2b5e2f;
+            color: #3a7a2a;
         }
         .plant-trait {
-            font-size: 0.75rem;
-            color: #6b7a54;
-            margin: 6px 0;
-            font-style: italic;
+            font-size: 0.7rem;
+            background: #fff0c0;
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 30px;
+            margin: 8px 0;
         }
         .care-list {
             text-align: left;
-            background: #f9f6e8;
-            border-radius: 20px;
+            background: #f9f9e8;
+            border-radius: 24px;
             padding: 10px 14px;
             margin: 12px 0;
             font-size: 0.7rem;
-            color: #4a5a3a;
+            color: #5a6a3a;
         }
         .care-list div {
             margin: 5px 0;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .badge-group {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 8px;
-            margin: 8px 0;
-        }
-        .time-badge {
-            display: inline-block;
-            background: #e0d5b9;
-            border-radius: 30px;
-            padding: 4px 12px;
-            font-size: 0.7rem;
-            font-weight: bold;
-        }
-        .care-eval {
-            background: #f3efdf;
-            border-radius: 20px;
-            padding: 8px 10px;
-            margin: 8px 0;
-            font-size: 0.7rem;
-            color: #6b4c2a;
-            text-align: left;
         }
         .quantity-input {
             margin: 12px 0;
@@ -185,8 +110,9 @@
             font-size: 1rem;
             text-align: center;
             border-radius: 40px;
-            border: 1px solid #b3cf9b;
-            background: #fef9e6;
+            border: 2px solid #cce3b0;
+            background: #fffef0;
+            font-weight: bold;
         }
         .percent-bar {
             background: #e0e0d0;
@@ -196,23 +122,23 @@
             margin-top: 8px;
         }
         .percent-fill {
-            background: #2b5e2f;
+            background: #ffaa44;
             height: 100%;
             width: 0%;
             transition: width 0.1s;
         }
         .percent-text {
-            font-size: 0.7rem;
-            color: #5a6e4a;
+            font-size: 0.65rem;
+            color: #8a9a6a;
             margin-top: 4px;
         }
         .warning {
-            background: #ffe0b5;
-            border-radius: 28px;
+            background: #fff0c0;
+            border-radius: 40px;
             padding: 12px;
             margin: 16px 0;
             text-align: center;
-            color: #a35100;
+            color: #c07a2a;
         }
         .flex-btns {
             display: flex;
@@ -220,25 +146,30 @@
             margin-top: 24px;
         }
         button {
-            background: #2b5e2f;
+            background: #ffaa44;
             color: white;
             border: none;
-            padding: 12px 20px;
+            padding: 14px 20px;
             font-size: 1rem;
             font-weight: bold;
             border-radius: 60px;
             cursor: pointer;
             flex: 1;
+            box-shadow: 0 4px 0 #cc8833;
+            transition: 0.05s linear;
         }
         button:active {
-            transform: scale(0.98);
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #cc8833;
         }
         button:disabled {
             opacity: 0.5;
+            transform: none;
             cursor: not-allowed;
         }
         .btn-secondary {
-            background: #7f8c5e;
+            background: #8aaa6e;
+            box-shadow: 0 4px 0 #6a8a4e;
         }
         .quick-btns {
             display: flex;
@@ -247,8 +178,8 @@
             justify-content: flex-end;
         }
         .quick-btn {
-            background: #cddba6;
-            color: #2b5e2f;
+            background: #ddeec0;
+            color: #3a7a2a;
             font-size: 0.8rem;
             padding: 6px 16px;
             margin: 0;
@@ -257,128 +188,82 @@
             border: none;
             border-radius: 40px;
             font-weight: bold;
+            box-shadow: none;
         }
         footer {
             text-align: center;
             font-size: 0.7rem;
-            color: #8a9a6e;
-            margin-top: 24px;
+            color: #8aaa6e;
+            margin-top: 20px;
         }
-        @media (max-width: 800px) {
+        @media (max-width: 750px) {
             .plant-grid {
                 grid-template-columns: 1fr;
-            }
-            .knowledge-content {
-                flex-direction: column;
             }
         }
     </style>
 </head>
 <body>
 <div class="card">
-    <h1>🌱 第二步 · 選擇植物與數量（養護時間評估）</h1>
-
-    <!-- 植物知識教育區塊 -->
-    <div class="knowledge-section">
-        <div class="knowledge-title">
-            📚 植物小百科｜為什麼植生牆要選對植物？
-        </div>
-        <div class="knowledge-content">
-            <div class="knowledge-card">
-                <h4>🌿 固碳能力</h4>
-                <p>植物透過光合作用吸收二氧化碳，不同植物的固碳效率差異可達30%以上。葉片厚實、生長快速的品種固碳效果更佳。</p>
-            </div>
-            <div class="knowledge-card">
-                <h4>💧 水分管理</h4>
-                <p>植生牆的給水系統需要配合植物習性。需水量高的植物適合配置在給水充足區域，耐旱植物則可放在邊角。</p>
-            </div>
-            <div class="knowledge-card">
-                <h4>☀️ 光照需求</h4>
-                <p>室內植生牆需選耐陰品種（如粗勒草），室外則可選全日照植物。光照不足會導致徒長、葉色變淡。</p>
-            </div>
-            <div class="knowledge-card">
-                <h4>🕰️ 養護週期</h4>
-                <p>每種植物都有不同的適應期與穩定期。了解植物特性，才能制定合理的養護計畫，降低長期維護成本。</p>
-            </div>
-        </div>
-        <div class="knowledge-fact">
-            🌟 你知道嗎？一面10平方公尺的植生牆，每年約可吸收 30-50 公斤的二氧化碳，相當於 2-3 棵成年樹木的固碳量！
-        </div>
-    </div>
+    <h1>
+        <span>🌱</span> 
+        第二步 · 選植物夥伴
+        <span>🌸</span>
+    </h1>
 
     <div id="mainContent"></div>
 </div>
 
 <script>
-    // 四種植物 — 完整養護時間評估邏輯
+    // 四種植物（兒童版）
     const PLANTS = [
         { 
             id: 0, 
             name: "綠葉鵝掌藤", 
-            trait: "室內外均可・超級好照顧",
-            suitableEnv: "室內／室外",
-            waterNeed: "中等，土乾澆透",
-            lightNeed: "耐陰也耐曬",
-            careDifficulty: "★☆☆☆☆ 極低",
-            establishmentPhase: "半年內即穩定生長",
-            timeToMature: "約 1 年可達理想覆蓋",
+            emoji: "🌿",
+            trait: "💪 超級好養！新手也能成功",
             care: [
-                "☀️ 光照：全日照～半日照，耐陰",
-                "💧 給水：土乾澆透，稍耐旱",
-                "🌬️ 通風：普通通風即可",
-                "🏠 適合：室內外皆宜，新手首選"
-            ]
+                "☀️ 喜歡陽光也耐陰，隨便放都可以",
+                "💧 土乾了再澆水，很乖",
+                "🏠 室內室外都OK"
+            ],
+            suitableEnv: "到處都可以！"
         },
         { 
             id: 1, 
             name: "蔓榕", 
-            trait: "只能室外・不能缺水",
-            suitableEnv: "僅室外",
-            waterNeed: "高，需常保濕潤",
-            lightNeed: "明亮散射光至半日照",
-            careDifficulty: "★★★☆☆ 中等",
-            establishmentPhase: "需半年適應期，水分管理是關鍵",
-            timeToMature: "約 1.5~2 年可達茂盛",
+            emoji: "🌱",
+            trait: "💧 愛喝水，只喜歡戶外",
             care: [
-                "☀️ 光照：需明亮散射光，避免長期陰暗",
-                "💧 給水：保持介質濕潤，缺水會快速落葉",
-                "🌬️ 通風：良好通風有助生長",
-                "🏠 適合：僅適合室外或半開放陽台"
-            ]
+                "☀️ 需要亮亮的光線",
+                "💧 不能缺水！要常常澆水",
+                "🏠 只適合戶外或陽台"
+            ],
+            suitableEnv: "戶外限定"
         },
         { 
             id: 2, 
             name: "腎蕨", 
-            trait: "室內外均可・初期難照顧要時間適應",
-            suitableEnv: "室內／室外",
-            waterNeed: "中等偏高，喜歡濕度",
-            lightNeed: "半日照～散射光，怕強光",
-            careDifficulty: "★★★★☆ 中高（初期）",
-            establishmentPhase: "前半年較敏感，適應後極強健",
-            timeToMature: "適應期約 6~8 個月，之後生長快速",
+            emoji: "🍃",
+            trait: "⏳ 需要一點耐心，之後超強",
             care: [
-                "☀️ 光照：半日照～散射光，怕強光直射",
-                "💧 給水：喜歡濕潤，葉面可噴水",
-                "🌬️ 通風：需良好通風避免病害",
-                "🏠 適合：室內明亮處、陽台遮陰處"
-            ]
+                "☀️ 喜歡散射光，怕大太陽直射",
+                "💧 喜歡濕濕的，可以噴噴水",
+                "🏠 室內室外都可以，但要給它時間適應"
+            ],
+            suitableEnv: "到處都可以（要有耐心）"
         },
         { 
             id: 3, 
             name: "粗勒草", 
-            trait: "只能室內・注意給水不能過多",
-            suitableEnv: "僅室內",
-            waterNeed: "低，土乾再澆",
-            lightNeed: "耐陰，日光燈下可存活",
-            careDifficulty: "★☆☆☆☆ 低",
-            establishmentPhase: "約 3~4 個月穩定",
-            timeToMature: "約 1 年可達飽滿",
+            emoji: "🌸",
+            trait: "🏠 室內小公主，水不能太多",
             care: [
-                "☀️ 光照：耐陰，日光燈下也能活",
-                "💧 給水：土乾再澆，避免積水爛根",
-                "🌬️ 通風：普通室內通風即可",
-                "🏠 適合：只適合室內，室外會寒害或曬傷"
-            ]
+                "☀️ 很耐陰，燈光下也能活",
+                "💧 土乾再澆水，太多水會生病",
+                "🏠 只適合室內，外面太熱太冷都不行"
+            ],
+            suitableEnv: "室內限定"
         }
     ];
 
@@ -392,24 +277,10 @@
         siteLocation = localStorage.getItem('greenwall_location');
         area = parseInt(localStorage.getItem('greenwall_area'));
         
-        console.log('讀取資料:', { totalPlants, siteLocation, area });
-        
         if (!totalPlants || !siteLocation || !area) {
             return false;
         }
         return true;
-    }
-
-    function updateQuantitiesFromInputs() {
-        for (let i = 0; i < PLANTS.length; i++) {
-            const input = document.getElementById(`qty_${i}`);
-            if (input) {
-                let val = parseInt(input.value);
-                if (isNaN(val)) val = 0;
-                quantities[i] = Math.max(0, val);
-            }
-        }
-        updateSummaryAndUI();
     }
 
     function updateSummaryAndUI() {
@@ -419,11 +290,11 @@
         const summaryDiv = document.getElementById('summaryArea');
         if (summaryDiv) {
             summaryDiv.innerHTML = `
-                📐 面積：${area} m² &nbsp;|&nbsp;
-                📍 ${siteLocation === 'outdoor' ? '室外' : '室內'} &nbsp;|&nbsp;
-                🧱 總株數：<span>${totalPlants}</span> 株<br>
-                ✅ 已分配：${allocated} 株 &nbsp;|&nbsp;
-                ⏳ 剩餘：${remaining} 株
+                📐 ${area} 平方公尺 &nbsp;|&nbsp;
+                📍 ${siteLocation === 'outdoor' ? '🌞 戶外陽光區' : '🏠 室內舒適區'} &nbsp;|&nbsp;
+                🌱 總共需要 <span>${totalPlants}</span> 株植物<br>
+                ✅ 已經選了 ${allocated} 株 &nbsp;|&nbsp;
+                ⏳ 還剩 ${remaining} 株要選
             `;
         }
         
@@ -432,7 +303,7 @@
             const fillBar = document.getElementById(`percent_fill_${i}`);
             const percentText = document.getElementById(`percent_text_${i}`);
             if (fillBar) fillBar.style.width = `${percent}%`;
-            if (percentText) percentText.innerText = `${quantities[i]} 株 (${percent.toFixed(1)}%)`;
+            if (percentText) percentText.innerText = `${quantities[i]} 株 (${percent.toFixed(0)}%)`;
         }
         
         const nextBtn = document.getElementById('nextBtn');
@@ -443,7 +314,6 @@
         } else {
             if (nextBtn) nextBtn.disabled = true;
             if (warningDiv && totalPlants > 0) warningDiv.style.display = 'block';
-            else if (warningDiv) warningDiv.style.display = 'none';
         }
     }
 
@@ -475,18 +345,14 @@
     function saveAndNext() {
         const allocated = quantities.reduce((a, b) => a + b, 0);
         if (allocated !== totalPlants) {
-            alert(`請分配完所有株數！剩餘 ${totalPlants - allocated} 株未分配。`);
+            alert(`還剩 ${totalPlants - allocated} 株還沒選！要選完才能去下一關喔～`);
             return;
         }
         
         localStorage.setItem('greenwall_quantities', JSON.stringify(quantities));
         localStorage.setItem('greenwall_plants_data', JSON.stringify(PLANTS.map((p, i) => ({
             name: p.name,
-            trait: p.trait,
-            suitableEnv: p.suitableEnv,
-            careDifficulty: p.careDifficulty,
-            establishmentPhase: p.establishmentPhase,
-            timeToMature: p.timeToMature,
+            emoji: p.emoji,
             quantity: quantities[i]
         }))));
         
@@ -514,26 +380,22 @@
             const careHtml = p.care.map(c => `<div>${c}</div>`).join('');
             plantsHtml += `
                 <div class="plant-card">
+                    <div class="plant-emoji">${p.emoji}</div>
                     <div class="plant-name">${p.name}</div>
-                    <div class="plant-trait">✨ ${p.trait}</div>
+                    <div class="plant-trait">${p.trait}</div>
                     <div class="care-list">
                         ${careHtml}
                     </div>
-                    <div class="badge-group">
-                        <span class="time-badge">🌿 適合：${p.suitableEnv}</span>
-                        <span class="time-badge">💧 難度：${p.careDifficulty}</span>
-                    </div>
-                    <div class="care-eval">
-                        📈 <strong>養護評估：</strong>${p.establishmentPhase}<br>
-                        ⏳ <strong>穩定期：</strong>${p.timeToMature}
+                    <div style="font-size:0.7rem; background:#eef0e0; border-radius:20px; padding:4px; margin:6px 0;">
+                        🏠 適合：${p.suitableEnv}
                     </div>
                     <div class="quantity-input">
-                        <input type="number" id="qty_${i}" value="${quantities[i]}" min="0" step="1" placeholder="株數">
+                        <input type="number" id="qty_${i}" value="${quantities[i]}" min="0" step="1" placeholder="幾株？">
                     </div>
                     <div class="percent-bar">
                         <div class="percent-fill" id="percent_fill_${i}" style="width:${(quantities[i]/totalPlants*100)}%"></div>
                     </div>
-                    <div class="percent-text" id="percent_text_${i}">${quantities[i]} 株 (${(quantities[i]/totalPlants*100).toFixed(1)}%)</div>
+                    <div class="percent-text" id="percent_text_${i}">${quantities[i]} 株</div>
                 </div>
             `;
         }
@@ -548,13 +410,13 @@
                 ${plantsHtml}
             </div>
             <div id="warningMsg" class="warning" style="display:none;">
-                ⚠️ 尚未分配完所有株數，請將總數分配給四種植物。
+                🌟 還沒選完！把 ${totalPlants} 株植物分配好就可以去下一關囉～
             </div>
             <div class="flex-btns">
-                <button id="backBtn" class="btn-secondary">⬅ 返回面積</button>
-                <button id="nextBtn" disabled>下一步 ▶ 施工團隊</button>
+                <button id="backBtn" class="btn-secondary">⬅ 返回</button>
+                <button id="nextBtn" disabled>🎮 下一步：找隊友 ➡</button>
             </div>
-            <footer>💡 每種植物的養護時間與適應期不同，選擇比例會影響長期維護成本與植生牆成效。</footer>
+            <footer>💡 每種植物都有自己的個性！可以全部平均，也可以選你最喜歡的～</footer>
         `;
         
         for (let i = 0; i < PLANTS.length; i++) {
@@ -569,15 +431,10 @@
             }
         }
         
-        const balanceBtn = document.getElementById('balanceBtn');
-        const clearBtn = document.getElementById('clearBtn');
-        const backBtn = document.getElementById('backBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        
-        if (balanceBtn) balanceBtn.onclick = autoBalance;
-        if (clearBtn) clearBtn.onclick = clearAll;
-        if (backBtn) backBtn.onclick = goBack;
-        if (nextBtn) nextBtn.onclick = saveAndNext;
+        document.getElementById('balanceBtn').onclick = autoBalance;
+        document.getElementById('clearBtn').onclick = clearAll;
+        document.getElementById('backBtn').onclick = goBack;
+        document.getElementById('nextBtn').onclick = saveAndNext;
         
         updateSummaryAndUI();
     }
@@ -585,23 +442,19 @@
     function renderErrorPage(message) {
         const container = document.getElementById('mainContent');
         container.innerHTML = `
-            <div class="error-box">
+            <div class="summary" style="background:#ffe0b5;">
                 <p>⚠️ ${message}</p>
-                <p style="font-size:0.8rem; margin-top:8px;">請先從第一步設定面積與株數。</p>
-                <button id="goToStep1Btn" style="margin-top:16px;">返回第一步</button>
+                <button id="goToStep1Btn" style="margin-top:16px;">🏠 返回第一步</button>
             </div>
         `;
-        const goBtn = document.getElementById('goToStep1Btn');
-        if (goBtn) {
-            goBtn.addEventListener('click', () => {
-                window.location.href = 'step1_select.html';
-            });
-        }
+        document.getElementById('goToStep1Btn')?.addEventListener('click', () => {
+            window.location.href = 'step1_select.html';
+        });
     }
 
     const hasData = loadFromStorage();
     if (!hasData) {
-        renderErrorPage('找不到第一步的資料，請先設定面積與株數。');
+        renderErrorPage('找不到資料！請從第一步開始～');
     } else {
         renderMainPage();
     }
