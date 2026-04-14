@@ -90,6 +90,16 @@
             60% { opacity: 1; transform: scale(1.05); }
             100% { opacity: 1; transform: scale(1); }
         }
+        .btn-outline-white {
+            border: 2px solid rgba(255,255,255,0.6);
+            background: transparent;
+            transition: all 0.2s;
+        }
+        .btn-outline-white:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: white;
+            transform: scale(1.02);
+        }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen p-6 text-white text-center relative">
@@ -121,12 +131,12 @@
                 <span>🐯 虎妹 Sans</span>
                 <span>🌵 肉肉 Succ</span>
                 <span>🎵 琴哥 Ficus</span>
-                 <span>💧 小積 Brom</span>
+                <span>💧 小積 Brom</span>
                 <span>☁️ 空空 Till</span>
             </div>
         </div>
         
-        <!-- 成就數據面板 - 從 localStorage 讀取實際累積減碳量 -->
+        <!-- 成就數據面板 -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
             <div class="bg-white/20 backdrop-blur-sm rounded-2xl p-4 border border-white/30">
                 <div class="text-4xl mb-1">🌍</div>
@@ -159,10 +169,15 @@
             </div>
         </div>
         
-        <!-- 行動呼籲按鈕 - 重新冒險跳轉到 level1.html -->
-        <button onclick="restartAdventure()" class="btn-glow bg-white text-green-800 px-12 py-5 rounded-full text-2xl font-black shadow-xl hover:bg-green-50 active:scale-95 transition-all flex items-center gap-3 mx-auto mb-6">
-            <span>🌍</span> 重新冒險 <span>🌱</span>
-        </button>
+        <!-- 雙按鈕：重新冒險 + 返回蕨積 -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
+            <button onclick="restartAdventure()" class="btn-glow bg-white text-green-800 px-8 py-4 rounded-full text-xl font-black shadow-xl hover:bg-green-50 active:scale-95 transition-all flex items-center gap-2">
+                <span>🌍</span> 重新冒險 <span>🌱</span>
+            </button>
+            <button onclick="goToHome()" class="btn-outline-white px-8 py-4 rounded-full text-xl font-bold shadow-lg active:scale-95 transition-all flex items-center gap-2">
+                <span>🏠</span> 返回蕨積
+            </button>
+        </div>
         
         <!-- 版權與小彩蛋 -->
         <p class="text-white/50 text-xs tracking-widest mt-4">© 2026 FERN+ 蕨積綠色宇宙 · 淨零冒險全紀錄</p>
@@ -171,33 +186,25 @@
     
     <script>
         // ==================== 大圓滿頁面 ====================
-        // 從 localStorage 讀取實際累積減碳量（由各關卡儲存）
-        
         let totalCarbonReduction = 0;
         
-        // 嘗試從 localStorage 讀取總減碳量
         try {
             let savedCarbon = localStorage.getItem('fern_total_carbon');
             if (savedCarbon && !isNaN(parseFloat(savedCarbon))) {
                 totalCarbonReduction = parseFloat(savedCarbon);
             } else {
-                // 如果沒有任何數據，顯示0並提示未完成任何關卡
                 totalCarbonReduction = 0;
-                console.log('尚未完成任何關卡，減碳量為0');
             }
         } catch(e) { 
             totalCarbonReduction = 0; 
         }
         
-        // 四捨五入到小數點後一位
         totalCarbonReduction = Math.round(totalCarbonReduction * 10) / 10;
         
-        // DOM 元素
         const carbonTotalElem = document.getElementById('carbonTotal');
         const missionsDoneElem = document.getElementById('missionsDone');
         const knowledgeCountElem = document.getElementById('knowledgeCount');
         
-        // 計算通關數量（檢查各關卡完成標記）
         let completedLevels = 0;
         const levelKeys = ['fern_level1_completed', 'fern_level2_completed', 'fern_level3_completed', 
                            'fern_level4_completed', 'fern_level5_completed', 'fern_level6_completed', 'fern_level7_completed'];
@@ -206,11 +213,9 @@
         });
         missionsDoneElem.innerText = `${completedLevels} / 7`;
         
-        // 知識點數量（根據通關數量計算，每關約2個知識點）
         const knowledgeUnlocked = Math.min(7 + completedLevels * 1, 20);
         knowledgeCountElem.innerText = knowledgeUnlocked;
         
-        // 數字滾動效果
         function animateNumber(element, start, end, duration = 1600) {
             let startTime = null;
             const step = (timestamp) => {
@@ -227,7 +232,6 @@
             requestAnimationFrame(step);
         }
         
-        // 觸發數字滾動
         animateNumber(carbonTotalElem, 0, totalCarbonReduction, 1600);
         
         // ==================== 慶祝特效 ====================
@@ -293,9 +297,14 @@
             }, 20000);
         }
         
-        // 重新冒險功能：跳轉到 level1.html
+        // 重新冒險：跳轉到植生牆遊戲第一步
         function restartAdventure() {
-            window.location.href = 'level1.html';
+            window.location.href = 'step1_select.html';
+        }
+        
+        // 返回蕨積首頁
+        function goToHome() {
+            window.location.href = 'index.html';
         }
         
         // 圖片備援
@@ -327,7 +336,6 @@
             });
         });
         
-        // 儲存最終數據到 localStorage
         if (typeof(Storage) !== "undefined") {
             localStorage.setItem('fern_final_carbon', totalCarbonReduction.toFixed(1));
             localStorage.setItem('fern_completed', 'true');
