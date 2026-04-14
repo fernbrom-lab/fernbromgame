@@ -3,16 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>植生牆遊戲 · 第三步：召集施工夥伴（工安協同）</title>
+    <title>🌱 第三步 · 找隊友一起施工</title>
     <style>
         * {
             box-sizing: border-box;
-            font-family: system-ui, 'Segoe UI', sans-serif;
+            font-family: system-ui, 'Segoe UI', 'Comic Neue', 'Noto Sans TC', sans-serif;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
         body {
-            background: #1a472a;
+            background: #6eb56e;
+            background-image: radial-gradient(circle at 10% 20%, rgba(255,255,200,0.2) 2%, transparent 2.5%);
+            background-size: 28px 28px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -23,62 +25,39 @@
         .card {
             max-width: 1000px;
             width: 100%;
-            background: #fef7e0;
-            border-radius: 48px;
+            background: #fffef7;
+            border-radius: 64px;
             padding: 28px;
-            box-shadow: 0 20px 35px rgba(0,0,0,0.3);
-            position: relative;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+            border: 3px solid #ffdd99;
         }
         h1 {
-            color: #1a3b1e;
-            border-left: 8px solid #2e7d32;
-            padding-left: 20px;
-            margin-top: 0;
+            color: #3a7a2a;
             font-size: 1.6rem;
+            text-align: center;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         .summary {
-            background: #e0f0da;
-            border-radius: 28px;
+            background: #e8f5e0;
+            border-radius: 40px;
             padding: 12px 20px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             text-align: center;
             font-size: 0.9rem;
+            border: 2px dashed #aad48a;
         }
-        .safety-warning {
-            background: #fff0e0;
-            border-left: 6px solid #e67e22;
-            border-radius: 20px;
+        .team-tip {
+            background: #fff0c0;
+            border-radius: 30px;
             padding: 12px 16px;
             margin-bottom: 20px;
             font-size: 0.85rem;
-            color: #a35100;
-        }
-        .safety-tips {
-            background: #fef4e8;
-            border-radius: 20px;
-            padding: 12px 16px;
-            margin-bottom: 20px;
-            border: 1px solid #f0dca8;
-        }
-        .safety-tips-title {
-            font-weight: bold;
-            color: #c0392b;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .safety-tips-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 8px;
-            font-size: 0.75rem;
-            color: #5a4a2a;
-        }
-        .safety-tips-list li {
-            margin-left: 20px;
-            line-height: 1.4;
+            text-align: center;
+            color: #c07a2a;
         }
         .two-columns {
             display: flex;
@@ -87,18 +66,18 @@
         }
         .team-area {
             flex: 2;
-            background: #fff5e0;
-            border-radius: 32px;
+            background: #fff5e8;
+            border-radius: 40px;
             padding: 20px;
-            border: 2px dashed #b3cf9b;
+            border: 3px dashed #cce3b0;
         }
         .truck-area {
             flex: 1;
-            background: #e8f0e0;
-            border-radius: 32px;
+            background: #f0f5e8;
+            border-radius: 40px;
             padding: 20px;
             text-align: center;
-            border: 2px solid #8aaa6e;
+            border: 3px solid #aad48a;
         }
         .section-title {
             font-weight: bold;
@@ -113,32 +92,23 @@
         }
         .member-card {
             background: white;
-            border-radius: 20px;
-            padding: 10px 8px;
+            border-radius: 30px;
+            padding: 12px 8px;
             text-align: center;
             cursor: pointer;
             transition: all 0.08s linear;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-            border: 1px solid #cddba6;
-            -webkit-tap-highlight-color: transparent;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+            border: 2px solid #ddeec0;
         }
         .member-card:active {
             transform: scale(0.94);
-            background: #e8f0e0;
-        }
-        .member-card.click-effect {
-            animation: cardPop 0.2s ease-out;
-        }
-        @keyframes cardPop {
-            0% { transform: scale(1); background: white; }
-            50% { transform: scale(0.92); background: #d4e8c4; }
-            100% { transform: scale(1); background: white; }
+            background: #e8f5e0;
         }
         .member-avatar {
             width: 60px;
             height: 60px;
             margin: 0 auto 6px;
-            background: #d9e0c5;
+            background: #ddeec0;
             border-radius: 60px;
             display: flex;
             align-items: center;
@@ -157,7 +127,7 @@
         }
         .add-icon {
             font-size: 0.7rem;
-            color: #2b5e2f;
+            color: #ffaa44;
             margin-top: 4px;
         }
         .truck-icon {
@@ -174,10 +144,10 @@
             75% { transform: translateX(3px); }
         }
         .truck-team {
-            background: #cddba6;
-            border-radius: 28px;
+            background: #ddeec0;
+            border-radius: 30px;
             padding: 16px;
-            min-height: 200px;
+            min-height: 180px;
             margin: 16px 0;
             display: flex;
             flex-wrap: wrap;
@@ -189,52 +159,50 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
-            width: 70px;
+            width: 65px;
             cursor: pointer;
             transition: all 0.08s linear;
-            -webkit-tap-highlight-color: transparent;
         }
         .truck-member:active {
             transform: scale(0.94);
         }
         .truck-member .member-avatar {
-            width: 55px;
-            height: 55px;
-            font-size: 1.8rem;
+            width: 50px;
+            height: 50px;
+            font-size: 1.6rem;
         }
         .truck-member .member-name {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
         }
         .remove-icon {
-            font-size: 0.65rem;
-            color: #a35100;
+            font-size: 0.6rem;
+            color: #ff8866;
             margin-top: 3px;
         }
         .counter {
             font-size: 1.5rem;
             font-weight: bold;
-            color: #1a5a1a;
+            color: #ffaa44;
         }
         .warning-msg {
-            background: #ffe0b5;
-            border-radius: 28px;
+            background: #fff0c0;
+            border-radius: 30px;
             padding: 10px;
             margin-top: 16px;
             text-align: center;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
         }
-        .error-msg {
-            background: #f8d7da;
-            color: #721c24;
-            border-radius: 28px;
+        .info-msg {
+            background: #d4edda;
+            border-radius: 30px;
             padding: 12px;
             margin-top: 16px;
             text-align: center;
             font-size: 0.85rem;
-            border-left: 4px solid #dc3545;
+            color: #2b6e2f;
         }
         button {
-            background: #2b5e2f;
+            background: #ffaa44;
             color: white;
             border: none;
             padding: 14px 24px;
@@ -244,19 +212,21 @@
             cursor: pointer;
             width: 100%;
             margin-top: 20px;
-            -webkit-tap-highlight-color: transparent;
-            transition: transform 0.05s linear;
+            box-shadow: 0 4px 0 #cc8833;
+            transition: 0.05s linear;
         }
         button:active {
-            transform: scale(0.97);
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #cc8833;
         }
         button:disabled {
             opacity: 0.5;
-            cursor: not-allowed;
             transform: none;
+            cursor: not-allowed;
         }
         .btn-secondary {
-            background: #7f8c5e;
+            background: #8aaa6e;
+            box-shadow: 0 4px 0 #6a8a4e;
             margin-top: 0;
         }
         .flex-btns {
@@ -267,120 +237,88 @@
         footer {
             text-align: center;
             font-size: 0.7rem;
-            color: #8a9a6e;
+            color: #8aaa6e;
             margin-top: 24px;
         }
         .fly-quote {
             position: fixed;
-            background: #ffe8c0;
-            color: #5a1e00;
+            background: #fff0c0;
+            color: #c07a2a;
             padding: 6px 14px;
             border-radius: 30px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: bold;
             white-space: nowrap;
             z-index: 1000;
             pointer-events: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            border: 1px solid #cc8833;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: 1px solid #ffcc88;
             animation: flyQuote 1s ease-out forwards;
         }
         @keyframes flyQuote {
-            0% {
-                opacity: 1;
-                transform: translate(0, 0) scale(1);
-            }
-            30% {
-                opacity: 1;
-                transform: translate(15px, -35px) scale(1.08);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(40px, -90px) scale(0.7);
-            }
+            0% { opacity: 1; transform: translate(0, 0) scale(1); }
+            30% { opacity: 1; transform: translate(15px, -35px) scale(1.08); }
+            100% { opacity: 0; transform: translate(40px, -90px) scale(0.7); }
         }
         @media (max-width: 700px) {
             .card { padding: 18px; }
-            h1 { font-size: 1.3rem; }
             .members-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
-            .member-avatar { width: 50px; height: 50px; font-size: 1.6rem; }
-            .truck-member { width: 60px; }
-            .truck-member .member-avatar { width: 45px; height: 45px; }
+            .member-avatar { width: 50px; height: 50px; }
+            .truck-member { width: 55px; }
         }
     </style>
 </head>
 <body>
 <div class="card">
-    <h1>👥 第三步 · 召集施工夥伴（工安協同作業）</h1>
+    <h1>
+        <span>👥</span>
+        第三步 · 找隊友一起施工
+        <span>🚛</span>
+    </h1>
 
     <div class="summary" id="summaryArea">載入中...</div>
 
-    <!-- 工安與人力建議區 -->
-    <div class="safety-warning" id="safetyArea">
-        ⚠️ 載入中...
-    </div>
-
-    <!-- 新增施工安全注意事項區塊 -->
-    <div class="safety-tips">
-        <div class="safety-tips-title">
-            ⚠️ 施工安全注意事項 ⚠️
-        </div>
-        <ul class="safety-tips-list">
-            <li>🔹 高處作業必須佩戴安全帶，並確實勾掛於牢固點位</li>
-            <li>🔹 施工架及工作平台需經檢查確認穩固，方可使用</li>
-            <li>🔹 電動工具使用前須檢查電線有無破損，避免漏電風險</li>
-            <li>🔹 植生牆灌水後每平方公尺重量可達60-100kg，須確認結構荷重</li>
-            <li>🔹 作業時須佩戴安全帽、防滑手套及防護眼鏡</li>
-            <li>🔹 夜間或光線不足處，需增設臨時照明設備</li>
-            <li>🔹 高空物料吊掛時，下方嚴禁人員通過或停留</li>
-            <li>🔹 每日上工前實施工具箱會議(TBM)，確認作業風險</li>
-            <li>🔹 施工區域須設置警示帶及安全圍籬，防止無關人員進入</li>
-            <li>🔹 如遇強風(6級以上)、雷雨等惡劣天氣，應立即停止戶外作業</li>
-        </ul>
+    <div class="team-tip" id="teamTip">
+        🌟 點擊夥伴就會上車！人越多，施工越快喔～
     </div>
 
     <div class="two-columns">
         <div class="team-area">
             <div class="section-title">🌾 等待召集的夥伴（點擊加入）</div>
             <div class="members-grid" id="membersGrid"></div>
-            <div class="warning-msg">💡 點擊夥伴 = 加入貨車｜點擊貨車上的夥伴 = 移除</div>
+            <div class="warning-msg">💡 點擊夥伴 = 上車｜點擊車上的夥伴 = 下車</div>
         </div>
 
         <div class="truck-area">
-            <div class="section-title">🚛 施工貨車（點擊移除）</div>
+            <div class="section-title">🚛 施工小貨車</div>
             <div class="truck-icon" id="truckIcon">🚛</div>
             <div class="truck-team" id="truckTeam"></div>
             <div>👷 施工人數：<span class="counter" id="workerCount">0</span> / 7</div>
         </div>
     </div>
 
-    <div id="errorMsg" class="error-msg" style="display:none;"></div>
+    <div id="infoMsg" class="info-msg" style="display:none;"></div>
 
     <div class="flex-btns">
-        <button id="backBtn" class="btn-secondary">⬅ 返回植物分配</button>
-        <button id="nextBtn" disabled>🚧 出發施工！</button>
+        <button id="backBtn" class="btn-secondary">⬅ 返回選植物</button>
+        <button id="nextBtn" disabled>🎉 出發施工！</button>
     </div>
-    <footer>🌱 依據面積與工安規範，需符合最低人力建議才可施工。安全第一，品質至上！</footer>
+    <footer>🌱 人越多，種花速度越快！最少需要 2 個人才能開工喔～</footer>
 </div>
 
 <script>
-    // 工人語錄庫（老鄧系列）
-    const WORKER_QUOTES = [
-        "😤 老鄧資遣我是你的損失！",
-        "🤔 我做得快是傻子，多虧去職訓不然我還不會做這個呢！",
-        "💔 我喜歡做工不代表要接受你的不公平，大叔你摸著良心問問自己！",
-        "🌞 天氣熱要多喝水～",
-        "⚠️ 作業中須注意工安！",
-        "🌱 植物是生命也要尊重～",
-        "💪 今天也要努力施工！",
-        "🍵 休息一下喝個茶吧",
-        "🔧 工具要隨手收好",
-        "🤝 團隊合作最重要！",
-        "🌿 這面牆以後會很美",
-        "💧 記得幫植物澆水",
-        "🪴 每一株都是心血",
-        "🏗️ 安全第一，品質至上",
-        "😎 我種的植物最漂亮"
+    // 可愛語錄庫（兒童版）
+    const FUN_QUOTES = [
+        "🎉 耶！一起來種植物吧！",
+        "💪 團隊合作最棒了！",
+        "🌱 我們是最強綠手指！",
+        "😊 一起努力，牆壁變漂亮！",
+        "⭐ 你點得好快！好厲害！",
+        "🌸 植物們會謝謝我們～",
+        "🎵 邊唱歌邊工作好開心",
+        "🍪 做完去吃點心！",
+        "💚 愛護地球，人人有責",
+        "🪴 每一株都是小生命"
     ];
 
     // 夥伴資料（7位）
@@ -394,17 +332,6 @@
         { id: 6, name: "空空", emoji: "🎈", imgFile: "till.png" }
     ];
 
-    // 面積對應最低人力需求
-    function getMinWorkersByArea(area) {
-        if (area >= 1 && area <= 2) return 2;
-        if (area >= 3 && area <= 5) return 3;
-        if (area >= 6 && area <= 8) return 4;
-        if (area >= 9 && area <= 13) return 5;
-        if (area >= 14 && area <= 16) return 6;
-        if (area >= 17 && area <= 20) return 7;
-        return 2;
-    }
-
     let area = 0;
     let totalPlants = 0;
     let siteLocation = "";
@@ -412,10 +339,9 @@
     let selectedWorkers = [];
 
     function getRandomQuote() {
-        return WORKER_QUOTES[Math.floor(Math.random() * WORKER_QUOTES.length)];
+        return FUN_QUOTES[Math.floor(Math.random() * FUN_QUOTES.length)];
     }
 
-    // 噴飛語錄
     function flyQuote(text, x, y) {
         const div = document.createElement('div');
         div.className = 'fly-quote';
@@ -426,7 +352,6 @@
         setTimeout(() => div.remove(), 1000);
     }
 
-    // 觸發卡車震動
     function shakeTruck() {
         const truck = document.getElementById('truckIcon');
         truck.classList.add('shake');
@@ -442,22 +367,13 @@
         if (storedQuantities) {
             quantities = JSON.parse(storedQuantities);
         } else {
-            quantities = [0, 0, 0, 0, 0, 0];
+            quantities = [0, 0, 0, 0];
         }
         
         document.getElementById('summaryArea').innerHTML = `
-            📐 面積：${area} m² &nbsp;|&nbsp;
-            📍 ${siteLocation === 'outdoor' ? '室外' : '室內'} &nbsp;|&nbsp;
-            🧱 總株數：${totalPlants} 株 &nbsp;|&nbsp;
-            🌱 植物種類：${quantities.filter(q => q > 0).length} 種
-        `;
-        
-        const minRequired = getMinWorkersByArea(area);
-        document.getElementById('safetyArea').innerHTML = `
-            ⚠️ <strong>工安協同作業規範</strong><br>
-            📐 施作面積 ${area} m² → 最低建議人力：<strong style="color:#c0392b;">${minRequired} 人</strong><br>
-            🔧 依據職安法規，植生牆工程需協同作業，避免單獨施工發生意外。<br>
-            💰 人力配置亦會影響碳排放總量與施工成本，請審慎評估。
+            📐 ${area} 平方公尺 &nbsp;|&nbsp;
+            📍 ${siteLocation === 'outdoor' ? '🌞 戶外陽光區' : '🏠 室內舒適區'} &nbsp;|&nbsp;
+            🌱 總共 ${totalPlants} 株植物
         `;
     }
 
@@ -468,79 +384,66 @@
                      style="width:${sizeNum}px; height:${sizeNum}px; object-fit:cover; border-radius:60px;">`;
     }
 
-    // 加入夥伴（含動畫與語錄）
     function addWorker(worker, clickX, clickY) {
         if (selectedWorkers.some(w => w.id === worker.id)) {
-            flyQuote(`⚠️ ${worker.name} 已經在車上了！`, clickX, clickY);
+            flyQuote(`⚠️ ${worker.name} 已經在車上囉！`, clickX, clickY);
             return false;
         }
         if (selectedWorkers.length >= 7) {
-            flyQuote(`🚛 貨車已滿！最多 7 人`, clickX, clickY);
-            alert('貨車最多只能載 7 人！');
+            flyQuote(`🚛 車車滿了！最多7人～`, clickX, clickY);
             return false;
         }
         selectedWorkers.push(worker);
         
         const quote = getRandomQuote();
-        flyQuote(`✨ ${worker.name} 加入團隊！ ${quote}`, clickX, clickY);
+        flyQuote(`✨ ${worker.name} 上車了！ ${quote}`, clickX, clickY);
         shakeTruck();
         return true;
     }
 
-    // 移除夥伴（含動畫與語錄）
     function removeWorker(workerId, clickX, clickY) {
         const removed = selectedWorkers.find(w => w.id === workerId);
         if (removed) {
             const quote = getRandomQuote();
-            flyQuote(`😢 ${removed.name} 離開了... ${quote}`, clickX, clickY);
+            flyQuote(`😢 ${removed.name} 下車了... ${quote}`, clickX, clickY);
         }
         selectedWorkers = selectedWorkers.filter(w => w.id !== workerId);
         shakeTruck();
     }
 
-    function checkSafetyAndUpdateButton() {
-        const minRequired = getMinWorkersByArea(area);
+    function updateInfoAndButton() {
         const currentCount = selectedWorkers.length;
-        const errorDiv = document.getElementById('errorMsg');
+        const infoDiv = document.getElementById('infoMsg');
         const nextBtn = document.getElementById('nextBtn');
         
         if (currentCount === 0) {
-            errorDiv.style.display = 'block';
-            errorDiv.innerHTML = '⚠️ 尚未選擇任何夥伴！請點擊左側夥伴加入施工團隊。';
+            infoDiv.style.display = 'block';
+            infoDiv.innerHTML = '⚠️ 還沒有夥伴！點擊左邊的夥伴，讓他們上車吧～';
+            infoDiv.style.background = '#fff0c0';
+            infoDiv.style.color = '#c07a2a';
             nextBtn.disabled = true;
-            return false;
+            return;
         }
         
         if (currentCount === 1) {
-            errorDiv.style.display = 'block';
-            errorDiv.innerHTML = '⚠️ 單人作業風險極高！違反工安協同作業規範。請至少再增加 1 位夥伴協同施工。';
+            infoDiv.style.display = 'block';
+            infoDiv.innerHTML = '👥 只有一個人好孤單～再找一個夥伴一起施工吧！兩人以上才安全喔！';
+            infoDiv.style.background = '#fff0c0';
+            infoDiv.style.color = '#c07a2a';
             nextBtn.disabled = true;
-            return false;
+            return;
         }
         
-        if (currentCount < minRequired) {
-            const shortage = minRequired - currentCount;
-            errorDiv.style.display = 'block';
-            errorDiv.innerHTML = `⚠️ 人力不足！面積 ${area} m² 至少需要 ${minRequired} 人協同作業。<br>目前 ${currentCount} 人，請再增加 ${shortage} 位夥伴。`;
-            nextBtn.disabled = true;
-            return false;
-        }
-        
-        if (currentCount === minRequired) {
-            errorDiv.style.display = 'block';
-            errorDiv.style.background = '#d4edda';
-            errorDiv.style.color = '#155724';
-            errorDiv.style.borderLeftColor = '#28a745';
-            errorDiv.innerHTML = `✅ 人力符合最低規範！${currentCount} 人可安全施工。（碳排放與成本將依人數計算）`;
+        // 2人以上就可以出發
+        infoDiv.style.display = 'block';
+        infoDiv.style.background = '#d4edda';
+        infoDiv.style.color = '#2b6e2f';
+        if (currentCount === 2) {
+            infoDiv.innerHTML = `✅ ${currentCount} 人！可以出發了！人越多種越快喔～`;
         } else {
-            errorDiv.style.display = 'block';
-            errorDiv.style.background = '#d4edda';
-            errorDiv.style.color = '#155724';
-            errorDiv.style.borderLeftColor = '#28a745';
-            errorDiv.innerHTML = `✅ 人力充足！${currentCount} 人 > 最低需求 ${minRequired} 人，施工效率更高。（碳排放與成本將相應增加）`;
+            infoDiv.innerHTML = `🎉 ${currentCount} 人！好棒的團隊！出發施工吧！`;
         }
         nextBtn.disabled = false;
-        return true;
     }
 
     function renderMembers() {
@@ -553,12 +456,11 @@
             
             const card = document.createElement('div');
             card.className = 'member-card';
-            card.setAttribute('data-id', member.id);
             
             card.innerHTML = `
                 <div class="member-avatar" id="member_avatar_${member.id}"></div>
                 <div class="member-name">${member.name}</div>
-                <div class="add-icon">➕ 點擊加入</div>
+                <div class="add-icon">➕ 點擊上車</div>
             `;
             
             const avatarDiv = card.querySelector(`#member_avatar_${member.id}`);
@@ -571,9 +473,6 @@
                 const rect = card.getBoundingClientRect();
                 const clickX = rect.left + rect.width / 2;
                 const clickY = rect.top + rect.height / 2;
-                
-                card.classList.add('click-effect');
-                setTimeout(() => card.classList.remove('click-effect'), 200);
                 
                 if (addWorker(member, clickX, clickY)) {
                     saveAndRender();
@@ -589,22 +488,21 @@
         container.innerHTML = '';
         
         if (selectedWorkers.length === 0) {
-            container.innerHTML = '<div style="color:#8a9a6e; text-align:center; padding:20px;">點擊左邊夥伴加入貨車</div>';
+            container.innerHTML = '<div style="color:#8aaa6e; text-align:center; padding:20px;">🚛 點擊左邊夥伴讓他們上車～</div>';
         } else {
             selectedWorkers.forEach(worker => {
                 const div = document.createElement('div');
                 div.className = 'truck-member';
-                div.setAttribute('data-id', worker.id);
                 div.innerHTML = `
                     <div class="member-avatar" id="truck_avatar_${worker.id}"></div>
                     <div class="member-name">${worker.name}</div>
-                    <div class="remove-icon">✖ 點擊移除</div>
+                    <div class="remove-icon">✖ 點擊下車</div>
                 `;
                 container.appendChild(div);
                 
                 const avatarDiv = div.querySelector(`#truck_avatar_${worker.id}`);
                 if (avatarDiv) {
-                    avatarDiv.innerHTML = renderAvatar(worker.imgFile, worker.emoji, "55");
+                    avatarDiv.innerHTML = renderAvatar(worker.imgFile, worker.emoji, "50");
                 }
                 
                 div.addEventListener('click', (e) => {
@@ -619,7 +517,7 @@
         }
         
         document.getElementById('workerCount').innerText = selectedWorkers.length;
-        checkSafetyAndUpdateButton();
+        updateInfoAndButton();
     }
 
     function saveAndRender() {
@@ -644,19 +542,14 @@
     }
 
     function goToConstruction() {
-        const minRequired = getMinWorkersByArea(area);
         const currentCount = selectedWorkers.length;
         
         if (currentCount === 0) {
-            alert('請至少選擇一位夥伴一起施工！');
+            alert('還沒有夥伴！快點選左邊的夥伴上車～');
             return;
         }
         if (currentCount === 1) {
-            alert('⚠️ 單人作業風險極高！請至少再增加 1 位夥伴協同施工。');
-            return;
-        }
-        if (currentCount < minRequired) {
-            alert(`⚠️ 人力不足！面積 ${area} m² 至少需要 ${minRequired} 人協同作業。\n目前 ${currentCount} 人，請再增加 ${minRequired - currentCount} 位夥伴。`);
+            alert('一個人施工太危險了！再找一個夥伴一起吧！');
             return;
         }
         
