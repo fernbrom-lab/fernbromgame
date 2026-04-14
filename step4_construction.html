@@ -3,16 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>植生牆遊戲 · 第四步：創意植栽（自由配色）</title>
+    <title>🎨 第四步 · 一起來種植物</title>
     <style>
         * {
             box-sizing: border-box;
-            font-family: system-ui, 'Segoe UI', sans-serif;
+            font-family: system-ui, 'Segoe UI', 'Comic Neue', 'Noto Sans TC', sans-serif;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
         body {
-            background: #1a472a;
+            background: #6eb56e;
+            background-image: radial-gradient(circle at 10% 20%, rgba(255,255,200,0.2) 2%, transparent 2.5%);
+            background-size: 28px 28px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -21,42 +23,48 @@
             padding: 20px;
         }
         .card {
-            max-width: 1200px;
+            max-width: 1100px;
             width: 100%;
-            background: #fef7e0;
-            border-radius: 48px;
+            background: #fffef7;
+            border-radius: 64px;
             padding: 28px;
-            box-shadow: 0 20px 35px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+            border: 3px solid #ffdd99;
         }
         h1 {
-            color: #1a3b1e;
-            border-left: 8px solid #2e7d32;
-            padding-left: 20px;
+            color: #3a7a2a;
+            font-size: 1.6rem;
+            text-align: center;
             margin-top: 0;
-            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         .info-bar {
-            background: #e0f0da;
-            border-radius: 28px;
+            background: #e8f5e0;
+            border-radius: 40px;
             padding: 12px 20px;
             margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 10px;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
+            border: 2px dashed #aad48a;
         }
         .plants-summary {
-            background: #fff5e0;
-            border-radius: 28px;
+            background: #fff5e8;
+            border-radius: 40px;
             padding: 16px;
             margin-bottom: 20px;
-            border: 1px solid #cddba6;
+            border: 2px solid #ddeec0;
         }
         .plants-summary-title {
             font-weight: bold;
             margin-bottom: 12px;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
+            text-align: center;
         }
         .plant-list {
             display: flex;
@@ -69,62 +77,69 @@
             align-items: center;
             gap: 8px;
             background: white;
-            padding: 6px 12px;
+            padding: 8px 16px;
             border-radius: 40px;
-            border: 1px solid #cddba6;
+            border: 2px solid #ddeec0;
             cursor: pointer;
             transition: all 0.1s;
         }
         .plant-item.selected {
-            background: #c8e6b5;
-            border-color: #2b5e2f;
-            box-shadow: 0 0 0 2px #f9a825;
+            background: #ffdd99;
+            border-color: #ffaa44;
+            transform: scale(1.02);
         }
         .plant-color-box {
-            width: 24px;
-            height: 24px;
-            border-radius: 24px;
+            width: 28px;
+            height: 28px;
+            border-radius: 28px;
         }
         .progress-bar {
-            background: #ddd;
+            background: #e0e0d0;
             border-radius: 40px;
-            height: 28px;
+            height: 24px;
             overflow: hidden;
             margin: 15px 0;
         }
         .progress-fill {
             width: 0%;
             height: 100%;
-            background: #3c8c40;
+            background: #ffaa44;
             transition: width 0.1s linear;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: bold;
         }
         .canvas-container {
-            background: #e8e8e0;
-            border-radius: 24px;
-            padding: 8px;
+            background: #e8e0c8;
+            border-radius: 32px;
+            padding: 12px;
             margin: 20px 0;
             text-align: center;
         }
         canvas {
-            background: #ffffff;
-            border-radius: 16px;
+            background: #f5f0e0;
+            border-radius: 24px;
             display: block;
             margin: 0 auto;
             cursor: pointer;
             width: 100%;
             height: auto;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
         }
         .click-hint {
             text-align: center;
             font-size: 0.85rem;
             font-weight: bold;
-            color: #2b5e2f;
-            background: rgba(255,255,200,0.7);
+            color: #ffaa44;
+            background: #fff0c0;
             display: inline-block;
             width: auto;
-            margin: 8px auto 0;
-            padding: 6px 16px;
+            margin: 10px auto 0;
+            padding: 6px 20px;
             border-radius: 40px;
         }
         .worker-section {
@@ -144,13 +159,13 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-            border: 1px solid #cddba6;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 2px solid #ddeec0;
         }
         .worker-avatar {
             width: 45px;
             height: 45px;
-            background: #d9e0c5;
+            background: #ddeec0;
             border-radius: 45px;
             display: flex;
             align-items: center;
@@ -164,17 +179,17 @@
             object-fit: cover;
         }
         .worker-name {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             font-weight: bold;
-            color: #1a3b1e;
+            color: #3a7a2a;
         }
         .worker-talk {
             font-size: 0.65rem;
-            color: #8b3a00;
-            background: #fff0e0;
+            color: #c07a2a;
+            background: #fff0c0;
             border-radius: 20px;
             padding: 4px 10px;
-            max-width: 180px;
+            max-width: 160px;
             white-space: nowrap;
             overflow-x: auto;
             cursor: pointer;
@@ -186,48 +201,56 @@
             flex-wrap: wrap;
         }
         button {
-            background: #2b5e2f;
+            background: #ffaa44;
             color: white;
             border: none;
-            padding: 12px 16px;
-            font-size: 0.9rem;
+            padding: 12px 20px;
+            font-size: 1rem;
             font-weight: bold;
             border-radius: 60px;
             cursor: pointer;
             flex: 1;
             min-width: 120px;
+            box-shadow: 0 4px 0 #cc8833;
+            transition: 0.05s linear;
         }
         button:active {
-            transform: scale(0.98);
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #cc8833;
         }
         button:disabled {
             opacity: 0.5;
+            transform: none;
             cursor: not-allowed;
         }
         .btn-secondary {
-            background: #7f8c5e;
+            background: #8aaa6e;
+            box-shadow: 0 4px 0 #6a8a4e;
         }
         .btn-warning {
-            background: #c06d2e;
+            background: #ff8866;
+            box-shadow: 0 4px 0 #cc6644;
         }
         footer {
             text-align: center;
             font-size: 0.7rem;
-            color: #5a6e4a;
+            color: #8aaa6e;
             margin-top: 20px;
         }
         .selected-tool {
             text-align: center;
             margin: 10px 0;
-            font-size: 0.85rem;
-            color: #2b5e2f;
+            font-size: 0.9rem;
+            color: #ffaa44;
             font-weight: bold;
+            background: #fff0c0;
+            padding: 8px;
+            border-radius: 40px;
         }
-        /* 噴飛語錄動畫 */
         .fly-talk {
             position: fixed;
-            background: #ffe8c0;
-            color: #5a1e00;
+            background: #fff0c0;
+            color: #c07a2a;
             padding: 6px 14px;
             border-radius: 30px;
             font-size: 0.85rem;
@@ -235,51 +258,45 @@
             white-space: nowrap;
             z-index: 1000;
             pointer-events: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-            border: 1px solid #cc8833;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: 1px solid #ffcc88;
             animation: flyAway 1s ease-out forwards;
         }
         @keyframes flyAway {
-            0% {
-                opacity: 1;
-                transform: translate(0, 0) scale(1);
-            }
-            30% {
-                opacity: 1;
-                transform: translate(15px, -35px) scale(1.08);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(40px, -90px) scale(0.7);
-            }
+            0% { opacity: 1; transform: translate(0, 0) scale(1); }
+            30% { opacity: 1; transform: translate(15px, -35px) scale(1.08); }
+            100% { opacity: 0; transform: translate(40px, -90px) scale(0.7); }
         }
         @media (max-width: 700px) {
             .card { padding: 18px; }
-            .worker-talk { max-width: 130px; font-size: 0.6rem; }
-            .plant-item { padding: 4px 8px; font-size: 0.75rem; }
+            .worker-talk { max-width: 120px; font-size: 0.6rem; }
         }
     </style>
 </head>
 <body>
 <div class="card">
-    <h1>🎨 第四步 · 創意植栽（自由配色）</h1>
+    <h1>
+        <span>🎨</span>
+        第四步 · 一起來種植物
+        <span>🌱</span>
+    </h1>
 
     <div class="info-bar" id="infoBar">載入中...</div>
 
-    <div class="plants-summary" id="plantsSummary">
-        <div class="plants-summary-title">🌱 點擊下方色塊選擇植物，再點擊牆面格子塗色</div>
+    <div class="plants-summary">
+        <div class="plants-summary-title">🌱 點擊顏色，選擇要種的植物！</div>
         <div class="plant-list" id="plantList"></div>
     </div>
 
-    <div class="selected-tool" id="selectedTool">🎨 尚未選擇植物</div>
+    <div class="selected-tool" id="selectedTool">🎨 點擊上面的色塊選擇植物～</div>
 
     <div class="progress-bar">
-        <div class="progress-fill" id="progressFill"></div>
+        <div class="progress-fill" id="progressFill">0%</div>
     </div>
 
     <div class="canvas-container">
         <canvas id="greenCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; aspect-ratio:600/400"></canvas>
-        <div class="click-hint">✨ 點擊色塊選擇植物 → 點擊格子塗色 ✨</div>
+        <div class="click-hint">✨ 點擊格子 = 種植物！ ✨</div>
     </div>
 
     <div class="worker-section">
@@ -288,37 +305,25 @@
 
     <div class="flex-btns">
         <button id="resetBtn" class="btn-secondary">🔄 全部清除</button>
-        <button id="autoFillBtn" class="btn-warning">🎲 亂數填滿</button>
-        <button id="completeBtn" disabled>✅ 滿意完成 & 驗收</button>
+        <button id="autoFillBtn" class="btn-warning">🎲 魔法一鍵種滿</button>
+        <button id="completeBtn" disabled>🏆 完成！領獎章 🏆</button>
     </div>
-    <footer>🌱 自由搭配顏色，創造獨一無二的植生牆！完成後點擊驗收。</footer>
+    <footer>🌱 點一下種一株！把所有格子種滿，就可以拿到綠手指獎章喔！</footer>
 </div>
 
 <script>
-    // 工人語錄庫（豐富版）
-    const WORKER_TALKS = [
-        "😤 老鄧資遣我是你的損失！",
-        "🤔 多虧去職訓不然我還不會做這個呢！",
-        "🤔 大叔你有良心嗎！",
-        "🤔 大叔你有良心嗎！",
-        "🤔 大哥時薪350喔！",
-        "😤 老鄧資遣我是你的損失！",
-        "💔 我不接受你的不公平！",
-        "🌞 天氣熱要多喝水～",
-        "⚠️ 作業中須注意工安！",
-        "🌱 植物是生命也要尊重～",
-        "💪 今天也要努力施工！",
-        "🎨 這個配色真好看！",
-        "🪴 每一株都是心血",
-        "🍵 休息一下喝個茶吧",
-        "🔧 工具要隨手收好",
-        "🤝 團隊合作最重要！",
-        "🌿 這面牆以後會很美",
-        "💧 記得幫植物澆水",
-        "🏗️ 安全第一，品質至上",
-        "😎 我種的植物最漂亮",
-        "🌙 加班費記得多算一點",
-        "🎵 邊唱歌邊工作最開心"
+    // 兒童版可愛語錄
+    const FUN_TALKS = [
+        "🌱 種下一棵小植物！",
+        "🎉 耶！越來越漂亮了！",
+        "💚 愛護地球，好棒！",
+        "⭐ 你種得好快！",
+        "🌸 花花世界真美麗～",
+        "😊 一起努力完成它！",
+        "🍃 植物們在謝謝你！",
+        "🎵 種種種～種下去～",
+        "💪 再努力一下下！",
+        "🏆 快要完成了！"
     ];
 
     let PLANTS = [];
@@ -328,7 +333,10 @@
     let selectedPlantId = null;
     let cellSize = { w: 0, h: 0 };
 
-    // 噴飛語錄函數（從指定位置噴出）
+    function getRandomTalk() {
+        return FUN_TALKS[Math.floor(Math.random() * FUN_TALKS.length)];
+    }
+
     function flyTalk(text, x, y) {
         const div = document.createElement('div');
         div.className = 'fly-talk';
@@ -337,10 +345,6 @@
         div.style.top = (y - 30) + 'px';
         document.body.appendChild(div);
         setTimeout(() => div.remove(), 1000);
-    }
-
-    function getRandomTalk() {
-        return WORKER_TALKS[Math.floor(Math.random() * WORKER_TALKS.length)];
     }
 
     function refreshWorkerTalk(index) {
@@ -362,15 +366,15 @@
             PLANTS = plantData.map((p, idx) => ({
                 id: idx,
                 name: p.name,
-                color: p.color || (idx === 0 ? "#5b8c5a" : idx === 1 ? "#3a5a2a" : idx === 2 ? "#9bc48e" : "#e8a0b4"),
+                emoji: p.emoji || ["🌿","🌱","🍃","🌸"][idx],
                 quantity: p.quantity || quantities[idx]
             }));
         } else {
             PLANTS = [
-                { id: 0, name: "綠葉鵝掌藤", color: "#5b8c5a", quantity: quantities[0] || 0 },
-                { id: 1, name: "蔓榕", color: "#3a5a2a", quantity: quantities[1] || 0 },
-                { id: 2, name: "腎蕨", color: "#9bc48e", quantity: quantities[2] || 0 },
-                { id: 3, name: "粗勒草", color: "#e8a0b4", quantity: quantities[3] || 0 }
+                { id: 0, name: "綠葉鵝掌藤", emoji: "🌿", quantity: quantities[0] || 0 },
+                { id: 1, name: "蔓榕", emoji: "🌱", quantity: quantities[1] || 0 },
+                { id: 2, name: "腎蕨", emoji: "🍃", quantity: quantities[2] || 0 },
+                { id: 3, name: "粗勒草", emoji: "🌸", quantity: quantities[3] || 0 }
             ];
         }
         
@@ -380,10 +384,10 @@
         }
         
         document.getElementById('infoBar').innerHTML = `
-            <span>📐 ${area} m²</span>
-            <span>🌱 ${totalPlants} 株</span>
-            <span>📍 ${siteLocation === 'outdoor' ? '室外' : '室內'}</span>
-            <span class="speed-badge">👷 ${workerCount} 人</span>
+            <span>📐 ${area} 平方公尺</span>
+            <span>🌱 ${totalPlants} 株植物</span>
+            <span>📍 ${siteLocation === 'outdoor' ? '🌞 戶外陽光區' : '🏠 室內舒適區'}</span>
+            <span>👷 ${workerCount} 人團隊</span>
         `;
         renderPlantsSummary();
         renderWorkers();
@@ -398,35 +402,31 @@
             if (qty === 0) continue;
             const div = document.createElement('div');
             div.className = `plant-item ${selectedPlantId === i ? 'selected' : ''}`;
-            div.setAttribute('data-id', i);
-            div.innerHTML = `<div class="plant-color-box" style="background:${p.color}"></div>
-                <span>${p.name}</span><span><strong>${qty}</strong>株</span>`;
+            div.innerHTML = `<span style="font-size:1.3rem;">${p.emoji}</span>
+                <span>${p.name}</span>
+                <span><strong>${qty}</strong>株</span>`;
             div.addEventListener('click', (e) => {
                 e.stopPropagation();
                 selectedPlantId = i;
-                document.getElementById('selectedTool').innerHTML = `🎨 目前選擇：${p.name} <span style="display:inline-block;width:20px;height:20px;background:${p.color};border-radius:20px;vertical-align:middle;"></span>`;
+                document.getElementById('selectedTool').innerHTML = `🎨 現在要種：${p.name} ${p.emoji}`;
                 renderPlantsSummary();
                 
-                // 點擊色塊也噴語錄
                 const rect = div.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
-                const randomTalk = getRandomTalk();
-                flyTalk(`🎨 選擇 ${p.name}！ ${randomTalk}`, centerX, centerY);
+                flyTalk(`✨ 選擇 ${p.name}！`, rect.left + rect.width/2, rect.top + rect.height/2);
             });
             container.appendChild(div);
         }
         
         if (selectedPlantId === null && PLANTS.length > 0) {
             selectedPlantId = 0;
-            document.getElementById('selectedTool').innerHTML = `🎨 目前選擇：${PLANTS[0].name} <span style="display:inline-block;width:20px;height:20px;background:${PLANTS[0].color};border-radius:20px;vertical-align:middle;"></span>`;
+            document.getElementById('selectedTool').innerHTML = `🎨 現在要種：${PLANTS[0].name} ${PLANTS[0].emoji}`;
         }
     }
 
     function renderWorkers() {
         const container = document.getElementById('workerList');
         if (workers.length === 0) {
-            container.innerHTML = '<div style="color:#8b3a00;">⚠️ 沒有夥伴，請返回第三步召集團隊</div>';
+            container.innerHTML = '<div style="color:#c07a2a;">⚠️ 沒有隊友？回去第三步找夥伴吧～</div>';
             return;
         }
         const imgNames = ['brom.png', 'fern.png', 'ficus.png', 'mons.png', 'sans.png', 'succ.png', 'till.png'];
@@ -434,7 +434,7 @@
             const imgFile = imgNames[worker.id % imgNames.length];
             return `
                 <div class="worker-card">
-                    <div class="worker-avatar"><img src="${imgFile}" onerror="this.style.display='none'; this.parentElement.innerHTML='👨‍🌾';"></div>
+                    <div class="worker-avatar"><img src="${imgFile}" onerror="this.style.display='none'; this.parentElement.innerHTML='${worker.emoji || "👤"}';"></div>
                     <div>
                         <div class="worker-name">${worker.name}</div>
                         <div class="worker-talk" data-idx="${idx}">💬 ${workerTalks[idx]}</div>
@@ -446,10 +446,8 @@
             el.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const rect = el.getBoundingClientRect();
-                const talkX = rect.left + rect.width / 2;
-                const talkY = rect.top + rect.height / 2;
                 refreshWorkerTalk(parseInt(el.dataset.idx));
-                flyTalk(`🔄 換一句：${workerTalks[parseInt(el.dataset.idx)]}`, talkX, talkY);
+                flyTalk(`🔄 換一句：${workerTalks[parseInt(el.dataset.idx)]}`, rect.left + rect.width/2, rect.top + rect.height/2);
             });
         });
     }
@@ -462,6 +460,11 @@
         finishedCount = 0;
     }
 
+    function getPlantColor(plantId) {
+        const colors = ["#ffaa44", "#88cc44", "#44aa88", "#ff88aa"];
+        return colors[plantId % colors.length];
+    }
+
     function drawPixelWall() {
         if (!canvas || !ctx) return;
         const w = canvas.width, h = canvas.height;
@@ -472,7 +475,7 @@
             for (let col = 0; col < cols; col++) {
                 const idx = row * cols + col;
                 if (idx >= totalPlants) {
-                    ctx.fillStyle = "#d0d0c0";
+                    ctx.fillStyle = "#ddd0b0";
                     ctx.fillRect(col * cellSize.w, row * cellSize.h, cellSize.w, cellSize.h);
                     continue;
                 }
@@ -480,10 +483,10 @@
                 if (gridColors[idx]) {
                     ctx.fillStyle = gridColors[idx];
                 } else {
-                    ctx.fillStyle = "#ffffff";
+                    ctx.fillStyle = "#f0e8d0";
                 }
                 ctx.fillRect(col * cellSize.w, row * cellSize.h, cellSize.w, cellSize.h);
-                ctx.strokeStyle = "#cccccc";
+                ctx.strokeStyle = "#ddd0b0";
                 ctx.strokeRect(col * cellSize.w, row * cellSize.h, cellSize.w, cellSize.h);
             }
         }
@@ -492,13 +495,14 @@
     function updateProgressAndButton() {
         const coloredCount = gridColors.filter(c => c !== null).length;
         finishedCount = coloredCount;
-        const percent = (finishedCount / totalPlants) * 100;
-        document.getElementById('progressFill').style.width = `${percent}%`;
+        const percent = Math.floor((finishedCount / totalPlants) * 100);
+        const fillDiv = document.getElementById('progressFill');
+        fillDiv.style.width = `${percent}%`;
+        fillDiv.innerHTML = `${percent}%`;
         drawPixelWall();
         document.getElementById('completeBtn').disabled = (finishedCount < totalPlants);
     }
 
-    // 核心：點擊格子塗色 + 強制噴發語錄
     function handleCanvasClick(e) {
         if (!canvas) return;
         
@@ -535,44 +539,44 @@
         if (idx >= 0 && idx < totalPlants && selectedPlantId !== null) {
             const selectedPlant = PLANTS[selectedPlantId];
             const wasEmpty = !gridColors[idx];
-            gridColors[idx] = selectedPlant.color;
+            gridColors[idx] = getPlantColor(selectedPlantId);
             updateProgressAndButton();
             
-            // 每次點擊都噴發語錄（從點擊位置）
+            // 噴發可愛語錄
             let talk = "";
             if (workers.length > 0) {
                 const randomIdx = Math.floor(Math.random() * workers.length);
                 talk = workerTalks[randomIdx];
                 setTimeout(() => refreshWorkerTalk(randomIdx), 300);
             } else {
-                talk = "快找夥伴來幫忙！";
+                talk = "🌱 種下去囉！";
             }
             
             if (wasEmpty) {
-                flyTalk(`🌱 種下 ${selectedPlant.name}！ ${talk}`, clientX, clientY);
+                flyTalk(`🎨 種下 ${selectedPlant.emoji} ${selectedPlant.name}！ ${talk}`, clientX, clientY);
             } else {
-                flyTalk(`🎨 換成 ${selectedPlant.name}！ $很累耶`, clientX, clientY);
+                flyTalk(`🔄 換成 ${selectedPlant.emoji} ${selectedPlant.name}！`, clientX, clientY);
             }
         }
     }
 
     function resetAll() {
-        if (confirm('清除所有，重新種？')) {
+        if (confirm('清除所有植物，重新設計？')) {
             initGridColors();
             updateProgressAndButton();
-            // 重置完成後噴語錄
             const rect = document.getElementById('resetBtn').getBoundingClientRect();
-            flyTalk("🔄 已清除所有，重新開始種植！", rect.left + rect.width/2, rect.top + rect.height/2);
+            flyTalk("🔄 全部清除，重新開始設計！", rect.left + rect.width/2, rect.top + rect.height/2);
         }
     }
 
     function autoFill() {
-        if (confirm('隨機填滿所有格子？')) {
+        if (confirm('魔法一鍵種滿！會依照你選的比例隨機種植～')) {
             const colorPool = [];
             for (let i = 0; i < PLANTS.length; i++) {
                 const qty = PLANTS[i].quantity;
+                const color = getPlantColor(i);
                 for (let j = 0; j < qty; j++) {
-                    colorPool.push(PLANTS[i].color);
+                    colorPool.push(color);
                 }
             }
             for (let i = colorPool.length - 1; i > 0; i--) {
@@ -584,30 +588,30 @@
             }
             if (colorPool.length < totalPlants && PLANTS.length > 0) {
                 for (let i = colorPool.length; i < totalPlants; i++) {
-                    gridColors[i] = PLANTS[0].color;
+                    gridColors[i] = getPlantColor(0);
                 }
             }
             updateProgressAndButton();
             
             const rect = document.getElementById('autoFillBtn').getBoundingClientRect();
-            flyTalk("🎲 隨機種植完成！來看看成品吧～", rect.left + rect.width/2, rect.top + rect.height/2);
+            flyTalk("🎲 魔法完成！牆壁變得好漂亮～", rect.left + rect.width/2, rect.top + rect.height/2);
         }
     }
 
     function completeAndNext() {
         if (finishedCount < totalPlants) {
-            alert(`還沒種完！已種 ${finishedCount} / ${totalPlants} 顆，請繼續設計。`);
+            alert(`還剩 ${totalPlants - finishedCount} 格沒種！再努力一下下～`);
             return;
         }
         localStorage.setItem('greenwall_construction_done', 'true');
         localStorage.setItem('greenwall_grid_colors', JSON.stringify(gridColors));
         
         const rect = document.getElementById('completeBtn').getBoundingClientRect();
-        flyTalk("🎉 完成瞜！前往驗收與碳排評估！", rect.left + rect.width/2, rect.top + rect.height/2);
+        flyTalk("🏆 哇！你完成了！獲得綠手指獎章！前往頒獎典禮～", rect.left + rect.width/2, rect.top + rect.height/2);
         
         setTimeout(() => {
             window.location.href = 'step5_carbon.html';
-        }, 500);
+        }, 800);
     }
 
     function initCanvas() {
@@ -616,22 +620,14 @@
         canvas.height = 400;
         ctx = canvas.getContext('2d');
         
-        // 動態調整網格：面積越大，網格越多，但保持畫布比例
         cols = Math.ceil(Math.sqrt(totalPlants));
         rows = Math.ceil(totalPlants / cols);
         
-        // 限制最大行列數，避免格子太小（最小格子約 15px）
-        const maxGrid = 40;
-        if (cols > maxGrid) {
-            cols = maxGrid;
-            rows = Math.ceil(totalPlants / cols);
-        }
-        if (rows > maxGrid) {
-            rows = maxGrid;
-            cols = Math.ceil(totalPlants / rows);
-        }
+        // 限制最大格子數，避免太密集
+        if (cols > 30) { cols = 30; rows = Math.ceil(totalPlants / cols); }
+        if (rows > 30) { rows = 30; cols = Math.ceil(totalPlants / rows); }
         
-        console.log(`點陣圖: ${totalPlants} 株 → ${cols} 列 x ${rows} 行 = ${cols * rows} 格`);
+        console.log(`點陣圖: ${totalPlants} 株 → ${cols} x ${rows}`);
         
         initGridColors();
         updateProgressAndButton();
@@ -659,7 +655,7 @@
     loadSavedProgress();
     
     if (workerCount === 0) {
-        alert('⚠️ 沒有施工夥伴！請返回第三步召集團隊。');
+        alert('⚠️ 沒有施工夥伴！請返回第三步找隊友～');
     }
     
     initCanvas();
