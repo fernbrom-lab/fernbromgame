@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>植生牆遊戲 · 第四步：創意植栽（自由移動配色）</title>
+    <title>植生牆遊戲 · 第四步：創意植栽（自由配色）</title>
     <style>
         * {
             box-sizing: border-box;
@@ -21,7 +21,7 @@
             padding: 20px;
         }
         .card {
-            max-width: 1000px;
+            max-width: 1200px;
             width: 100%;
             background: #fef7e0;
             border-radius: 48px;
@@ -223,6 +223,36 @@
             color: #2b5e2f;
             font-weight: bold;
         }
+        /* 噴飛語錄動畫 */
+        .fly-talk {
+            position: fixed;
+            background: #ffe8c0;
+            color: #5a1e00;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            white-space: nowrap;
+            z-index: 1000;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            border: 1px solid #cc8833;
+            animation: flyAway 1s ease-out forwards;
+        }
+        @keyframes flyAway {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+            30% {
+                opacity: 1;
+                transform: translate(15px, -35px) scale(1.08);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(40px, -90px) scale(0.7);
+            }
+        }
         @media (max-width: 700px) {
             .card { padding: 18px; }
             .worker-talk { max-width: 130px; font-size: 0.6rem; }
@@ -265,11 +295,30 @@
 </div>
 
 <script>
+    // 工人語錄庫（豐富版）
     const WORKER_TALKS = [
-        "😤 老鄧資遣我是你的損失！", "🤔 多虧去職訓不然我還不會做這個呢！",
-        "💔 我喜歡做工不代表要接受你的不公平！", "🌞 天氣熱要多喝水～",
-        "⚠️ 作業中須注意工安！", "🌱 植物是生命也要尊重～",
-        "💪 今天也要努力施工！", "🎨 這個配色真好看！", "🪴 每一株都是心血"
+        "😤 老鄧資遣我是你的損失！",
+        "🤔 多虧去職訓不然我還不會做這個呢！",
+        "🤔 大叔你有良心嗎！",
+        "🤔 大叔你有良心嗎！",
+        "🤔 大哥時薪350喔！",
+        "😤 老鄧資遣我是你的損失！",
+        "💔 我不接受你的不公平！",
+        "🌞 天氣熱要多喝水～",
+        "⚠️ 作業中須注意工安！",
+        "🌱 植物是生命也要尊重～",
+        "💪 今天也要努力施工！",
+        "🎨 這個配色真好看！",
+        "🪴 每一株都是心血",
+        "🍵 休息一下喝個茶吧",
+        "🔧 工具要隨手收好",
+        "🤝 團隊合作最重要！",
+        "🌿 這面牆以後會很美",
+        "💧 記得幫植物澆水",
+        "🏗️ 安全第一，品質至上",
+        "😎 我種的植物最漂亮",
+        "🌙 加班費記得多算一點",
+        "🎵 邊唱歌邊工作最開心"
     ];
 
     let PLANTS = [];
@@ -278,6 +327,26 @@
     let workerTalks = [];
     let selectedPlantId = null;
     let cellSize = { w: 0, h: 0 };
+
+    // 噴飛語錄函數（從指定位置噴出）
+    function flyTalk(text, x, y) {
+        const div = document.createElement('div');
+        div.className = 'fly-talk';
+        div.textContent = '💬 ' + text;
+        div.style.left = (x - 50) + 'px';
+        div.style.top = (y - 30) + 'px';
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 1000);
+    }
+
+    function getRandomTalk() {
+        return WORKER_TALKS[Math.floor(Math.random() * WORKER_TALKS.length)];
+    }
+
+    function refreshWorkerTalk(index) {
+        workerTalks[index] = getRandomTalk();
+        renderWorkers();
+    }
 
     function loadData() {
         area = parseInt(localStorage.getItem('greenwall_area')) || 10;
@@ -320,15 +389,6 @@
         renderWorkers();
     }
 
-    function getRandomTalk() {
-        return WORKER_TALKS[Math.floor(Math.random() * WORKER_TALKS.length)];
-    }
-
-    function refreshWorkerTalk(index) {
-        workerTalks[index] = getRandomTalk();
-        renderWorkers();
-    }
-
     function renderPlantsSummary() {
         const container = document.getElementById('plantList');
         container.innerHTML = '';
@@ -346,6 +406,13 @@
                 selectedPlantId = i;
                 document.getElementById('selectedTool').innerHTML = `🎨 目前選擇：${p.name} <span style="display:inline-block;width:20px;height:20px;background:${p.color};border-radius:20px;vertical-align:middle;"></span>`;
                 renderPlantsSummary();
+                
+                // 點擊色塊也噴語錄
+                const rect = div.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const randomTalk = getRandomTalk();
+                flyTalk(`🎨 選擇 ${p.name}！ ${randomTalk}`, centerX, centerY);
             });
             container.appendChild(div);
         }
@@ -378,7 +445,11 @@
         document.querySelectorAll('.worker-talk').forEach(el => {
             el.addEventListener('click', (e) => {
                 e.stopPropagation();
+                const rect = el.getBoundingClientRect();
+                const talkX = rect.left + rect.width / 2;
+                const talkY = rect.top + rect.height / 2;
                 refreshWorkerTalk(parseInt(el.dataset.idx));
+                flyTalk(`🔄 換一句：${workerTalks[parseInt(el.dataset.idx)]}`, talkX, talkY);
             });
         });
     }
@@ -401,7 +472,6 @@
             for (let col = 0; col < cols; col++) {
                 const idx = row * cols + col;
                 if (idx >= totalPlants) {
-                    // 超出範圍的格子畫灰色（不參與點擊）
                     ctx.fillStyle = "#d0d0c0";
                     ctx.fillRect(col * cellSize.w, row * cellSize.h, cellSize.w, cellSize.h);
                     continue;
@@ -428,7 +498,7 @@
         document.getElementById('completeBtn').disabled = (finishedCount < totalPlants);
     }
 
-    // 修正：根據點擊座標正確計算格子索引
+    // 核心：點擊格子塗色 + 強制噴發語錄
     function handleCanvasClick(e) {
         if (!canvas) return;
         
@@ -449,7 +519,6 @@
         let canvasX = (clientX - rect.left) * scaleX;
         let canvasY = (clientY - rect.top) * scaleY;
         
-        // 邊界檢查
         if (canvasX < 0) canvasX = 0;
         if (canvasY < 0) canvasY = 0;
         if (canvasX > canvas.width) canvasX = canvas.width;
@@ -458,41 +527,31 @@
         const col = Math.floor(canvasX / cellSize.w);
         const row = Math.floor(canvasY / cellSize.h);
         
-        // 確保 col 和 row 在有效範圍內
         if (col < 0 || col >= cols) return;
         if (row < 0 || row >= rows) return;
         
         const idx = row * cols + col;
         
-        // 檢查索引是否在有效範圍內（不能超出 totalPlants）
         if (idx >= 0 && idx < totalPlants && selectedPlantId !== null) {
             const selectedPlant = PLANTS[selectedPlantId];
+            const wasEmpty = !gridColors[idx];
             gridColors[idx] = selectedPlant.color;
             updateProgressAndButton();
             
-            // 隨機噴飛語錄
-            if (workers.length > 0 && Math.random() > 0.7) {
+            // 每次點擊都噴發語錄（從點擊位置）
+            let talk = "";
+            if (workers.length > 0) {
                 const randomIdx = Math.floor(Math.random() * workers.length);
-                const talk = workerTalks[randomIdx];
-                const flyDiv = document.createElement('div');
-                flyDiv.className = 'fly-talk';
-                flyDiv.textContent = '💬 ' + talk;
-                flyDiv.style.left = (clientX - 50) + 'px';
-                flyDiv.style.top = (clientY - 30) + 'px';
-                flyDiv.style.position = 'fixed';
-                flyDiv.style.background = '#ffe8c0';
-                flyDiv.style.color = '#5a1e00';
-                flyDiv.style.padding = '4px 12px';
-                flyDiv.style.borderRadius = '30px';
-                flyDiv.style.fontSize = '0.8rem';
-                flyDiv.style.fontWeight = 'bold';
-                flyDiv.style.whiteSpace = 'nowrap';
-                flyDiv.style.zIndex = '1000';
-                flyDiv.style.pointerEvents = 'none';
-                flyDiv.style.animation = 'flyAway 1s ease-out forwards';
-                document.body.appendChild(flyDiv);
-                setTimeout(() => flyDiv.remove(), 1000);
-                setTimeout(() => refreshWorkerTalk(randomIdx), 200);
+                talk = workerTalks[randomIdx];
+                setTimeout(() => refreshWorkerTalk(randomIdx), 300);
+            } else {
+                talk = "快找夥伴來幫忙！";
+            }
+            
+            if (wasEmpty) {
+                flyTalk(`🌱 種下 ${selectedPlant.name}！ ${talk}`, clientX, clientY);
+            } else {
+                flyTalk(`🎨 換成 ${selectedPlant.name}！ ${talk}`, clientX, clientY);
             }
         }
     }
@@ -501,6 +560,9 @@
         if (confirm('清除所有顏色，重新設計？')) {
             initGridColors();
             updateProgressAndButton();
+            // 重置完成後噴語錄
+            const rect = document.getElementById('resetBtn').getBoundingClientRect();
+            flyTalk("🔄 已清除所有顏色，重新開始設計！", rect.left + rect.width/2, rect.top + rect.height/2);
         }
     }
 
@@ -513,22 +575,22 @@
                     colorPool.push(PLANTS[i].color);
                 }
             }
-            // 隨機打亂
             for (let i = colorPool.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [colorPool[i], colorPool[j]] = [colorPool[j], colorPool[i]];
             }
-            // 填滿所有格子
             for (let i = 0; i < totalPlants && i < colorPool.length; i++) {
                 gridColors[i] = colorPool[i];
             }
-            // 如果顏色不夠，用第一種植物補滿
             if (colorPool.length < totalPlants && PLANTS.length > 0) {
                 for (let i = colorPool.length; i < totalPlants; i++) {
                     gridColors[i] = PLANTS[0].color;
                 }
             }
             updateProgressAndButton();
+            
+            const rect = document.getElementById('autoFillBtn').getBoundingClientRect();
+            flyTalk("🎲 亂數填滿完成！來看看成品吧～", rect.left + rect.width/2, rect.top + rect.height/2);
         }
     }
 
@@ -539,7 +601,13 @@
         }
         localStorage.setItem('greenwall_construction_done', 'true');
         localStorage.setItem('greenwall_grid_colors', JSON.stringify(gridColors));
-        window.location.href = 'step5_carbon.html';
+        
+        const rect = document.getElementById('completeBtn').getBoundingClientRect();
+        flyTalk("🎉 設計完成！前往驗收與碳排評估！", rect.left + rect.width/2, rect.top + rect.height/2);
+        
+        setTimeout(() => {
+            window.location.href = 'step5_carbon.html';
+        }, 500);
     }
 
     function initCanvas() {
@@ -548,16 +616,26 @@
         canvas.height = 400;
         ctx = canvas.getContext('2d');
         
-        // 計算網格：使網格總數 >= totalPlants，但確保所有格子都能被點擊
+        // 動態調整網格：面積越大，網格越多，但保持畫布比例
         cols = Math.ceil(Math.sqrt(totalPlants));
         rows = Math.ceil(totalPlants / cols);
+        
+        // 限制最大行列數，避免格子太小（最小格子約 15px）
+        const maxGrid = 40;
+        if (cols > maxGrid) {
+            cols = maxGrid;
+            rows = Math.ceil(totalPlants / cols);
+        }
+        if (rows > maxGrid) {
+            rows = maxGrid;
+            cols = Math.ceil(totalPlants / rows);
+        }
         
         console.log(`點陣圖: ${totalPlants} 株 → ${cols} 列 x ${rows} 行 = ${cols * rows} 格`);
         
         initGridColors();
         updateProgressAndButton();
         
-        // 移除舊監聽，避免重複綁定
         canvas.removeEventListener('click', handleCanvasClick);
         canvas.removeEventListener('touchstart', handleCanvasClick);
         canvas.addEventListener('click', handleCanvasClick);
@@ -589,15 +667,6 @@
     document.getElementById('resetBtn').onclick = resetAll;
     document.getElementById('autoFillBtn').onclick = autoFill;
     document.getElementById('completeBtn').onclick = completeAndNext;
-    
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes flyAway {
-            0% { opacity: 1; transform: translate(0, 0) scale(1); }
-            100% { opacity: 0; transform: translate(30px, -60px) scale(0.5); }
-        }
-    `;
-    document.head.appendChild(style);
 </script>
 </body>
 </html>
