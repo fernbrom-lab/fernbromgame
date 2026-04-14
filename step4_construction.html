@@ -293,7 +293,6 @@
         workers = JSON.parse(localStorage.getItem('greenwall_workers') || '[]');
         workerCount = workers.length;
         
-        // 讀取植物資料（從第二步儲存的資料）
         const storedPlants = localStorage.getItem('greenwall_plants_data');
         if (storedPlants) {
             const plantData = JSON.parse(storedPlants);
@@ -304,7 +303,6 @@
                 quantity: p.quantity || quantities[idx]
             }));
         } else {
-            // 預設四種植物
             PLANTS = [
                 { id: 0, name: "綠葉鵝掌藤", color: "#5b8c5a", quantity: quantities[0] || 0 },
                 { id: 1, name: "蔓榕", color: "#3a5a2a", quantity: quantities[1] || 0 },
@@ -389,7 +387,6 @@
         });
     }
 
-    // 根據植物比例建立顏色池（亂數產生植生牆面）
     function buildColorPool() {
         const colorPool = [];
         for (let i = 0; i < PLANTS.length; i++) {
@@ -398,7 +395,6 @@
                 colorPool.push(PLANTS[i].color);
             }
         }
-        // 隨機打亂顏色池（讓植生牆更自然）
         for (let i = colorPool.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [colorPool[i], colorPool[j]] = [colorPool[j], colorPool[i]];
@@ -452,18 +448,31 @@
         document.getElementById('completeBtn').disabled = (finishedPixels < totalPlants);
     }
 
-    // 由下往上取得下一個要種植的索引
-    function getNextUnfinishedIndex() {
-        // 由下往上：從最後一行開始找
+    // 核心修正：由下往上種植（不需要特別處理順序，因為 finishedPixels 是連續的）
+    // 但為了讓視覺上是由下往上，我們需要重新排列索引順序
+    // 讓較下面的格子索引較小，這樣填滿時就會先填下面
+    
+    function reorderIndicesBottomUp() {
+        // 重新排列 gridColors 的順序，讓底部的格子排在前面
+        const newOrder = [];
         for (let row = rows - 1; row >= 0; row--) {
             for (let col = 0; col < cols; col++) {
                 const idx = row * cols + col;
-                if (idx < totalPlants && idx >= finishedPixels) {
-                    return idx;
+                if (idx < totalPlants) {
+                    newOrder.push(idx);
                 }
             }
         }
-        return finishedPixels;
+        
+        // 重新排列 gridColors
+        const newGridColors = [];
+        for (let i = 0; i < newOrder.length; i++) {
+            newGridColors.push(gridColors[newOrder[i]]);
+        }
+        gridColors = newGridColors;
+        
+        // 重新繪製
+        drawPixelWall();
     }
 
     function handleCanvasClick(e) {
@@ -479,7 +488,6 @@
             clientY = e.clientY;
         }
         
-        // 每次點擊完成的人數倍率個方格（由下往上）
         let increment = Math.max(1, workerCount);
         let newFinished = Math.min(totalPlants, finishedPixels + increment);
         finishedPixels = newFinished;
@@ -498,6 +506,7 @@
         if (confirm('確定要重新施工嗎？目前進度將會歸零。')) {
             finishedPixels = 0;
             initGridColors();
+            reorderIndicesBottomUp();  // 重新排列為由下往上順序
             updateProgress();
             for (let i = 0; i < workerCount; i++) workerTalks[i] = getRandomTalk();
             renderWorkers();
@@ -521,13 +530,13 @@
         canvas.height = 400;
         ctx = canvas.getContext('2d');
         
-        // 計算網格：盡量接近正方形
         cols = Math.ceil(Math.sqrt(totalPlants));
         rows = Math.ceil(totalPlants / cols);
         
         console.log(`點陣圖設定: ${totalPlants} 株 → ${cols} x ${rows} = ${cols * rows} 格`);
         
         initGridColors();
+        reorderIndicesBottomUp();  // 關鍵：重新排列為由下往上的順序
         if (finishedPixels > totalPlants) finishedPixels = totalPlants;
         updateProgress();
         
