@@ -133,16 +133,28 @@
             background: #8aaa6e;
             box-shadow: 0 4px 0 #6a8a4e;
         }
+        .green-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 28px;
+            background: #88cc66;
+            color: white;
+            border-radius: 60px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: 0.1s;
+            box-shadow: 0 4px 0 #558844;
+        }
+        .green-link:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #558844;
+        }
         footer {
             text-align: center;
             font-size: 0.7rem;
             color: #8aaa6e;
             margin-top: 24px;
-        }
-        .medal-icon {
-            font-size: 3rem;
-            display: inline-block;
-            margin: 0 5px;
         }
         @media (max-width: 600px) {
             .card { padding: 20px; }
@@ -201,6 +213,12 @@
         <button id="restartBtn" class="btn-secondary">🌱 再玩一次</button>
         <button id="certificateBtn">📸 拍張獎狀</button>
     </div>
+
+    <!-- 🌍 前往綠色宇宙的連結 🌟 -->
+    <a href="level1.html" class="green-link">
+        🌍 前往綠色宇宙 🌟
+    </a>
+
     <footer>🌱 你為地球種下了一片綠色，謝謝你！</footer>
 </div>
 
@@ -246,24 +264,20 @@
     }
 
     function calculateEarthPoints() {
-        let points = 60; // 基礎分
+        let points = 60;
         
-        // 植物多樣性加分
         const plantTypesUsed = quantities.filter(q => q > 0).length;
         if (plantTypesUsed >= 4) points += 20;
         else if (plantTypesUsed >= 3) points += 15;
         else if (plantTypesUsed >= 2) points += 10;
         
-        // 施工完成度
         const coloredCount = gridColors ? gridColors.filter(c => c !== null).length : 0;
         if (coloredCount >= totalPlants) points += 20;
         else points += Math.floor((coloredCount / totalPlants) * 20);
         
-        // 團隊人數加分
         if (workerCount >= 5) points += 10;
         else if (workerCount >= 3) points += 5;
         
-        // 面積大小加分（越大越辛苦）
         if (area >= 15) points += 10;
         else if (area >= 10) points += 5;
         
