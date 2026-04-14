@@ -33,6 +33,56 @@
             margin-top: 0;
             font-size: 1.6rem;
         }
+        /* 知識教育區塊 */
+        .knowledge-section {
+            background: #e8f0e0;
+            border-radius: 28px;
+            padding: 20px;
+            margin: 20px 0 24px 0;
+            border: 1px solid #c8d8b0;
+        }
+        .knowledge-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2b5e2f;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .knowledge-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+        }
+        .knowledge-card {
+            flex: 1;
+            min-width: 180px;
+            background: #fffdf7;
+            border-radius: 20px;
+            padding: 12px 16px;
+            border-left: 4px solid #5a8f4c;
+        }
+        .knowledge-card h4 {
+            color: #3d5a38;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+        .knowledge-card p {
+            font-size: 0.75rem;
+            color: #5a6e4a;
+            line-height: 1.4;
+        }
+        .knowledge-fact {
+            background: #d9e6c0;
+            border-radius: 20px;
+            padding: 10px 16px;
+            margin-top: 12px;
+            font-size: 0.75rem;
+            color: #2d4a1e;
+            text-align: center;
+        }
         .summary {
             background: #e0f0da;
             border-radius: 28px;
@@ -53,7 +103,6 @@
             color: #a35100;
             margin: 20px 0;
         }
-        /* 2x2 網格排版 */
         .plant-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -76,19 +125,11 @@
             transform: translateY(-3px);
             box-shadow: 0 12px 24px rgba(0,0,0,0.12);
         }
-        .plant-color-block {
-            width: 80px;
-            height: 80px;
-            border-radius: 60px;
-            margin: 0 auto 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border: 2px solid #fff;
-            outline: 1px solid #cddba6;
-        }
         .plant-name {
             font-weight: bold;
             font-size: 1.2rem;
             margin: 8px 0 4px;
+            color: #2b5e2f;
         }
         .plant-trait {
             font-size: 0.75rem;
@@ -227,6 +268,9 @@
             .plant-grid {
                 grid-template-columns: 1fr;
             }
+            .knowledge-content {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -234,17 +278,43 @@
 <div class="card">
     <h1>🌱 第二步 · 選擇植物與數量（養護時間評估）</h1>
 
+    <!-- 植物知識教育區塊 -->
+    <div class="knowledge-section">
+        <div class="knowledge-title">
+            📚 植物小百科｜為什麼植生牆要選對植物？
+        </div>
+        <div class="knowledge-content">
+            <div class="knowledge-card">
+                <h4>🌿 固碳能力</h4>
+                <p>植物透過光合作用吸收二氧化碳，不同植物的固碳效率差異可達30%以上。葉片厚實、生長快速的品種固碳效果更佳。</p>
+            </div>
+            <div class="knowledge-card">
+                <h4>💧 水分管理</h4>
+                <p>植生牆的給水系統需要配合植物習性。需水量高的植物適合配置在給水充足區域，耐旱植物則可放在邊角。</p>
+            </div>
+            <div class="knowledge-card">
+                <h4>☀️ 光照需求</h4>
+                <p>室內植生牆需選耐陰品種（如粗勒草），室外則可選全日照植物。光照不足會導致徒長、葉色變淡。</p>
+            </div>
+            <div class="knowledge-card">
+                <h4>🕰️ 養護週期</h4>
+                <p>每種植物都有不同的適應期與穩定期。了解植物特性，才能制定合理的養護計畫，降低長期維護成本。</p>
+            </div>
+        </div>
+        <div class="knowledge-fact">
+            🌟 你知道嗎？一面10平方公尺的植生牆，每年約可吸收 30-50 公斤的二氧化碳，相當於 2-3 棵成年樹木的固碳量！
+        </div>
+    </div>
+
     <div id="mainContent"></div>
 </div>
 
 <script>
-    // 四種植物 — 完整養護時間評估邏輯 (半年 / 1年 / 2年)
+    // 四種植物 — 完整養護時間評估邏輯
     const PLANTS = [
         { 
             id: 0, 
             name: "綠葉鵝掌藤", 
-            color: "#5b8c5a",
-            colorName: "綠",
             trait: "室內外均可・超級好照顧",
             suitableEnv: "室內／室外",
             waterNeed: "中等，土乾澆透",
@@ -262,8 +332,6 @@
         { 
             id: 1, 
             name: "蔓榕", 
-            color: "#3a5a2a",
-            colorName: "深綠",
             trait: "只能室外・不能缺水",
             suitableEnv: "僅室外",
             waterNeed: "高，需常保濕潤",
@@ -281,8 +349,6 @@
         { 
             id: 2, 
             name: "腎蕨", 
-            color: "#9bc48e",
-            colorName: "淡淺綠",
             trait: "室內外均可・初期難照顧要時間適應",
             suitableEnv: "室內／室外",
             waterNeed: "中等偏高，喜歡濕度",
@@ -300,8 +366,6 @@
         { 
             id: 3, 
             name: "粗勒草", 
-            color: "#e8a0b4",
-            colorName: "粉紅",
             trait: "只能室內・注意給水不能過多",
             suitableEnv: "僅室內",
             waterNeed: "低，土乾再澆",
@@ -419,8 +483,6 @@
         localStorage.setItem('greenwall_plants_data', JSON.stringify(PLANTS.map((p, i) => ({
             name: p.name,
             trait: p.trait,
-            color: p.color,
-            colorName: p.colorName,
             suitableEnv: p.suitableEnv,
             careDifficulty: p.careDifficulty,
             establishmentPhase: p.establishmentPhase,
@@ -452,8 +514,7 @@
             const careHtml = p.care.map(c => `<div>${c}</div>`).join('');
             plantsHtml += `
                 <div class="plant-card">
-                    <div class="plant-color-block" style="background:${p.color};"></div>
-                    <div class="plant-name">${p.name} <span style="font-size:0.7rem;">(${p.colorName})</span></div>
+                    <div class="plant-name">${p.name}</div>
                     <div class="plant-trait">✨ ${p.trait}</div>
                     <div class="care-list">
                         ${careHtml}
