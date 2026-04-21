@@ -1,0 +1,37 @@
+<!-- ========== game.html（轉單最強） ========== -->
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>踩雷模擬器</title>
+<style>
+body{background:#111;color:#fff;text-align:center;font-family:sans-serif}
+button{margin:5px;padding:10px}
+</style>
+</head>
+<body>
+
+<h1>你會不會做出失敗的植生牆？</h1>
+
+<p>選擇：</p>
+<button onclick="score-=30">亂選植物</button>
+<button onclick="score-=30">人工澆水</button>
+<button onclick="score-=20">低預算</button>
+<button onclick="score+=10">找專業</button>
+
+<br><br>
+<button onclick="result()">看結果</button>
+
+<p id="r"></p>
+
+<script>
+let score=100;
+function result(){
+ document.getElementById('r').innerHTML=
+ '成功率 '+score+'%<br><br>多數人最後都失敗<br><br><a href="truth.html" style="color:lightgreen">為什麼？</a>';
+}
+</script>
+
+</body>
+</html>
