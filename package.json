@@ -1,13 +1,8 @@
-// ===============================
-// package.json
-// ===============================
-
-/*
 {
   "name": "lobster-generator",
   "version": "1.0.0",
+  "type": "commonjs",
   "scripts": {
     "generate": "node lobster-generator.js"
   }
 }
-*/
