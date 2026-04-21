@@ -1,14 +1,15 @@
+!-- ========== carbon.html（未來成本） ========== -->
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>碳測試</title>
+<title>碳問題</title>
 </head>
 <body style="background:#0c4a6e;color:#fff;text-align:center;font-family:sans-serif">
 
-<h1>你每天排多少碳？</h1>
-<input id="km" placeholder="開車公里數">
+<h1>這不只是環保問題</h1>
+<input id="km" placeholder="每天開車公里數">
 <button onclick="c()">計算</button>
 <p id="r"></p>
 
@@ -16,7 +17,7 @@
 function c(){
  let v=document.getElementById('km').value*0.2;
  document.getElementById('r').innerHTML=
- '你一年約 '+(v*365)+' kg CO₂<br><br>未來企業都要揭露<br><br><a href="truth.html" style="color:yellow">這代表什麼？</a>';
+ '一年 '+(v*365)+' kg CO₂<br><br>未來這會變成成本與壓力<br><br><a href="truth.html" style="color:yellow">這代表什麼？</a>';
 }
 </script>
 
