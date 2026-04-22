@@ -222,73 +222,66 @@
     <!-- 進度與結果 -->
     <div id="progressArea" class="progress-area" style="display: none;"></div>
     <div id="resultArea"></div>
-    <footer>🌱 角色台詞皆為內建經典語錄，維持蕨積宇宙一致風格。PNG頭像可替換為你的角色設計。</footer>
+    <footer>🌱 角色台詞皆為內建經典語錄，維持蕨積宇宙一致風格。</footer>
 </div>
 
 <script>
     // ---------- 角色資料庫 (內建固定台詞，維持形象) ----------
-    // 角色資料庫 (內建固定台詞，維持形象)
-const ROLES = [
-    {
-        id: "fern",
-        name: "阿蕨",
-        tag: "理性・解題專家",
-        avatar: "fern.png",      // ← 這裡放你的圖片檔名
-        line: "碳盤查不是為了罪惡感，是為了知道下一步往哪走。"
-    },
-    {
-        id: "brom",
-        name: "小積",
-        tag: "厭世・執行擔當",
-        avatar: "brom.png",      // ← 這裡放你的圖片檔名
-        line: "講人話，我幫你做到。"
-    },
-    {
-        id: "mons",
-        name: "小龜",
-        tag: "好奇・冒險王",
-        avatar: "mons.png",      // ← 這裡放你的圖片檔名
-        line: "新路線？我第一個去踩點！"
-    },
-    {
-        id: "sans",
-        name: "虎妹",
-        tag: "夜貓・健身教練",
-        avatar: "sans.png",      // ← 這裡放你的圖片檔名
-        line: "半夜運動最安靜，要跟嗎？"
-    },
-    {
-        id: "succ",
-        name: "肉肉",
-        tag: "佛系・儲水大師",
-        avatar: "succ.png",      // ← 這裡放你的圖片檔名
-        line: "慢慢來，水要存，心情也要。"
-    },
-    {
-        id: "ficus",
-        name: "琴哥",
-        tag: "文青・優雅擔當",
-        avatar: "ficus.png",      // ← 這裡放你的圖片檔名
-        line: "今天想聽巴哈，還是蕭邦？"
-    },
-    {
-        id: "till",
-        name: "空空",
-        tag: "自由・外派特派",
-        avatar: "till.png",      // ← 這裡放你的圖片檔名
-        line: "不用土壤，哪裡都是我的座位。"
-    }
-];
+    // 注意：圖片檔名請根據你實際上傳的 PNG 檔名修改
+    const ROLES = [
+        {
+            id: "fern",
+            name: "阿蕨",
+            tag: "理性・解題專家",
+            avatar: "fern.png",      // ← 你的圖片檔名
+            line: "碳盤查不是為了罪惡感，是為了知道下一步往哪走。"
+        },
+        {
+            id: "brom",
+            name: "小積",
+            tag: "厭世・執行擔當",
+            avatar: "brom.png",      // ← 你的圖片檔名
+            line: "講人話，我幫你做到。"
+        },
+        {
+            id: "turtle",
+            name: "小龜",
+            tag: "好奇・冒險王",
+            avatar: "turtle.png",    // ← 你的圖片檔名
+            line: "新路線？我第一個去踩點！"
+        },
+        {
+            id: "tiger",
+            name: "虎妹",
+            tag: "夜貓・健身教練",
+            avatar: "tiger.png",     // ← 你的圖片檔名
+            line: "半夜運動最安靜，要跟嗎？"
+        },
+        {
+            id: "succu",
+            name: "肉肉",
+            tag: "佛系・儲水大師",
+            avatar: "succu.png",     // ← 你的圖片檔名
+            line: "慢慢來，水要存，心情也要。"
+        },
+        {
+            id: "fiddle",
+            name: "琴哥",
+            tag: "文青・優雅擔當",
+            avatar: "fiddle.png",    // ← 你的圖片檔名
+            line: "今天想聽巴哈，還是蕭邦？"
+        },
+        {
+            id: "air",
+            name: "空空",
+            tag: "自由・外派特派",
+            avatar: "air.png",       // ← 你的圖片檔名
+            line: "不用土壤，哪裡都是我的座位。"
+        }
+    ];
 
-    // 儲存目前選中的角色 (物件陣列，包含id, name, line)
+    // 儲存目前選中的角色
     let selectedRoles = [];
-
-    // 生成占位 PNG 圖片 URL (使用 placeholder 產生帶文字的背景圖，實際上是PNG格式)
-    // 你可以把這些圖片換成真實的角色 PNG 檔，只需修改 img.src 路徑即可。
-  // 角色頭像圖片路徑 (使用你指定的檔名)
-    function getAvatarUrl(role) {
-    return role.avatar;
-      }
 
     // 渲染角色卡片
     function renderRoles() {
@@ -300,9 +293,13 @@ const ROLES = [
             card.dataset.roleId = role.id;
 
             const img = document.createElement("img");
-            img.src = getAvatarUrl(role);
+            img.src = role.avatar;
             img.alt = role.name;
             img.className = "role-avatar";
+            img.onerror = function() {
+                this.src = "https://via.placeholder.com/90x90/cccccc/ffffff?text=" + role.name;
+                this.onerror = null;
+            };
 
             const nameSpan = document.createElement("div");
             nameSpan.className = "role-name";
@@ -321,13 +318,10 @@ const ROLES = [
             card.appendChild(tagSpan);
             card.appendChild(lineSpan);
 
-            // 點擊切換選中狀態
             card.addEventListener("click", (e) => {
-                // 避免點擊內部冒泡干擾
                 e.stopPropagation();
                 const isSelected = card.classList.contains("selected");
                 if (!isSelected) {
-                    // 加入選中
                     card.classList.add("selected");
                     selectedRoles.push({
                         id: role.id,
@@ -335,12 +329,10 @@ const ROLES = [
                         line: role.line
                     });
                 } else {
-                    // 取消選中
                     card.classList.remove("selected");
                     selectedRoles = selectedRoles.filter(r => r.id !== role.id);
                 }
-                // 可以加個小回饋（可選）
-                console.log("目前選中角色:", selectedRoles.map(r=>r.name));
+                console.log("目前選中角色:", selectedRoles.map(r => r.name));
             });
 
             container.appendChild(card);
@@ -348,7 +340,7 @@ const ROLES = [
     }
 
     // 秒數選擇邏輯
-    let currentDuration = 30; // 預設30秒
+    let currentDuration = 30;
     function initDurationSelector() {
         const btns = document.querySelectorAll("[data-duration]");
         btns.forEach(btn => {
@@ -361,78 +353,68 @@ const ROLES = [
     }
 
     // 生成影片的主要函式
-    // 生成影片的主要函式 (支援 HTTP Basic Auth)
-async function generateVideo() {
-    const scene = document.getElementById("sceneSelect").value;
-    const outline = document.getElementById("outline").value.trim();
-    if (selectedRoles.length === 0) {
-        alert("請至少選擇一位角色來演出 🌿");
-        return;
-    }
-    if (!outline) {
-        alert("請填寫劇情大綱，讓AI知道影片內容方向～");
-        return;
-    }
-
-    const progressDiv = document.getElementById("progressArea");
-    const resultDiv = document.getElementById("resultArea");
-    progressDiv.style.display = "block";
-    progressDiv.innerHTML = "⏳ 正在召喚AI導演，影片生成中（可能需要1~3分鐘）...";
-    resultDiv.innerHTML = "";
-
-    const payload = {
-        roles: selectedRoles,
-        scene: scene,
-        outline: outline,
-        duration: currentDuration
-    };
-
-    try {
-        // 使用相對路徑 (因為前後端都在同一個 Render 服務)
-        const API_URL = "/api/generate-video";
+    async function generateVideo() {
+        const scene = document.getElementById("sceneSelect").value;
+        const outline = document.getElementById("outline").value.trim();
         
-        // 加入帳號密碼 (從瀏覽器彈窗或固定寫入)
-        // 方法1: 讓瀏覽器彈出登入視窗
-        // 方法2: 直接寫入 (較不安全，但方便)
-        // 這裡示範從 sessionStorage 讀取或讓瀏覽器處理
-        
-        const response = await fetch(API_URL, {
-            method: "POST",
-            headers: { 
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(payload),
-            credentials: "include"  // 重要: 讓瀏覽器記住認證
-        });
-
-        if (response.status === 401) {
-            // 未授權，讓瀏覽器彈出登入視窗
-            progressDiv.innerHTML = "❌ 請重新整理頁面並輸入帳號密碼";
+        if (selectedRoles.length === 0) {
+            alert("請至少選擇一位角色來演出 🌿");
+            return;
+        }
+        if (!outline) {
+            alert("請填寫劇情大綱，讓AI知道影片內容方向～");
             return;
         }
 
-        if (!response.ok) {
-            const errText = await response.text();
-            throw new Error(`API 錯誤 (${response.status}): ${errText}`);
-        }
+        const progressDiv = document.getElementById("progressArea");
+        const resultDiv = document.getElementById("resultArea");
+        progressDiv.style.display = "block";
+        progressDiv.innerHTML = "⏳ 正在召喚AI導演，影片生成中（可能需要1~3分鐘）...";
+        resultDiv.innerHTML = "";
 
-        const data = await response.json();
-        if (data.videoUrl) {
-            progressDiv.innerHTML = "✅ 影片生成成功！";
-            resultDiv.innerHTML = `
-                <video src="${data.videoUrl}" controls autoplay loop playsinline style="width:100%; max-width:400px; display:block; margin:0 auto;"></video>
-                <div style="text-align:center; margin-top:16px;">
-                    <a href="${data.videoUrl}" download="zepisode_${Date.now()}.mp4" class="download-link">⬇️ 下載影片 (MP4)</a>
-                </div>
-            `;
-        } else {
-            throw new Error("後端未回傳 videoUrl");
+        const payload = {
+            roles: selectedRoles,
+            scene: scene,
+            outline: outline,
+            duration: currentDuration
+        };
+
+        try {
+            const API_URL = "/api/generate-video";
+            const response = await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+                credentials: "include"
+            });
+
+            if (response.status === 401) {
+                progressDiv.innerHTML = "❌ 請重新整理頁面並輸入帳號密碼";
+                return;
+            }
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`API 錯誤 (${response.status}): ${errText}`);
+            }
+
+            const data = await response.json();
+            if (data.videoUrl) {
+                progressDiv.innerHTML = "✅ 影片生成成功！";
+                resultDiv.innerHTML = `
+                    <video src="${data.videoUrl}" controls autoplay loop playsinline style="width:100%; max-width:400px; display:block; margin:0 auto;"></video>
+                    <div style="text-align:center; margin-top:16px;">
+                        <a href="${data.videoUrl}" download="zepisode_${Date.now()}.mp4" class="download-link">⬇️ 下載影片 (MP4)</a>
+                    </div>
+                `;
+            } else {
+                throw new Error("後端未回傳 videoUrl");
+            }
+        } catch (error) {
+            console.error(error);
+            progressDiv.innerHTML = `❌ 生成失敗：${error.message}<br>請確認後端服務已啟動，並檢查 API 金鑰設定。`;
         }
-    } catch (error) {
-        console.error(error);
-        progressDiv.innerHTML = `❌ 生成失敗：${error.message}<br>請確認後端服務已啟動，並檢查 API 金鑰設定。`;
     }
-}
 
     // 綁定生成按鈕
     function bindEvents() {
