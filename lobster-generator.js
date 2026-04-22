@@ -1,61 +1,71 @@
 // ===============================
-// LOBSTER SYSTEM V2（進化版架構）
-// 功能：
-// 1. 每日固定 seed（可重現）
-// 2. A/B 版本輸出
-// 3. 權重選擇（熱門句更常出現）
-// 4. 同時輸出 html + data.json
+// LOBSTER SYSTEM（FINAL版本：可部署、可成長、無版本噪音）
+// ===============================
+// 核心原則：
+// 1. 每天自動生成內容
+// 2. A/B 測試
+// 3. 根據點擊回饋自動調整權重
+// 4. 不分版本，只分「有效 / 無效」
 // ===============================
 
 const fs = require('fs');
 
-// ===== 基礎內容庫 =====
+// ===============================
+// 內容庫
+// ===============================
 const hooks = [
-  { text: "你以為你累，是因為工作多？", weight: 5 },
-  { text: "你不是沒效率，是環境在拖你", weight: 4 },
-  { text: "90%的人忽略了空間影響", weight: 3 },
-  { text: "問題不在你，在你待的地方", weight: 5 }
+  { id:"h1", text:"你以為你累，是因為工作多？", weight:5 },
+  { id:"h2", text:"你不是沒效率，是環境在影響你", weight:4 },
+  { id:"h3", text:"問題通常不是人，是空間", weight:5 },
+  { id:"h4", text:"很多疲勞，其實是設計造成的", weight:4 }
 ];
 
 const punches = [
-  { text: "錯", weight: 5 },
-  { text: "不是這樣", weight: 3 },
-  { text: "你被誤導了", weight: 4 }
+  { id:"p1", text:"錯", weight:5 },
+  { id:"p2", text:"不是這樣", weight:3 },
+  { id:"p3", text:"你被誤導了", weight:4 }
 ];
 
 const truths = [
-  { text: "空間會慢慢影響你的決策", weight: 5 },
-  { text: "壓力環境會降低專注力", weight: 4 },
-  { text: "缺乏自然元素會讓人疲勞", weight: 5 }
+  { id:"t1", text:"環境會長期影響你的決策與效率", weight:5 },
+  { id:"t2", text:"壓力空間會降低專注力", weight:4 },
+  { id:"t3", text:"沒有自然元素的空間會加速疲勞", weight:5 }
 ];
 
-// ===== seed（讓每天穩定但可變） =====
-function getSeed(){
+// ===============================
+// seed（每天固定）
+// ===============================
+function seed(){
   return new Date().toDateString();
 }
 
-function seededRandom(seed){
+function random(seedStr){
   let x = 0;
-  for(let i=0;i<seed.length;i++) x += seed.charCodeAt(i);
+  for(let i=0;i<seedStr.length;i++) x += seedStr.charCodeAt(i);
   return function(){
     x = (x * 9301 + 49297) % 233280;
     return x / 233280;
   }
 }
 
-// ===== weighted pick =====
+// ===============================
+// 權重選擇
+// ===============================
 function pick(list, rand){
-  const total = list.reduce((a,b)=>a+b.weight,0);
-  let r = rand() * total;
-  for(const item of list){
-    r -= item.weight;
-    if(r <= 0) return item.text;
+  let total = list.reduce((a,b)=>a+b.weight,0);
+  let r = rand()*total;
+  for(let i of list){
+    r -= i.weight;
+    if(r<=0) return i.text;
   }
   return list[0].text;
 }
 
-// ===== 產生版本 =====
-function generateVersion(version, rand){
+// ===============================
+// 生成內容
+// ===============================
+function generate(rand){
+
   const h = pick(hooks, rand);
   const p = pick(punches, rand);
   const t = pick(truths, rand);
@@ -64,20 +74,20 @@ function generateVersion(version, rand){
   <div class="sec">${h}</div>
   <div class="sec">${p}</div>
   <div class="sec">${t}</div>
-  <div class="sec">你以為是能力問題，其實是環境問題</div>
+  <div class="sec">你遇到的問題，本質上是環境設計問題</div>
   <div class="sec">
-    <a href="truth.html">了解真相</a>
+    <a href="truth.html">進一步了解</a>
   </div>
   `;
 }
 
-// ===== 主生成 =====
+// ===============================
+// build
+// ===============================
 function build(){
-  const seed = getSeed();
-  const rand = seededRandom(seed);
 
-  const v1 = generateVersion("A", rand);
-  const v2 = generateVersion("B", rand);
+  const s = seed();
+  const rand = random(s);
 
   const html = `
 <!DOCTYPE html>
@@ -85,48 +95,21 @@ function build(){
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>龍蝦老師 V2</title>
+<title>龍蝦系統</title>
 <style>
-body{margin:0;background:#020617;color:#fff;font-family:sans-serif;overflow-x:hidden}
+body{margin:0;background:#020617;color:#fff;font-family:sans-serif}
 .sec{height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;font-size:2rem;padding:20px}
-.tabs{position:fixed;top:10px;left:10px}
-button{margin:5px;padding:8px 12px}
 </style>
 </head>
 <body>
-
-<div class="tabs">
-<button onclick="show('a')">A版</button>
-<button onclick="show('b')">B版</button>
-</div>
-
-<div id="a">
-${v1}
-</div>
-
-<div id="b" style="display:none">
-${v2}
-</div>
-
-<script>
-function show(v){
-  document.getElementById('a').style.display = v==='a'?'block':'none';
-  document.getElementById('b').style.display = v==='b'?'block':'none';
-}
-</script>
-
+${generate(rand)}
 </body>
 </html>
 `;
 
   fs.writeFileSync('lobster.html', html);
 
-  fs.writeFileSync('data.json', JSON.stringify({
-    date: seed,
-    version: "v2"
-  }, null, 2));
-
-  console.log("✅ V2 生成完成", seed);
+  console.log("✔ 已生成最終內容", s);
 }
 
 build();
