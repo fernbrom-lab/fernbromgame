@@ -108,6 +108,43 @@ def generate_video_with_replicate(prompt: str, duration: int) -> str:
     return output
 
 # API 端點 (需要登入)
+# 在 main.py 中加入這個新的 API 端點
+
+@app.get("/api/test-replicate")
+async def test_replicate_api():
+    """測試 Replicate API 是否正常運作"""
+    import replicate
+    import os
+    
+    try:
+        # 檢查 API Token
+        token = os.getenv("REPLICATE_API_TOKEN")
+        if not token:
+            return {
+                "success": False,
+                "error": "REPLICATE_API_TOKEN 未設定",
+                "hint": "請在 Render 的 Environment Variables 中加入 REPLICATE_API_TOKEN"
+            }
+        
+        # 測試生成一張圖片
+        output = replicate.run(
+            "black-forest-labs/flux-schnell",
+            input={"prompt": "a cute cartoon fern plant, white background"}
+        )
+        
+        image_url = output[0] if isinstance(output, list) else output
+        
+        return {
+            "success": True,
+            "message": "Replicate API 運作正常",
+            "image_url": image_url
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
 @app.post("/api/generate-video")
 async def generate_video(
     req: GenerateRequest,
