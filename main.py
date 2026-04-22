@@ -7,6 +7,7 @@ from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import List
 from dotenv import load_dotenv
@@ -65,22 +66,18 @@ def build_prompt(req: GenerateRequest) -> str:
     else:
         detail_level = "詳細完整"
     
-    prompt = f"""【影片風格】
-2D動畫風格，可愛、輕鬆戲謔，角色為植物擬人，背景明亮乾淨。
+    prompt = f"""2D animation style, cute, lighthearted and playful, anthropomorphic plant characters, bright and clean background.
 
-【場景】
-{req.scene}
+Scene: {req.scene}
 
-【劇情大綱】
-{req.outline}
+Story: {req.outline}
 
-【角色對話】
+Character dialogues:
 {role_text}
 
-【影片長度】
-{req.duration}秒，{detail_level}節奏。
+Video length: {req.duration} seconds, {detail_level} pace.
 
-請生成一段符合以上描述的短動畫影片。"""
+Generate a short animated video matching the above description."""
     
     return prompt
 
@@ -122,7 +119,7 @@ def generate_video_with_cosmos(prompt: str, duration: int) -> str:
     # 步骤 2: 轮询结果
     result_url = f"{API_BASE}/predictions/{task_id}/result"
     
-    max_attempts = 60  # 最多等 2 分钟
+    max_attempts = 90  # 最多等 3 分钟
     for attempt in range(max_attempts):
         time.sleep(2)  # 每 2 秒检查一次
         
@@ -230,6 +227,10 @@ async def get_index(credentials: HTTPBasicCredentials = Depends(security)):
         return HTMLResponse(content=html_content)
     except FileNotFoundError:
         return HTMLResponse(content="<h1>index.html 不存在</h1><p>請確認檔案已上傳</p>", status_code=404)
+
+# 掛載靜態檔案（讓圖片可以被存取）
+# 注意：這必須放在所有 API 路由之後，否則會攔截 API 請求
+app.mount("/", StaticFiles(directory=".", html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn
