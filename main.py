@@ -86,26 +86,38 @@ def build_prompt(req: GenerateRequest) -> str:
     
     return prompt
 
-# 生成影片 (使用 Replicate)
-def generate_video_with_replicate(prompt: str, duration: int) -> str:
-    import replicate
-    
-    num_frames = min(duration * 24, 200)
-    
-    output = replicate.run(
-        "anotherjesse/zeroscope-v2-xl:9f747673945c62801b13b84701c783929c0ee784e4748ec062204894dda1b351",
-        input={
-            "prompt": prompt,
-            "num_frames": num_frames,
-            "width": 576,
-            "height": 1024,
-            "seed": -1,
+import requests
+import os
+
+# ... (前面的程式碼保持不變)
+
+# 生成影片 (改用 WaveSpeedAI 的 Cosmos Predict 2.5 模型)
+def generate_video_with_cosmos(prompt: str, first_image_url: str) -> str:
+    WAVESPEED_API_KEY = os.getenv("WAVESPEED_API_KEY")
+    WAVESPEED_API_URL = "https://api.wavespeed.ai/v1/generate"
+
+    headers = {
+        "Authorization": f"Bearer {WAVESPEED_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "model": "wavespeed-ai/cosmos-predict-2.5/image-to-video", # 指定模型
+        "input": {
+            "prompt": prompt,           # 你原本生成好的 prompt
+            "image_url": first_image_url # 你的角色圖片網址（例如阿蕨.png）
         }
-    )
-    
-    if isinstance(output, list) and len(output) > 0:
-        return output[0]
-    return output
+    }
+
+    try:
+        response = requests.post(WAVESPEED_API_URL, headers=headers, json=payload)
+        response.raise_for_status() # 檢查是否呼叫成功
+        result = response.json()
+        # 根據 WaveSpeedAI 的 API 回傳格式，取出影片網址
+        video_url = result["output"]["video_url"]
+        return video_url
+    except Exception as e:
+        raise Exception(f"WaveSpeedAI API 錯誤: {str(e)}")
 
 # API 端點 (需要登入)
 # 在 main.py 中加入這個新的 API 端點
