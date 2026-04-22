@@ -1,25 +1,449 @@
-<!-- ========== index.html ========== -->
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>今天誰來教你？</title>
-<style>
-body{margin:0;font-family:"Noto Sans TC";background:#0f172a;color:#fff;text-align:center}
-.wrap{padding:60px 20px}
-.card{background:#1e293b;margin:15px auto;padding:20px;border-radius:16px;max-width:300px;cursor:pointer}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>蕨積宇宙 · 短影音產生器</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', 'Noto Sans TC', sans-serif;
+        }
+        body {
+            background: #f5f7f0;
+            margin: 0;
+            padding: 24px 20px;
+            color: #2c3e2f;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 1.9rem;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        h1 small {
+            font-size: 0.9rem;
+            font-weight: normal;
+            background: #dcedbc;
+            padding: 4px 12px;
+            border-radius: 40px;
+        }
+        h2 {
+            font-size: 1.4rem;
+            border-left: 6px solid #4caf50;
+            padding-left: 16px;
+            margin: 32px 0 16px 0;
+        }
+        .role-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: flex-start;
+        }
+        .role-card {
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            width: 150px;
+            padding: 16px 8px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid #e0e0e0;
+        }
+        .role-card.selected {
+            border-color: #2e7d32;
+            background: #f0f9e8;
+            box-shadow: 0 8px 20px rgba(46,125,50,0.2);
+            transform: scale(0.98);
+        }
+        .role-avatar {
+            width: 90px;
+            height: 90px;
+            object-fit: contain;
+            margin: 0 auto 8px;
+            display: block;
+            border-radius: 50%;
+            background: #eef5e6;
+            padding: 8px;
+        }
+        .role-name {
+            font-weight: 800;
+            font-size: 1.2rem;
+            margin: 8px 0 4px;
+        }
+        .role-tag {
+            font-size: 0.7rem;
+            background: #e8f0e3;
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 20px;
+            color: #2c5e2a;
+        }
+        .role-line {
+            font-size: 0.7rem;
+            color: #4e6b3c;
+            margin-top: 10px;
+            padding: 6px;
+            background: #fef9e3;
+            border-radius: 16px;
+            font-style: italic;
+        }
+        .scene-selector, .duration-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            margin: 16px 0 8px;
+        }
+        select, .duration-btn {
+            background: white;
+            border: 1px solid #b8c9aa;
+            padding: 10px 20px;
+            border-radius: 60px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .duration-btn {
+            background: #f0f4ea;
+        }
+        .duration-btn.active {
+            background: #2e7d32;
+            color: white;
+            border-color: #2e7d32;
+        }
+        textarea {
+            width: 100%;
+            padding: 14px;
+            border-radius: 24px;
+            border: 1px solid #cbdbb6;
+            font-size: 0.95rem;
+            background: #fffef7;
+            resize: vertical;
+        }
+        .generate-btn {
+            background: #2e7d32;
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            font-size: 1.2rem;
+            border-radius: 60px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 24px 0;
+            transition: 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .generate-btn:hover {
+            background: #1b5e20;
+            transform: scale(1.01);
+        }
+        .progress-area {
+            background: #e9f0e3;
+            padding: 16px;
+            border-radius: 32px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+        video {
+            max-width: 100%;
+            border-radius: 24px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            margin-top: 16px;
+        }
+        .download-link {
+            display: inline-block;
+            margin-top: 12px;
+            background: #3c6e3f;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 40px;
+            text-decoration: none;
+        }
+        footer {
+            text-align: center;
+            margin-top: 48px;
+            font-size: 0.8rem;
+            color: #7f8c6d;
+        }
+        @media (max-width: 700px) {
+            .role-card { width: 130px; }
+            .role-avatar { width: 70px; height: 70px; }
+        }
+    </style>
 </head>
 <body>
-<div class="wrap">
-<h1>今天，誰來教你？</h1>
-<p>你以為是內容，其實是入口</p>
+<div class="container">
+    <h1>
+        🌿 蕨積宇宙 · 短影音產生器
+        <small>阿蕨 ╳ 小積 與好朋友們</small>
+    </h1>
 
-<div class="card" onclick="location.href='lobster.html'">🦞 你為什麼一直很累？</div>
-<div class="card" onclick="location.href='game.html'">🎮 你會不會做錯？</div>
-<div class="card" onclick="location.href='carbon.html'">🌍 這會不會變成本？</div>
+    <!-- 角色選擇區 -->
+    <h2>🎭 1. 誰來演出？ (可複選)</h2>
+    <div id="roleContainer" class="role-grid"></div>
 
+    <!-- 場景 -->
+    <h2>🏞️ 2. 場景</h2>
+    <div class="scene-selector">
+        <select id="sceneSelect">
+            <option value="辦公室植生牆角落">🌱 辦公室植生牆角落</option>
+            <option value="陽台療癒花園">☀️ 陽台療癒花園</option>
+            <option value="綠色會議室">📋 綠色會議室</option>
+            <option value="都市咖啡廳戶外座">☕ 都市咖啡廳戶外座</option>
+            <option value="蕨積總部大廳">🏢 蕨積總部大廳</option>
+        </select>
+    </div>
+
+    <!-- 內容大綱 -->
+    <h2>📝 3. 劇情大綱 (描述想傳達的ESG/生活觀念)</h2>
+    <textarea id="outline" rows="3" placeholder="範例：阿蕨冷靜分析碳盤查步驟，小積吐槽並提供實用生活解法，碳碳搗蛋但被電錶君抓包..."></textarea>
+
+    <!-- 影片秒數 -->
+    <h2>⏱️ 4. 影片長度</h2>
+    <div class="duration-selector" id="durationGroup">
+        <button type="button" data-duration="15" class="duration-btn">15秒</button>
+        <button type="button" data-duration="30" class="duration-btn active">30秒</button>
+        <button type="button" data-duration="60" class="duration-btn">60秒</button>
+    </div>
+
+    <!-- 生成按鈕 -->
+    <div style="text-align: center;">
+        <button id="generateBtn" class="generate-btn">🚀 生成短影音</button>
+    </div>
+
+    <!-- 進度與結果 -->
+    <div id="progressArea" class="progress-area" style="display: none;"></div>
+    <div id="resultArea"></div>
+    <footer>🌱 角色台詞皆為內建經典語錄，維持蕨積宇宙一致風格。PNG頭像可替換為你的角色設計。</footer>
 </div>
+
+<script>
+    // ---------- 角色資料庫 (內建固定台詞，維持形象) ----------
+    const ROLES = [
+        {
+            id: "fern",
+            name: "阿蕨",
+            tag: "理性・解題專家",
+            avatarPlaceholder: "蕨",   // 用於占位圖文字
+            bgColor: "3a7d44",
+            line: "碳盤查不是為了罪惡感，是為了知道下一步往哪走。"
+        },
+        {
+            id: "brom",
+            name: "小積",
+            tag: "厭世・執行擔當",
+            avatarPlaceholder: "積",
+            bgColor: "e0a82b",
+            line: "講人話，我幫你做到。"
+        },
+        {
+            id: "turtle",
+            name: "小龜",
+            tag: "好奇・冒險王",
+            avatarPlaceholder: "龜",
+            bgColor: "5ba675",
+            line: "新路線？我第一個去踩點！"
+        },
+        {
+            id: "tiger",
+            name: "虎妹",
+            tag: "夜貓・健身教練",
+            avatarPlaceholder: "虎",
+            bgColor: "8e6b3c",
+            line: "半夜運動最安靜，要跟嗎？"
+        },
+        {
+            id: "succu",
+            name: "肉肉",
+            tag: "佛系・儲水大師",
+            avatarPlaceholder: "肉",
+            bgColor: "d98c5f",
+            line: "慢慢來，水要存，心情也要。"
+        },
+        {
+            id: "fiddle",
+            name: "琴哥",
+            tag: "文青・優雅擔當",
+            avatarPlaceholder: "琴",
+            bgColor: "6f8c6d",
+            line: "今天想聽巴哈，還是蕭邦？"
+        },
+        {
+            id: "air",
+            name: "空空",
+            tag: "自由・外派特派",
+            avatarPlaceholder: "空",
+            bgColor: "b0c4b1",
+            line: "不用土壤，哪裡都是我的座位。"
+        }
+    ];
+
+    // 儲存目前選中的角色 (物件陣列，包含id, name, line)
+    let selectedRoles = [];
+
+    // 生成占位 PNG 圖片 URL (使用 placeholder 產生帶文字的背景圖，實際上是PNG格式)
+    // 你可以把這些圖片換成真實的角色 PNG 檔，只需修改 img.src 路徑即可。
+    function getAvatarUrl(role) {
+        // 如果已經準備好真實 PNG，請把這裡改成你的圖片路徑，例如 `/images/${role.id}.png`
+        // 目前用動態產生的 PNG 占位圖，清楚顯示角色代表文字，可點選。
+        const text = role.avatarPlaceholder;
+        const bg = role.bgColor;
+        // 使用 via.placeholder.com 產生的 90x90 PNG 圖片
+        return `https://via.placeholder.com/90x90/${bg}/ffffff?text=${encodeURIComponent(text)}`;
+        // 未來你只需替換成自己的 PNG 網址即可，例如：
+        // return `/avatars/${role.id}.png`;
+    }
+
+    // 渲染角色卡片
+    function renderRoles() {
+        const container = document.getElementById("roleContainer");
+        container.innerHTML = "";
+        ROLES.forEach(role => {
+            const card = document.createElement("div");
+            card.className = "role-card";
+            card.dataset.roleId = role.id;
+
+            const img = document.createElement("img");
+            img.src = getAvatarUrl(role);
+            img.alt = role.name;
+            img.className = "role-avatar";
+
+            const nameSpan = document.createElement("div");
+            nameSpan.className = "role-name";
+            nameSpan.innerText = role.name;
+
+            const tagSpan = document.createElement("div");
+            tagSpan.className = "role-tag";
+            tagSpan.innerText = role.tag;
+
+            const lineSpan = document.createElement("div");
+            lineSpan.className = "role-line";
+            lineSpan.innerText = `「${role.line}」`;
+
+            card.appendChild(img);
+            card.appendChild(nameSpan);
+            card.appendChild(tagSpan);
+            card.appendChild(lineSpan);
+
+            // 點擊切換選中狀態
+            card.addEventListener("click", (e) => {
+                // 避免點擊內部冒泡干擾
+                e.stopPropagation();
+                const isSelected = card.classList.contains("selected");
+                if (!isSelected) {
+                    // 加入選中
+                    card.classList.add("selected");
+                    selectedRoles.push({
+                        id: role.id,
+                        name: role.name,
+                        line: role.line
+                    });
+                } else {
+                    // 取消選中
+                    card.classList.remove("selected");
+                    selectedRoles = selectedRoles.filter(r => r.id !== role.id);
+                }
+                // 可以加個小回饋（可選）
+                console.log("目前選中角色:", selectedRoles.map(r=>r.name));
+            });
+
+            container.appendChild(card);
+        });
+    }
+
+    // 秒數選擇邏輯
+    let currentDuration = 30; // 預設30秒
+    function initDurationSelector() {
+        const btns = document.querySelectorAll("[data-duration]");
+        btns.forEach(btn => {
+            btn.addEventListener("click", () => {
+                btns.forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                currentDuration = parseInt(btn.dataset.duration, 10);
+            });
+        });
+    }
+
+    // 生成影片的主要函式
+    async function generateVideo() {
+        const scene = document.getElementById("sceneSelect").value;
+        const outline = document.getElementById("outline").value.trim();
+        if (selectedRoles.length === 0) {
+            alert("請至少選擇一位角色來演出 🌿");
+            return;
+        }
+        if (!outline) {
+            alert("請填寫劇情大綱，讓AI知道影片內容方向～");
+            return;
+        }
+
+        const progressDiv = document.getElementById("progressArea");
+        const resultDiv = document.getElementById("resultArea");
+        progressDiv.style.display = "block";
+        progressDiv.innerHTML = "⏳ 正在召喚AI導演，影片生成中（可能需要1~3分鐘）...";
+        resultDiv.innerHTML = "";
+
+        const payload = {
+            roles: selectedRoles,      // 包含 id, name, line
+            scene: scene,
+            outline: outline,
+            duration: currentDuration
+        };
+
+        try {
+            // 請替換成你的後端 API 位置 (預設同域下的 /api/generate-video)
+            const API_URL = "/api/generate-video";
+            const response = await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`API 錯誤 (${response.status}): ${errText}`);
+            }
+
+            const data = await response.json();
+            if (data.videoUrl) {
+                progressDiv.innerHTML = "✅ 影片生成成功！";
+                resultDiv.innerHTML = `
+                    <video src="${data.videoUrl}" controls autoplay loop playsinline style="width:100%; max-width:400px; display:block; margin:0 auto;"></video>
+                    <div style="text-align:center; margin-top:16px;">
+                        <a href="${data.videoUrl}" download="zepisode_${Date.now()}.mp4" class="download-link">⬇️ 下載影片 (MP4)</a>
+                    </div>
+                `;
+            } else {
+                throw new Error("後端未回傳 videoUrl");
+            }
+        } catch (error) {
+            console.error(error);
+            progressDiv.innerHTML = `❌ 生成失敗：${error.message}<br>請確認後端服務已啟動，並檢查 API 金鑰設定。`;
+        }
+    }
+
+    // 綁定生成按鈕
+    function bindEvents() {
+        const genBtn = document.getElementById("generateBtn");
+        genBtn.addEventListener("click", generateVideo);
+    }
+
+    // 初始化頁面
+    function init() {
+        renderRoles();
+        initDurationSelector();
+        bindEvents();
+    }
+
+    init();
+</script>
 </body>
 </html>
