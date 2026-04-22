@@ -1,28 +1,54 @@
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>龍蝦老師</title>
+<title>龍蝦老師 V2</title>
 <style>
-body{margin:0;background:#020617;color:#fff;font-family:sans-serif}
-.sec{height:100vh;display:flex;justify-content:center;align-items:center;text-align:center;padding:20px;font-size:2rem}
-.btn{padding:15px 25px;background:#ef4444;border-radius:12px;cursor:pointer}
+body{margin:0;background:#020617;color:#fff;font-family:sans-serif;overflow-x:hidden}
+.sec{height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;font-size:2rem;padding:20px}
+.tabs{position:fixed;top:10px;left:10px}
+button{margin:5px;padding:8px 12px}
 </style>
 </head>
 <body>
 
-<div class="sec">大多數辦公室，都在慢性傷害人</div>
-<div class="sec">問題不在你</div>
-<div class="sec">長時間處在壓力視覺環境</div>
-<div class="sec">你不是沒效率<br>你只是被環境消耗</div>
-<div class="sec">
-<div>
-有些公司已經開始改
-<br><br>
-<div class="btn" onclick="location.href='truth.html'">他們怎麼做？</div>
+<div class="tabs">
+<button onclick="show('a')">A版</button>
+<button onclick="show('b')">B版</button>
 </div>
+
+<div id="a">
+
+  <div class="sec">你以為你累，是因為工作多？</div>
+  <div class="sec">錯</div>
+  <div class="sec">缺乏自然元素會讓人疲勞</div>
+  <div class="sec">你以為是能力問題，其實是環境問題</div>
+  <div class="sec">
+    <a href="truth.html">了解真相</a>
+  </div>
+  
 </div>
+
+<div id="b" style="display:none">
+
+  <div class="sec">問題不在你，在你待的地方</div>
+  <div class="sec">錯</div>
+  <div class="sec">缺乏自然元素會讓人疲勞</div>
+  <div class="sec">你以為是能力問題，其實是環境問題</div>
+  <div class="sec">
+    <a href="truth.html">了解真相</a>
+  </div>
+  
+</div>
+
+<script>
+function show(v){
+  document.getElementById('a').style.display = v==='a'?'block':'none';
+  document.getElementById('b').style.display = v==='b'?'block':'none';
+}
+</script>
 
 </body>
 </html>
