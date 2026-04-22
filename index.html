@@ -227,80 +227,68 @@
 
 <script>
     // ---------- 角色資料庫 (內建固定台詞，維持形象) ----------
-    const ROLES = [
-        {
-            id: "fern",
-            name: "阿蕨",
-            tag: "理性・解題專家",
-            avatarPlaceholder: "蕨",   // 用於占位圖文字
-            bgColor: "3a7d44",
-            line: "碳盤查不是為了罪惡感，是為了知道下一步往哪走。"
-        },
-        {
-            id: "brom",
-            name: "小積",
-            tag: "厭世・執行擔當",
-            avatarPlaceholder: "積",
-            bgColor: "e0a82b",
-            line: "講人話，我幫你做到。"
-        },
-        {
-            id: "turtle",
-            name: "小龜",
-            tag: "好奇・冒險王",
-            avatarPlaceholder: "龜",
-            bgColor: "5ba675",
-            line: "新路線？我第一個去踩點！"
-        },
-        {
-            id: "tiger",
-            name: "虎妹",
-            tag: "夜貓・健身教練",
-            avatarPlaceholder: "虎",
-            bgColor: "8e6b3c",
-            line: "半夜運動最安靜，要跟嗎？"
-        },
-        {
-            id: "succu",
-            name: "肉肉",
-            tag: "佛系・儲水大師",
-            avatarPlaceholder: "肉",
-            bgColor: "d98c5f",
-            line: "慢慢來，水要存，心情也要。"
-        },
-        {
-            id: "fiddle",
-            name: "琴哥",
-            tag: "文青・優雅擔當",
-            avatarPlaceholder: "琴",
-            bgColor: "6f8c6d",
-            line: "今天想聽巴哈，還是蕭邦？"
-        },
-        {
-            id: "air",
-            name: "空空",
-            tag: "自由・外派特派",
-            avatarPlaceholder: "空",
-            bgColor: "b0c4b1",
-            line: "不用土壤，哪裡都是我的座位。"
-        }
-    ];
+    // 角色資料庫 (內建固定台詞，維持形象)
+const ROLES = [
+    {
+        id: "fern",
+        name: "阿蕨",
+        tag: "理性・解題專家",
+        avatar: "fern.png",      // ← 這裡放你的圖片檔名
+        line: "碳盤查不是為了罪惡感，是為了知道下一步往哪走。"
+    },
+    {
+        id: "brom",
+        name: "小積",
+        tag: "厭世・執行擔當",
+        avatar: "brom.png",      // ← 這裡放你的圖片檔名
+        line: "講人話，我幫你做到。"
+    },
+    {
+        id: "mons",
+        name: "小龜",
+        tag: "好奇・冒險王",
+        avatar: "mons.png",      // ← 這裡放你的圖片檔名
+        line: "新路線？我第一個去踩點！"
+    },
+    {
+        id: "sans",
+        name: "虎妹",
+        tag: "夜貓・健身教練",
+        avatar: "sans.png",      // ← 這裡放你的圖片檔名
+        line: "半夜運動最安靜，要跟嗎？"
+    },
+    {
+        id: "succ",
+        name: "肉肉",
+        tag: "佛系・儲水大師",
+        avatar: "succ.png",      // ← 這裡放你的圖片檔名
+        line: "慢慢來，水要存，心情也要。"
+    },
+    {
+        id: "ficus",
+        name: "琴哥",
+        tag: "文青・優雅擔當",
+        avatar: "ficus.png",      // ← 這裡放你的圖片檔名
+        line: "今天想聽巴哈，還是蕭邦？"
+    },
+    {
+        id: "till",
+        name: "空空",
+        tag: "自由・外派特派",
+        avatar: "till.png",      // ← 這裡放你的圖片檔名
+        line: "不用土壤，哪裡都是我的座位。"
+    }
+];
 
     // 儲存目前選中的角色 (物件陣列，包含id, name, line)
     let selectedRoles = [];
 
     // 生成占位 PNG 圖片 URL (使用 placeholder 產生帶文字的背景圖，實際上是PNG格式)
     // 你可以把這些圖片換成真實的角色 PNG 檔，只需修改 img.src 路徑即可。
+  // 角色頭像圖片路徑 (使用你指定的檔名)
     function getAvatarUrl(role) {
-        // 如果已經準備好真實 PNG，請把這裡改成你的圖片路徑，例如 `/images/${role.id}.png`
-        // 目前用動態產生的 PNG 占位圖，清楚顯示角色代表文字，可點選。
-        const text = role.avatarPlaceholder;
-        const bg = role.bgColor;
-        // 使用 via.placeholder.com 產生的 90x90 PNG 圖片
-        return `https://via.placeholder.com/90x90/${bg}/ffffff?text=${encodeURIComponent(text)}`;
-        // 未來你只需替換成自己的 PNG 網址即可，例如：
-        // return `/avatars/${role.id}.png`;
-    }
+    return role.avatar;
+      }
 
     // 渲染角色卡片
     function renderRoles() {
