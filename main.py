@@ -2,13 +2,13 @@ import os
 import time
 import hashlib
 import hmac
+import requests
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List
 from dotenv import load_dotenv
 
 # 載入環境變數
@@ -86,14 +86,14 @@ def build_prompt(req: GenerateRequest) -> str:
     
     return prompt
 
-import requests
-import os
-
-# ... (前面的程式碼保持不變)
-
-# 生成影片 (改用 WaveSpeedAI 的 Cosmos Predict 2.5 模型)
-def generate_video_with_cosmos(prompt: str, first_image_url: str) -> str:
+# 生成影片 (使用 WaveSpeedAI 的 Cosmos Predict 2.5 模型)
+def generate_video_with_cosmos(prompt: str, duration: int) -> str:
+    """呼叫 WaveSpeedAI 的 Cosmos 模型生成影片"""
     WAVESPEED_API_KEY = os.getenv("WAVESPEED_API_KEY")
+    
+    if not WAVESPEED_API_KEY:
+        raise Exception("WAVESPEED_API_KEY 未設定")
+    
     WAVESPEED_API_URL = "https://api.wavespeed.ai/v1/generate"
 
     headers = {
@@ -102,54 +102,50 @@ def generate_video_with_cosmos(prompt: str, first_image_url: str) -> str:
     }
 
     payload = {
-        "model": "wavespeed-ai/cosmos-predict-2.5/image-to-video", # 指定模型
+        "model": "wavespeed-ai/cosmos-predict-2.5/text-to-video",
         "input": {
-            "prompt": prompt,           # 你原本生成好的 prompt
-            "image_url": first_image_url # 你的角色圖片網址（例如阿蕨.png）
+            "prompt": prompt,
+            "duration": duration
         }
     }
 
     try:
+        print(f"📡 呼叫 WaveSpeedAI API...")
         response = requests.post(WAVESPEED_API_URL, headers=headers, json=payload)
-        response.raise_for_status() # 檢查是否呼叫成功
+        response.raise_for_status()
         result = response.json()
-        # 根據 WaveSpeedAI 的 API 回傳格式，取出影片網址
-        video_url = result["output"]["video_url"]
+        
+        # 根據 WaveSpeedAI 的 API 回傳格式取出影片網址
+        video_url = result.get("output", {}).get("video_url")
+        if not video_url:
+            raise Exception(f"API 回傳格式錯誤: {result}")
+        
+        print(f"✅ 影片生成成功: {video_url}")
         return video_url
+        
+    except requests.exceptions.RequestException as e:
+        raise Exception(f"WaveSpeedAI API 請求錯誤: {str(e)}")
     except Exception as e:
         raise Exception(f"WaveSpeedAI API 錯誤: {str(e)}")
 
-# API 端點 (需要登入)
-# 在 main.py 中加入這個新的 API 端點
-
+# 測試端點
 @app.get("/api/test-replicate")
 async def test_replicate_api():
-    """測試 Replicate API 是否正常運作"""
-    import replicate
-    import os
-    
+    """測試 WaveSpeedAI API 是否正常運作"""
     try:
         # 檢查 API Token
-        token = os.getenv("REPLICATE_API_TOKEN")
+        token = os.getenv("WAVESPEED_API_KEY")
         if not token:
             return {
                 "success": False,
-                "error": "REPLICATE_API_TOKEN 未設定",
-                "hint": "請在 Render 的 Environment Variables 中加入 REPLICATE_API_TOKEN"
+                "error": "WAVESPEED_API_KEY 未設定",
+                "hint": "請在 Render 的 Environment Variables 中加入 WAVESPEED_API_KEY"
             }
-        
-        # 測試生成一張圖片
-        output = replicate.run(
-            "black-forest-labs/flux-schnell",
-            input={"prompt": "a cute cartoon fern plant, white background"}
-        )
-        
-        image_url = output[0] if isinstance(output, list) else output
         
         return {
             "success": True,
-            "message": "Replicate API 運作正常",
-            "image_url": image_url
+            "message": "WAVESPEED_API_KEY 已設定",
+            "api_key_preview": token[:8] + "..."
         }
         
     except Exception as e:
@@ -157,6 +153,8 @@ async def test_replicate_api():
             "success": False,
             "error": str(e)
         }
+
+# 主要影片生成 API 端點
 @app.post("/api/generate-video")
 async def generate_video(
     req: GenerateRequest,
@@ -171,13 +169,16 @@ async def generate_video(
     prompt = build_prompt(req)
     print(f"👤 使用者: {username}")
     print(f"📝 Prompt:\n{prompt}\n")
+    print(f"⏱️ 影片長度: {req.duration} 秒")
     
     try:
-        replicate_token = os.getenv("REPLICATE_API_TOKEN")
-        if replicate_token:
-            video_url = generate_video_with_replicate(prompt, req.duration)
+        # 使用 WaveSpeedAI 的 Cosmos 模型
+        wavespeed_token = os.getenv("WAVESPEED_API_KEY")
+        if wavespeed_token:
+            video_url = generate_video_with_cosmos(prompt, req.duration)
         else:
-            # 測試模式
+            # 如果沒有 WaveSpeedAI API Key，回傳測試影片
+            print("⚠️ WAVESPEED_API_KEY 未設定，使用測試影片")
             video_url = "https://replicate.delivery/pbxt/example-test-video.mp4"
         
         return {
@@ -193,7 +194,7 @@ async def generate_video(
 # 健康檢查 (不需要登入)
 @app.get("/api/health")
 async def health_check():
-    return {"status": "ok"}
+    return {"status": "ok", "service": "蕨積宇宙影片產生器"}
 
 # 提供前端頁面 (需要登入)
 @app.get("/", response_class=HTMLResponse)
