@@ -19,12 +19,10 @@ app = FastAPI(title="蕨積宇宙影片產生器 API")
 # 基本認證
 security = HTTPBasic()
 
-# 從環境變數讀取帳號密碼
 VALID_USERNAME = os.getenv("PAGE_USERNAME", "admin")
 VALID_PASSWORD = os.getenv("PAGE_PASSWORD", "zepower2025")
 
 def verify_credentials(credentials: HTTPBasicCredentials = Depends(security)):
-    """驗證使用者帳號密碼"""
     is_username_correct = hmac.compare_digest(credentials.username, VALID_USERNAME)
     is_password_correct = hmac.compare_digest(credentials.password, VALID_PASSWORD)
     if not (is_username_correct and is_password_correct):
@@ -86,65 +84,88 @@ def build_prompt(req: GenerateRequest) -> str:
     
     return prompt
 
-# 生成影片 (使用 WaveSpeedAI 的 Cosmos Predict 2.5 模型)
+# 生成影片 (使用 WaveSpeedAI Cosmos Predict 2.5)
 def generate_video_with_cosmos(prompt: str, duration: int) -> str:
-    """呼叫 WaveSpeedAI 的 Cosmos 模型生成影片"""
-    WAVESPEED_API_KEY = os.getenv("WAVESPEED_API_KEY")
-    
-    if not WAVESPEED_API_KEY:
+    """
+    呼叫 WaveSpeedAI Cosmos Predict 2.5 模型生成影片
+    使用异步任务模式：提交 → 轮询 → 返回影片URL
+    """
+    API_KEY = os.getenv("WAVESPEED_API_KEY")
+    if not API_KEY:
         raise Exception("WAVESPEED_API_KEY 未設定")
     
-    WAVESPEED_API_URL = "https://api.wavespeed.ai/v1/generate"
-
+    # 模型路径（文字生成影片）
+    MODEL = "wavespeed-ai/cosmos-predict-2.5/text-to-video"
+    API_BASE = "https://api.wavespeed.ai/api/v3"
+    
     headers = {
-        "Authorization": f"Bearer {WAVESPEED_API_KEY}",
+        "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json"
     }
-
-    payload = {
-        "model": "wavespeed-ai/cosmos-predict-2.5/text-to-video",
-        "input": {
-            "prompt": prompt,
-            "duration": duration
-        }
-    }
-
-    try:
-        print(f"📡 呼叫 WaveSpeedAI API...")
-        response = requests.post(WAVESPEED_API_URL, headers=headers, json=payload)
-        response.raise_for_status()
-        result = response.json()
+    
+    # 步骤 1: 提交任务
+    submit_url = f"{API_BASE}/{MODEL}"
+    payload = {"prompt": prompt}
+    
+    print(f"📡 提交任务到 WaveSpeedAI: {MODEL}")
+    submit_response = requests.post(submit_url, headers=headers, json=payload)
+    submit_response.raise_for_status()
+    
+    submit_result = submit_response.json()
+    task_id = submit_result.get("data", {}).get("id")
+    
+    if not task_id:
+        raise Exception(f"提交任务失败: {submit_result}")
+    
+    print(f"✅ 任务已提交，ID: {task_id}")
+    
+    # 步骤 2: 轮询结果
+    result_url = f"{API_BASE}/predictions/{task_id}/result"
+    
+    max_attempts = 60  # 最多等 2 分钟
+    for attempt in range(max_attempts):
+        time.sleep(2)  # 每 2 秒检查一次
         
-        # 根據 WaveSpeedAI 的 API 回傳格式取出影片網址
-        video_url = result.get("output", {}).get("video_url")
-        if not video_url:
-            raise Exception(f"API 回傳格式錯誤: {result}")
+        result_response = requests.get(result_url, headers=headers)
+        result_response.raise_for_status()
         
-        print(f"✅ 影片生成成功: {video_url}")
-        return video_url
+        result_data = result_response.json()
+        status = result_data.get("data", {}).get("status")
         
-    except requests.exceptions.RequestException as e:
-        raise Exception(f"WaveSpeedAI API 請求錯誤: {str(e)}")
-    except Exception as e:
-        raise Exception(f"WaveSpeedAI API 錯誤: {str(e)}")
+        if status == "completed":
+            outputs = result_data.get("data", {}).get("outputs", [])
+            if outputs and len(outputs) > 0:
+                video_url = outputs[0]
+                print(f"✅ 影片生成成功: {video_url}")
+                return video_url
+            else:
+                raise Exception("任务完成但没有输出影片")
+        
+        elif status == "failed":
+            error_msg = result_data.get("data", {}).get("error", "未知错误")
+            raise Exception(f"影片生成失败: {error_msg}")
+        
+        else:
+            print(f"⏳ 处理中... ({status}) 尝试 {attempt + 1}/{max_attempts}")
+    
+    raise Exception("生成超时，请稍后重试")
 
-# 測試端點
+# 测试端点
 @app.get("/api/test-replicate")
-async def test_replicate_api():
-    """測試 WaveSpeedAI API 是否正常運作"""
+async def test_api():
+    """测试 WaveSpeedAI API 是否正常"""
     try:
-        # 檢查 API Token
         token = os.getenv("WAVESPEED_API_KEY")
         if not token:
             return {
                 "success": False,
-                "error": "WAVESPEED_API_KEY 未設定",
-                "hint": "請在 Render 的 Environment Variables 中加入 WAVESPEED_API_KEY"
+                "error": "WAVESPEED_API_KEY 未设定",
+                "hint": "请在 Render 环境变量中添加 WAVESPEED_API_KEY"
             }
         
         return {
             "success": True,
-            "message": "WAVESPEED_API_KEY 已設定",
+            "message": "WAVESPEED_API_KEY 已设定",
             "api_key_preview": token[:8] + "..."
         }
         
