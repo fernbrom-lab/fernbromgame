@@ -361,62 +361,78 @@ const ROLES = [
     }
 
     // 生成影片的主要函式
-    async function generateVideo() {
-        const scene = document.getElementById("sceneSelect").value;
-        const outline = document.getElementById("outline").value.trim();
-        if (selectedRoles.length === 0) {
-            alert("請至少選擇一位角色來演出 🌿");
-            return;
-        }
-        if (!outline) {
-            alert("請填寫劇情大綱，讓AI知道影片內容方向～");
-            return;
-        }
-
-        const progressDiv = document.getElementById("progressArea");
-        const resultDiv = document.getElementById("resultArea");
-        progressDiv.style.display = "block";
-        progressDiv.innerHTML = "⏳ 正在召喚AI導演，影片生成中（可能需要1~3分鐘）...";
-        resultDiv.innerHTML = "";
-
-        const payload = {
-            roles: selectedRoles,      // 包含 id, name, line
-            scene: scene,
-            outline: outline,
-            duration: currentDuration
-        };
-
-        try {
-            // 請替換成你的後端 API 位置 (預設同域下的 /api/generate-video)
-            const API_URL = "/api/generate-video";
-            const response = await fetch(API_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) {
-                const errText = await response.text();
-                throw new Error(`API 錯誤 (${response.status}): ${errText}`);
-            }
-
-            const data = await response.json();
-            if (data.videoUrl) {
-                progressDiv.innerHTML = "✅ 影片生成成功！";
-                resultDiv.innerHTML = `
-                    <video src="${data.videoUrl}" controls autoplay loop playsinline style="width:100%; max-width:400px; display:block; margin:0 auto;"></video>
-                    <div style="text-align:center; margin-top:16px;">
-                        <a href="${data.videoUrl}" download="zepisode_${Date.now()}.mp4" class="download-link">⬇️ 下載影片 (MP4)</a>
-                    </div>
-                `;
-            } else {
-                throw new Error("後端未回傳 videoUrl");
-            }
-        } catch (error) {
-            console.error(error);
-            progressDiv.innerHTML = `❌ 生成失敗：${error.message}<br>請確認後端服務已啟動，並檢查 API 金鑰設定。`;
-        }
+    // 生成影片的主要函式 (支援 HTTP Basic Auth)
+async function generateVideo() {
+    const scene = document.getElementById("sceneSelect").value;
+    const outline = document.getElementById("outline").value.trim();
+    if (selectedRoles.length === 0) {
+        alert("請至少選擇一位角色來演出 🌿");
+        return;
     }
+    if (!outline) {
+        alert("請填寫劇情大綱，讓AI知道影片內容方向～");
+        return;
+    }
+
+    const progressDiv = document.getElementById("progressArea");
+    const resultDiv = document.getElementById("resultArea");
+    progressDiv.style.display = "block";
+    progressDiv.innerHTML = "⏳ 正在召喚AI導演，影片生成中（可能需要1~3分鐘）...";
+    resultDiv.innerHTML = "";
+
+    const payload = {
+        roles: selectedRoles,
+        scene: scene,
+        outline: outline,
+        duration: currentDuration
+    };
+
+    try {
+        // 使用相對路徑 (因為前後端都在同一個 Render 服務)
+        const API_URL = "/api/generate-video";
+        
+        // 加入帳號密碼 (從瀏覽器彈窗或固定寫入)
+        // 方法1: 讓瀏覽器彈出登入視窗
+        // 方法2: 直接寫入 (較不安全，但方便)
+        // 這裡示範從 sessionStorage 讀取或讓瀏覽器處理
+        
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload),
+            credentials: "include"  // 重要: 讓瀏覽器記住認證
+        });
+
+        if (response.status === 401) {
+            // 未授權，讓瀏覽器彈出登入視窗
+            progressDiv.innerHTML = "❌ 請重新整理頁面並輸入帳號密碼";
+            return;
+        }
+
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(`API 錯誤 (${response.status}): ${errText}`);
+        }
+
+        const data = await response.json();
+        if (data.videoUrl) {
+            progressDiv.innerHTML = "✅ 影片生成成功！";
+            resultDiv.innerHTML = `
+                <video src="${data.videoUrl}" controls autoplay loop playsinline style="width:100%; max-width:400px; display:block; margin:0 auto;"></video>
+                <div style="text-align:center; margin-top:16px;">
+                    <a href="${data.videoUrl}" download="zepisode_${Date.now()}.mp4" class="download-link">⬇️ 下載影片 (MP4)</a>
+                </div>
+            `;
+        } else {
+            throw new Error("後端未回傳 videoUrl");
+        }
+    } catch (error) {
+        console.error(error);
+        progressDiv.innerHTML = `❌ 生成失敗：${error.message}<br>請確認後端服務已啟動，並檢查 API 金鑰設定。`;
+    }
+}
 
     // 綁定生成按鈕
     function bindEvents() {
