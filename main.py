@@ -1,236 +1,435 @@
-import os
-import time
-import hashlib
-import hmac
-import requests
-from fastapi import FastAPI, HTTPException, Depends, status
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
-from fastapi.responses import HTMLResponse
-from pydantic import BaseModel
-from typing import List
-from dotenv import load_dotenv
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>蕨積宇宙 · 短影音產生器</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', 'Noto Sans TC', sans-serif;
+        }
+        body {
+            background: #f5f7f0;
+            margin: 0;
+            padding: 24px 20px;
+            color: #2c3e2f;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 1.9rem;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        h1 small {
+            font-size: 0.9rem;
+            font-weight: normal;
+            background: #dcedbc;
+            padding: 4px 12px;
+            border-radius: 40px;
+        }
+        h2 {
+            font-size: 1.4rem;
+            border-left: 6px solid #4caf50;
+            padding-left: 16px;
+            margin: 32px 0 16px 0;
+        }
+        .role-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: flex-start;
+        }
+        .role-card {
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            width: 150px;
+            padding: 16px 8px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid #e0e0e0;
+        }
+        .role-card.selected {
+            border-color: #2e7d32;
+            background: #f0f9e8;
+            box-shadow: 0 8px 20px rgba(46,125,50,0.2);
+            transform: scale(0.98);
+        }
+        .role-avatar {
+            width: 90px;
+            height: 90px;
+            object-fit: contain;
+            margin: 0 auto 8px;
+            display: block;
+            border-radius: 50%;
+            background: #eef5e6;
+            padding: 8px;
+        }
+        .role-name {
+            font-weight: 800;
+            font-size: 1.2rem;
+            margin: 8px 0 4px;
+        }
+        .role-tag {
+            font-size: 0.7rem;
+            background: #e8f0e3;
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 20px;
+            color: #2c5e2a;
+        }
+        .role-line {
+            font-size: 0.7rem;
+            color: #4e6b3c;
+            margin-top: 10px;
+            padding: 6px;
+            background: #fef9e3;
+            border-radius: 16px;
+            font-style: italic;
+        }
+        .scene-selector, .duration-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            margin: 16px 0 8px;
+        }
+        select, .duration-btn {
+            background: white;
+            border: 1px solid #b8c9aa;
+            padding: 10px 20px;
+            border-radius: 60px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .duration-btn {
+            background: #f0f4ea;
+        }
+        .duration-btn.active {
+            background: #2e7d32;
+            color: white;
+            border-color: #2e7d32;
+        }
+        textarea {
+            width: 100%;
+            padding: 14px;
+            border-radius: 24px;
+            border: 1px solid #cbdbb6;
+            font-size: 0.95rem;
+            background: #fffef7;
+            resize: vertical;
+        }
+        .generate-btn {
+            background: #2e7d32;
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            font-size: 1.2rem;
+            border-radius: 60px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 24px 0;
+            transition: 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .generate-btn:hover {
+            background: #1b5e20;
+            transform: scale(1.01);
+        }
+        .progress-area {
+            background: #e9f0e3;
+            padding: 16px;
+            border-radius: 32px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+        video {
+            max-width: 100%;
+            border-radius: 24px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            margin-top: 16px;
+        }
+        .download-link {
+            display: inline-block;
+            margin-top: 12px;
+            background: #3c6e3f;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 40px;
+            text-decoration: none;
+        }
+        footer {
+            text-align: center;
+            margin-top: 48px;
+            font-size: 0.8rem;
+            color: #7f8c6d;
+        }
+        @media (max-width: 700px) {
+            .role-card { width: 130px; }
+            .role-avatar { width: 70px; height: 70px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>
+        🌿 蕨積宇宙 · 短影音產生器
+        <small>阿蕨 ╳ 小積 與好朋友們</small>
+    </h1>
 
-# 載入環境變數
-load_dotenv()
+    <!-- 角色選擇區 -->
+    <h2>🎭 1. 誰來演出？ (可複選)</h2>
+    <div id="roleContainer" class="role-grid"></div>
 
-app = FastAPI(title="蕨積宇宙影片產生器 API")
+    <!-- 場景 -->
+    <h2>🏞️ 2. 場景</h2>
+    <div class="scene-selector">
+        <select id="sceneSelect">
+            <option value="辦公室植生牆角落">🌱 辦公室植生牆角落</option>
+            <option value="陽台療癒花園">☀️ 陽台療癒花園</option>
+            <option value="綠色會議室">📋 綠色會議室</option>
+            <option value="都市咖啡廳戶外座">☕ 都市咖啡廳戶外座</option>
+            <option value="蕨積總部大廳">🏢 蕨積總部大廳</option>
+        </select>
+    </div>
 
-# 基本認證
-security = HTTPBasic()
+    <!-- 內容大綱 -->
+    <h2>📝 3. 劇情大綱 (描述想傳達的ESG/生活觀念)</h2>
+    <textarea id="outline" rows="3" placeholder="範例：阿蕨冷靜分析碳盤查步驟，小積吐槽並提供實用生活解法，碳碳搗蛋但被電錶君抓包..."></textarea>
 
-VALID_USERNAME = os.getenv("PAGE_USERNAME", "admin")
-VALID_PASSWORD = os.getenv("PAGE_PASSWORD", "zepower2025")
+    <!-- 影片秒數 -->
+    <h2>⏱️ 4. 影片長度</h2>
+    <div class="duration-selector" id="durationGroup">
+        <button type="button" data-duration="15" class="duration-btn">15秒</button>
+        <button type="button" data-duration="30" class="duration-btn active">30秒</button>
+        <button type="button" data-duration="60" class="duration-btn">60秒</button>
+    </div>
 
-def verify_credentials(credentials: HTTPBasicCredentials = Depends(security)):
-    is_username_correct = hmac.compare_digest(credentials.username, VALID_USERNAME)
-    is_password_correct = hmac.compare_digest(credentials.password, VALID_PASSWORD)
-    if not (is_username_correct and is_password_correct):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="帳號或密碼錯誤",
-            headers={"WWW-Authenticate": "Basic"},
-        )
-    return credentials.username
+    <!-- 生成按鈕 -->
+    <div style="text-align: center;">
+        <button id="generateBtn" class="generate-btn">🚀 生成短影音</button>
+    </div>
 
-# CORS 設定
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+    <!-- 進度與結果 -->
+    <div id="progressArea" class="progress-area" style="display: none;"></div>
+    <div id="resultArea"></div>
+    <footer>🌱 角色台詞皆為內建經典語錄，維持蕨積宇宙一致風格。</footer>
+</div>
 
-# 請求格式
-class RoleLine(BaseModel):
-    id: str
-    name: str
-    line: str
+<script>
+    // ---------- 角色資料庫 (內建固定台詞，維持形象) ----------
+    // 注意：圖片檔名請根據你實際上傳的 PNG 檔名修改
+    const ROLES = [
+        {
+            id: "fern",
+            name: "阿蕨",
+            tag: "理性・解題專家",
+            avatar: "fern.png",      // ← 你的圖片檔名
+            line: "碳盤查不是為了罪惡感，是為了知道下一步往哪走。"
+        },
+        {
+            id: "brom",
+            name: "小積",
+            tag: "厭世・執行擔當",
+            avatar: "brom.png",      // ← 你的圖片檔名
+            line: "講人話，我幫你做到。"
+        },
+        {
+            id: "mons",
+            name: "小龜",
+            tag: "好奇・冒險王",
+            avatar: "mons.png",    // ← 你的圖片檔名
+            line: "新路線？我第一個去踩點！"
+        },
+        {
+            id: "sans",
+            name: "虎妹",
+            tag: "夜貓・健身教練",
+            avatar: "sans.png",     // ← 你的圖片檔名
+            line: "半夜運動最安靜，要跟嗎？"
+        },
+        {
+            id: "succ",
+            name: "肉肉",
+            tag: "佛系・儲水大師",
+            avatar: "succ.png",     // ← 你的圖片檔名
+            line: "慢慢來，水要存，心情也要。"
+        },
+        {
+            id: "ficus",
+            name: "琴哥",
+            tag: "文青・優雅擔當",
+            avatar: "ficus.png",    // ← 你的圖片檔名
+            line: "今天想聽巴哈，還是蕭邦？"
+        },
+        {
+            id: "till",
+            name: "空空",
+            tag: "自由・外派特派",
+            avatar: "till.png",       // ← 你的圖片檔名
+            line: "不用土壤，哪裡都是我的座位。"
+        }
+    ];
 
-class GenerateRequest(BaseModel):
-    roles: List[RoleLine]
-    scene: str
-    outline: str
-    duration: int
+    // 儲存目前選中的角色
+    let selectedRoles = [];
 
-# 建立 prompt
-def build_prompt(req: GenerateRequest) -> str:
-    role_text = "\n".join([f"{r.name}：{r.line}" for r in req.roles])
-    
-    if req.duration <= 15:
-        detail_level = "簡短精簡"
-    elif req.duration <= 30:
-        detail_level = "適中"
-    else:
-        detail_level = "詳細完整"
-    
-    prompt = f"""【影片風格】
-2D動畫風格，可愛、輕鬆戲謔，角色為植物擬人，背景明亮乾淨。
+    // 渲染角色卡片
+    function renderRoles() {
+        const container = document.getElementById("roleContainer");
+        container.innerHTML = "";
+        ROLES.forEach(role => {
+            const card = document.createElement("div");
+            card.className = "role-card";
+            card.dataset.roleId = role.id;
 
-【場景】
-{req.scene}
+            const img = document.createElement("img");
+            img.src = role.avatar;
+            img.alt = role.name;
+            img.className = "role-avatar";
+            img.onerror = function() {
+                this.src = "https://via.placeholder.com/90x90/cccccc/ffffff?text=" + role.name;
+                this.onerror = null;
+            };
 
-【劇情大綱】
-{req.outline}
+            const nameSpan = document.createElement("div");
+            nameSpan.className = "role-name";
+            nameSpan.innerText = role.name;
 
-【角色對話】
-{role_text}
+            const tagSpan = document.createElement("div");
+            tagSpan.className = "role-tag";
+            tagSpan.innerText = role.tag;
 
-【影片長度】
-{req.duration}秒，{detail_level}節奏。
+            const lineSpan = document.createElement("div");
+            lineSpan.className = "role-line";
+            lineSpan.innerText = `「${role.line}」`;
 
-請生成一段符合以上描述的短動畫影片。"""
-    
-    return prompt
+            card.appendChild(img);
+            card.appendChild(nameSpan);
+            card.appendChild(tagSpan);
+            card.appendChild(lineSpan);
 
-# 生成影片 (使用 WaveSpeedAI Cosmos Predict 2.5)
-def generate_video_with_cosmos(prompt: str, duration: int) -> str:
-    """
-    呼叫 WaveSpeedAI Cosmos Predict 2.5 模型生成影片
-    使用异步任务模式：提交 → 轮询 → 返回影片URL
-    """
-    API_KEY = os.getenv("WAVESPEED_API_KEY")
-    if not API_KEY:
-        raise Exception("WAVESPEED_API_KEY 未設定")
-    
-    # 模型路径（文字生成影片）
-    MODEL = "wavespeed-ai/cosmos-predict-2.5/text-to-video"
-    API_BASE = "https://api.wavespeed.ai/api/v3"
-    
-    headers = {
-        "Authorization": f"Bearer {API_KEY}",
-        "Content-Type": "application/json"
+            card.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const isSelected = card.classList.contains("selected");
+                if (!isSelected) {
+                    card.classList.add("selected");
+                    selectedRoles.push({
+                        id: role.id,
+                        name: role.name,
+                        line: role.line
+                    });
+                } else {
+                    card.classList.remove("selected");
+                    selectedRoles = selectedRoles.filter(r => r.id !== role.id);
+                }
+                console.log("目前選中角色:", selectedRoles.map(r => r.name));
+            });
+
+            container.appendChild(card);
+        });
     }
-    
-    # 步骤 1: 提交任务
-    submit_url = f"{API_BASE}/{MODEL}"
-    payload = {"prompt": prompt}
-    
-    print(f"📡 提交任务到 WaveSpeedAI: {MODEL}")
-    submit_response = requests.post(submit_url, headers=headers, json=payload)
-    submit_response.raise_for_status()
-    
-    submit_result = submit_response.json()
-    task_id = submit_result.get("data", {}).get("id")
-    
-    if not task_id:
-        raise Exception(f"提交任务失败: {submit_result}")
-    
-    print(f"✅ 任务已提交，ID: {task_id}")
-    
-    # 步骤 2: 轮询结果
-    result_url = f"{API_BASE}/predictions/{task_id}/result"
-    
-    max_attempts = 60  # 最多等 2 分钟
-    for attempt in range(max_attempts):
-        time.sleep(2)  # 每 2 秒检查一次
-        
-        result_response = requests.get(result_url, headers=headers)
-        result_response.raise_for_status()
-        
-        result_data = result_response.json()
-        status = result_data.get("data", {}).get("status")
-        
-        if status == "completed":
-            outputs = result_data.get("data", {}).get("outputs", [])
-            if outputs and len(outputs) > 0:
-                video_url = outputs[0]
-                print(f"✅ 影片生成成功: {video_url}")
-                return video_url
-            else:
-                raise Exception("任务完成但没有输出影片")
-        
-        elif status == "failed":
-            error_msg = result_data.get("data", {}).get("error", "未知错误")
-            raise Exception(f"影片生成失败: {error_msg}")
-        
-        else:
-            print(f"⏳ 处理中... ({status}) 尝试 {attempt + 1}/{max_attempts}")
-    
-    raise Exception("生成超时，请稍后重试")
 
-# 测试端点
-@app.get("/api/test-replicate")
-async def test_api():
-    """测试 WaveSpeedAI API 是否正常"""
-    try:
-        token = os.getenv("WAVESPEED_API_KEY")
-        if not token:
-            return {
-                "success": False,
-                "error": "WAVESPEED_API_KEY 未设定",
-                "hint": "请在 Render 环境变量中添加 WAVESPEED_API_KEY"
+    // 秒數選擇邏輯
+    let currentDuration = 30;
+    function initDurationSelector() {
+        const btns = document.querySelectorAll("[data-duration]");
+        btns.forEach(btn => {
+            btn.addEventListener("click", () => {
+                btns.forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                currentDuration = parseInt(btn.dataset.duration, 10);
+            });
+        });
+    }
+
+    // 生成影片的主要函式
+    async function generateVideo() {
+        const scene = document.getElementById("sceneSelect").value;
+        const outline = document.getElementById("outline").value.trim();
+        
+        if (selectedRoles.length === 0) {
+            alert("請至少選擇一位角色來演出 🌿");
+            return;
+        }
+        if (!outline) {
+            alert("請填寫劇情大綱，讓AI知道影片內容方向～");
+            return;
+        }
+
+        const progressDiv = document.getElementById("progressArea");
+        const resultDiv = document.getElementById("resultArea");
+        progressDiv.style.display = "block";
+        progressDiv.innerHTML = "⏳ 正在召喚AI導演，影片生成中（可能需要1~3分鐘）...";
+        resultDiv.innerHTML = "";
+
+        const payload = {
+            roles: selectedRoles,
+            scene: scene,
+            outline: outline,
+            duration: currentDuration
+        };
+
+        try {
+            const API_URL = "/api/generate-video";
+            const response = await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+                credentials: "include"
+            });
+
+            if (response.status === 401) {
+                progressDiv.innerHTML = "❌ 請重新整理頁面並輸入帳號密碼";
+                return;
             }
-        
-        return {
-            "success": True,
-            "message": "WAVESPEED_API_KEY 已设定",
-            "api_key_preview": token[:8] + "..."
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`API 錯誤 (${response.status}): ${errText}`);
+            }
+
+            const data = await response.json();
+            if (data.videoUrl) {
+                progressDiv.innerHTML = "✅ 影片生成成功！";
+                resultDiv.innerHTML = `
+                    <video src="${data.videoUrl}" controls autoplay loop playsinline style="width:100%; max-width:400px; display:block; margin:0 auto;"></video>
+                    <div style="text-align:center; margin-top:16px;">
+                        <a href="${data.videoUrl}" download="zepisode_${Date.now()}.mp4" class="download-link">⬇️ 下載影片 (MP4)</a>
+                    </div>
+                `;
+            } else {
+                throw new Error("後端未回傳 videoUrl");
+            }
+        } catch (error) {
+            console.error(error);
+            progressDiv.innerHTML = `❌ 生成失敗：${error.message}<br>請確認後端服務已啟動，並檢查 API 金鑰設定。`;
         }
-        
-    except Exception as e:
-        return {
-            "success": False,
-            "error": str(e)
-        }
+    }
 
-# 主要影片生成 API 端點
-@app.post("/api/generate-video")
-async def generate_video(
-    req: GenerateRequest,
-    username: str = Depends(verify_credentials)
-):
-    if not req.roles:
-        raise HTTPException(status_code=400, detail="請至少選擇一個角色")
-    
-    if not req.outline.strip():
-        raise HTTPException(status_code=400, detail="請填寫內容大綱")
-    
-    prompt = build_prompt(req)
-    print(f"👤 使用者: {username}")
-    print(f"📝 Prompt:\n{prompt}\n")
-    print(f"⏱️ 影片長度: {req.duration} 秒")
-    
-    try:
-        # 使用 WaveSpeedAI 的 Cosmos 模型
-        wavespeed_token = os.getenv("WAVESPEED_API_KEY")
-        if wavespeed_token:
-            video_url = generate_video_with_cosmos(prompt, req.duration)
-        else:
-            # 如果沒有 WaveSpeedAI API Key，回傳測試影片
-            print("⚠️ WAVESPEED_API_KEY 未設定，使用測試影片")
-            video_url = "https://replicate.delivery/pbxt/example-test-video.mp4"
-        
-        return {
-            "success": True,
-            "videoUrl": video_url,
-            "prompt": prompt
-        }
-        
-    except Exception as e:
-        print(f"❌ 錯誤: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"生成失敗: {str(e)}")
+    // 綁定生成按鈕
+    function bindEvents() {
+        const genBtn = document.getElementById("generateBtn");
+        genBtn.addEventListener("click", generateVideo);
+    }
 
-# 健康檢查 (不需要登入)
-@app.get("/api/health")
-async def health_check():
-    return {"status": "ok", "service": "蕨積宇宙影片產生器"}
+    // 初始化頁面
+    function init() {
+        renderRoles();
+        initDurationSelector();
+        bindEvents();
+    }
 
-# 提供前端頁面 (需要登入)
-@app.get("/", response_class=HTMLResponse)
-async def get_index(credentials: HTTPBasicCredentials = Depends(security)):
-    """保護首頁，需要登入"""
-    verify_credentials(credentials)
-    
-    # 讀取 index.html 內容
-    try:
-        with open("index.html", "r", encoding="utf-8") as f:
-            html_content = f.read()
-        return HTMLResponse(content=html_content)
-    except FileNotFoundError:
-        return HTMLResponse(content="<h1>index.html 不存在</h1><p>請確認檔案已上傳</p>", status_code=404)
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    init();
+</script>
+</body>
+</html>
