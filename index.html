@@ -224,70 +224,73 @@
     <div id="resultArea"></div>
     <footer>🌱 角色台詞皆為內建經典語錄，維持蕨積宇宙一致風格。</footer>
 </div>
-
 <script>
-    // ---------- 角色資料庫 (內建固定台詞，維持形象) ----------
-    // // 角色資料庫 (內建固定台詞，維持形象)
-const ROLES = [
-    {
-        id: "fern",
-        name: "阿蕨",
-        tag: "理性・解題專家",
-        avatar: "fern.png",
-        line: "碳盤查不是為了罪惡感，是為了知道下一步往哪走。"
-    },
-    {
-        id: "brom",
-        name: "小積",
-        tag: "厭世・執行擔當",
-        avatar: "brom.png",
-        line: "講人話，我幫你做到。"
-    },
-    {
-        id: "mons",
-        name: "小龜",
-        tag: "好奇・冒險王",
-        avatar: "mons.png",
-        line: "新路線？我第一個去踩點！"
-    },
-    {
-        id: "sans",
-        name: "虎妹",
-        tag: "夜貓・健身教練",
-        avatar: "sans.png",
-        line: "半夜運動最安靜，要跟嗎？"
-    },
-    {
-        id: "succ",
-        name: "肉肉",
-        tag: "佛系・儲水大師",
-        avatar: "succ.png",
-        line: "慢慢來，水要存，心情也要。"
-    },
-    {
-        id: "ficus",
-        name: "琴哥",
-        tag: "文青・優雅擔當",
-        avatar: "ficus.png",
-        line: "今天想聽巴哈，還是蕭邦？"
-    },
-    {
-        id: "till",
-        name: "空空",
-        tag: "自由・外派特派",
-        avatar: "till.png",
-        line: "不用土壤，哪裡都是我的座位。"
-    }
-];注意：圖片檔名請根據你實際上傳的 PNG 檔名修改
-   
+    // 角色資料庫 (內建固定台詞，維持形象)
+    const ROLES = [
+        {
+            id: "role_1",
+            name: "阿蕨",
+            tag: "理性・解題專家",
+            avatar: "fern.png",
+            line: "碳盤查不是為了罪惡感，是為了知道下一步往哪走。"
+        },
+        {
+            id: "role_2",
+            name: "小積",
+            tag: "厭世・執行擔當",
+            avatar: "brom.png",
+            line: "講人話，我幫你做到。"
+        },
+        {
+            id: "role_3",
+            name: "小龜",
+            tag: "好奇・冒險王",
+            avatar: "mons.png",
+            line: "新路線？我第一個去踩點！"
+        },
+        {
+            id: "role_4",
+            name: "虎妹",
+            tag: "夜貓・健身教練",
+            avatar: "sans.png",
+            line: "半夜運動最安靜，要跟嗎？"
+        },
+        {
+            id: "role_5",
+            name: "肉肉",
+            tag: "佛系・儲水大師",
+            avatar: "succ.png",
+            line: "慢慢來，水要存，心情也要。"
+        },
+        {
+            id: "role_6",
+            name: "琴哥",
+            tag: "文青・優雅擔當",
+            avatar: "ficus.png",
+            line: "今天想聽巴哈，還是蕭邦？"
+        },
+        {
+            id: "role_7",
+            name: "空空",
+            tag: "自由・外派特派",
+            avatar: "till.png",
+            line: "不用土壤，哪裡都是我的座位。"
+        }
+    ];
+
     // 儲存目前選中的角色
     let selectedRoles = [];
 
     // 渲染角色卡片
     function renderRoles() {
         const container = document.getElementById("roleContainer");
+        if (!container) {
+            console.error("找不到 roleContainer 元素");
+            return;
+        }
         container.innerHTML = "";
-        ROLES.forEach(role => {
+        
+        ROLES.forEach((role, index) => {
             const card = document.createElement("div");
             card.className = "role-card";
             card.dataset.roleId = role.id;
@@ -297,7 +300,7 @@ const ROLES = [
             img.alt = role.name;
             img.className = "role-avatar";
             img.onerror = function() {
-                this.src = "https://via.placeholder.com/90x90/cccccc/ffffff?text=" + role.name;
+                this.src = "https://via.placeholder.com/90x90/cccccc/ffffff?text=" + encodeURIComponent(role.name);
                 this.onerror = null;
             };
 
@@ -337,6 +340,8 @@ const ROLES = [
 
             container.appendChild(card);
         });
+        
+        console.log(`已渲染 ${ROLES.length} 個角色`);
     }
 
     // 秒數選擇邏輯
@@ -419,17 +424,27 @@ const ROLES = [
     // 綁定生成按鈕
     function bindEvents() {
         const genBtn = document.getElementById("generateBtn");
-        genBtn.addEventListener("click", generateVideo);
+        if (genBtn) {
+            genBtn.addEventListener("click", generateVideo);
+        }
     }
 
     // 初始化頁面
     function init() {
+        console.log("初始化開始...");
         renderRoles();
         initDurationSelector();
         bindEvents();
+        console.log("初始化完成");
     }
 
-    init();
+    // 確保 DOM 載入完成後再執行
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+    } else {
+        init();
+    }
 </script>
+
 </body>
 </html>
